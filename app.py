@@ -42,14 +42,14 @@ if st.sidebar.button("Analizi Başlat"):
             # 2. Gemini AI Analizi
             st.subheader("🤖 AI Ajanının Kanal Strateji Raporu")
             with st.spinner("Yapay zeka verileri inceliyor..."):
-               genai.configure(api_key=gemini_key)
-        
-        # Kullanılabilir modelleri otomatik bul
-        available_models = [m.name for m in genai.list_models() if 'generateContent' in m.supported_generation_methods]
-        
-        # En güncel çalışan modeli seç
-        selected_model = available_models[0]
-        model = genai.GenerativeModel(selected_model)
+                genai.configure(api_key=gemini_key)
+                
+                # Kullanılabilir çalışan modelleri otomatik bul
+                available_models = [m.name for m in genai.list_models() if 'generateContent' in m.supported_generation_methods]
+                
+                # Hesabınızda aktif olan en güncel modeli seç
+                selected_model = available_models[0]
+                model = genai.GenerativeModel(selected_model)
                 
                 prompt = f"""
                 Sen profesyonel bir YouTube Kripto Kanalı Stratejistisin.
