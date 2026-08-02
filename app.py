@@ -37,9 +37,6 @@ if st.sidebar.button("Analizi Başlat"):
             with st.spinner("Yapay zeka verileri inceliyor..."):
                 genai.configure(api_key=gemini_key)
                 
-                # API Key'in doğrudan erişebildiği ilk çalışan modeli otomatik seç
-                models = [m.name for m in genai.list_models() if 'generateContent' in m.supported_generation_methods]
-                
                 prompt = f"""
                 Sen profesyonel bir YouTube Kripto Kanalı Stratejistisin.
                 Kanal Adı: {title}
@@ -53,8 +50,14 @@ if st.sidebar.button("Analizi Başlat"):
                 3. Tıklama oranını (CTR) ve izleyici tutmayı artıracak 1 altın tavsiye ver.
                 """
                 
-                model = genai.GenerativeModel(models[0])
-                response = model.generate_content(prompt)
+                # Model sırasıyla denenir, hata veren elenir
+                try:
+                    model = genai.GenerativeModel('gemini-1.5-flash')
+                    response = model.generate_content(prompt)
+                except Exception:
+                    model = genai.GenerativeModel('gemini-1.5-pro')
+                    response = model.generate_content(prompt)
+                    
                 st.markdown(response.text)
 
         except Exception as e:
