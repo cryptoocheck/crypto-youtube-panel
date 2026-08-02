@@ -44,13 +44,6 @@ if st.sidebar.button("Analizi Başlat"):
             with st.spinner("Yapay zeka verileri inceliyor..."):
                 genai.configure(api_key=gemini_key)
                 
-                # Kullanılabilir çalışan modelleri otomatik bul
-                available_models = [m.name for m in genai.list_models() if 'generateContent' in m.supported_generation_methods]
-                
-                # Hesabınızda aktif olan en güncel modeli seç
-                selected_model = available_models[0]
-                model = genai.GenerativeModel(selected_model)
-                
                 prompt = f"""
                 Sen profesyonel bir YouTube Kripto Kanalı Stratejistisin.
                 Kanal Adı: {title}
@@ -64,8 +57,23 @@ if st.sidebar.button("Analizi Başlat"):
                 3. Tıklama oranını (CTR) ve izleyici tutmayı artıracak 1 altın tavsiye ver.
                 """
                 
-                response = model.generate_content(prompt)
-                st.markdown(response.text)
+                # Model isimlerini sırayla dene (Hangisi çalışırsa onu kullanır)
+                candidate_models = ['gemini-1.5-flash', 'gemini-1.5-pro', 'gemini-2.0-flash']
+                response = None
+                
+                for model_name in candidate_models:
+                    try:
+                        model = genai.GenerativeModel(model_name)
+                        response = model.generate_content(prompt)
+                        if response:
+                            break
+                    except Exception:
+                        continue
+                
+                if response:
+                    st.markdown(response.text)
+                else:
+                    st.error("Çalışan bir Gemini modeli bulunamadı, lütfen API anahtarınızı kontrol edin.")
 
         except Exception as e:
             st.error(f"Bir hata oluştu: {e}")
