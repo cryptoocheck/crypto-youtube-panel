@@ -57,8 +57,14 @@ if st.sidebar.button("Analizi Başlat"):
                 3. Tıklama oranını (CTR) ve izleyici tutmayı artıracak 1 altın tavsiye ver.
                 """
                 
-                model = genai.GenerativeModel('models/gemini-1.5-flash')
-                response = model.generate_content(prompt)
+                # Model ismi v1beta uyumlu hale getirildi
+                try:
+                    model = genai.GenerativeModel('models/gemini-1.5-flash')
+                    response = model.generate_content(prompt)
+                except:
+                    model = genai.GenerativeModel('gemini-pro')
+                    response = model.generate_content(prompt)
+
                 st.markdown(response.text)
 
         except Exception as e:
