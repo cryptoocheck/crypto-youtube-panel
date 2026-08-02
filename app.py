@@ -6,7 +6,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 import os
 
-# 1. Streamlit Sayfa Yapılandırması (Sol Menü Başlangıçta Kapalı/Collapsed)
+# 1. Streamlit Sayfa Yapılandırması (Sol Menü Kapalı Başlar)
 st.set_page_config(
     page_title="Crypto Check — Profesyonel Analiz Paneli",
     page_icon="📈",
@@ -14,7 +14,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# 2. Apple Tarzı Özel Tasarım ve CSS Ayarları
+# 2. Apple Tarzı Özel Tasarım ve Boşlukları Sıfırlayan CSS Ayarları
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@300;400;600;700&display=swap');
@@ -28,17 +28,26 @@ st.markdown("""
         background-color: #000000;
     }
 
-    /* Logo Banner'ı Daha Büyük ve Ortalı Yapan Stil */
+    #MainMenu {visibility: hidden;}
+    footer {visibility: hidden;}
+
+    /* Streamlit'in üst boşluğunu tamamen kaldırma */
+    .block-container {
+        padding-top: 1rem !important;
+        padding-bottom: 0rem !important;
+    }
+
+    /* Logoyu Maksimum Boyuta Getiren ve Ortalayan Stil */
     .logo-container {
         display: flex;
         justify-content: center;
         align-items: center;
-        margin-top: -20px;
-        margin-bottom: 0px;
+        margin-top: -30px;
+        margin-bottom: -10px;
     }
     .logo-container img {
-        width: 75% !important; /* Logonun boyutunu büyüttük */
-        max-width: 900px;
+        width: 95% !important; /* Ekranı neredeyse tamamen kaplayacak dev boyut */
+        max-width: 1400px !important;
         border-radius: 12px;
     }
 
@@ -115,7 +124,7 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# --- BÜYÜTÜLMÜŞ LOGO BANNER (Boşluklar Minimuma İndirildi) ---
+# --- MAKSİMOUM BOYUTLU LOGO BANNER ---
 st.markdown('<div class="logo-container">', unsafe_allow_html=True)
 if os.path.exists("bg2.jpg"):
     st.image("bg2.jpg", use_container_width=False)
@@ -126,10 +135,8 @@ elif os.path.exists("bg.jpg.jpg"):
 elif os.path.exists("photo_6014965432080600852_y (1).jpg"):
     st.image("photo_6014965432080600852_y (1).jpg", use_container_width=False)
 else:
-    st.markdown("<h1 style='text-align: center; font-weight: 700; font-size: 48px; letter-spacing: -1px;'>Crypto Check</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 style='text-align: center; font-weight: 700; font-size: 48px;'>Crypto Check</h1>", unsafe_allow_html=True)
 st.markdown('</div>', unsafe_allow_html=True)
-
-st.markdown("<p style='text-align: center; color: #86868b; font-size: 15px; font-weight: 400; margin-bottom: 25px; margin-top: -10px;'>Yapay Zeka Destekli Kanal Analiz Stüdyosu</p>", unsafe_allow_html=True)
 
 # Sidebar (Kontrol Paneli)
 st.sidebar.markdown("### ⚙️ Kontrol Paneli")
