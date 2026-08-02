@@ -57,23 +57,9 @@ if st.sidebar.button("Analizi Başlat"):
                 3. Tıklama oranını (CTR) ve izleyici tutmayı artıracak 1 altın tavsiye ver.
                 """
                 
-                # Model isimlerini sırayla dene (Hangisi çalışırsa onu kullanır)
-                candidate_models = ['gemini-1.5-flash', 'gemini-1.5-pro', 'gemini-2.0-flash']
-                response = None
-                
-                for model_name in candidate_models:
-                    try:
-                        model = genai.GenerativeModel(model_name)
-                        response = model.generate_content(prompt)
-                        if response:
-                            break
-                    except Exception:
-                        continue
-                
-                if response:
-                    st.markdown(response.text)
-                else:
-                    st.error("Çalışan bir Gemini modeli bulunamadı, lütfen API anahtarınızı kontrol edin.")
+                model = genai.GenerativeModel('gemini-1.5-flash')
+                response = model.generate_content(prompt)
+                st.markdown(response.text)
 
         except Exception as e:
             st.error(f"Bir hata oluştu: {e}")
