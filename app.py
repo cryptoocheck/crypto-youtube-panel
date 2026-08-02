@@ -39,45 +39,30 @@ if st.sidebar.button("Analizi Başlat"):
 
             st.divider()
 
-            # 2. Gemini AI Analizi (Dinamik Model Seçimi)
+            # 2. Gemini AI Analizi
             st.subheader("🤖 AI Ajanının Kanal Strateji Raporu")
             with st.spinner("Yapay zeka verileri inceliyor..."):
                 client = genai.Client(api_key=gemini_key)
                 
-                # Kullanılabilir modelleri API'den çek
-                model_list = [m.name for m in client.models.list()]
-                
-                # Uygun metin modelini bul (İçinde 'flash' veya 'pro' geçen ilk model)
-                selected_model = None
-                for m_name in model_list:
-                    if 'flash' in m_name or 'pro' in m_name or 'gemini' in m_name:
-                        selected_model = m_name
-                        break
-                
-                if not selected_model and len(model_list) > 0:
-                    selected_model = model_list[0]
+                prompt = f"""
+                Sen profesyonel bir YouTube Kripto Kanalı Stratejistisin.
+                Kanal Adı: {title}
+                Toplam İzlenme: {views}
+                Abone Sayısı: {subscribers}
+                Video Sayısı: {videos}
 
-                if not selected_model:
-                    st.error("Hesabınıza tanımlı aktif bir Gemini modeli bulunamadı.")
-                else:
-                    prompt = f"""
-                    Sen profesyonel bir YouTube Kripto Kanalı Stratejistisin.
-                    Kanal Adı: {title}
-                    Toplam İzlenme: {views}
-                    Abone Sayısı: {subscribers}
-                    Video Sayısı: {videos}
-
-                    Bu verilere göre:
-                    1. Kanalın mevcut performansını değerlendir.
-                    2. Kripto piyasasındaki son trendlere uygun çekilebilecek 3 spesifik video konusu öner (Başlık fikirleriyle birlikte).
-                    3. Tıklama oranını (CTR) ve izleyici tutmayı artıracak 1 altın tavsiye ver.
-                    """
-                    
-                    response = client.models.generate_content(
-                        model=selected_model,
-                        contents=prompt
-                    )
-                    st.markdown(response.text)
+                Bu verilere göre:
+                1. Kanalın mevcut performansını değerlendir.
+                2. Kripto piyasasındaki son trendlere uygun çekilebilecek 3 spesifik video konusu öner (Başlık fikirleriyle birlikte).
+                3. Tıklama oranını (CTR) ve izleyici tutmayı artıracak 1 altın tavsiye ver.
+                """
+                
+                # Model ismi doğrudan "gemini-1.5-flash" olarak çağrılıyor
+                response = client.models.generate_content(
+                    model='gemini-1.5-flash',
+                    contents=prompt,
+                )
+                st.markdown(response.text)
 
         except Exception as e:
             st.error(f"Bir hata oluştu: {e}")
