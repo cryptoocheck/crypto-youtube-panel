@@ -1,7 +1,6 @@
 import streamlit as st
 from googleapiclient.discovery import build
 from google import genai
-from google.genai import types
 
 # Streamlit Sayfa Ayarları
 st.set_page_config(page_title="Crypto Check AI Panel", page_icon="📈", layout="wide")
@@ -40,34 +39,45 @@ if st.sidebar.button("Analizi Başlat"):
 
             st.divider()
 
-            # 2. Gemini AI Analizi
+            # 2. Gemini AI Analizi (Dinamik Model Seçimi)
             st.subheader("🤖 AI Ajanının Kanal Strateji Raporu")
             with st.spinner("Yapay zeka verileri inceliyor..."):
-                # Client tanımını v1 API sürümüne zorluyoruz
-                client = genai.Client(
-                    api_key=gemini_key,
-                    http_options=types.HttpOptions(api_version='v1')
-                )
+                client = genai.Client(api_key=gemini_key)
                 
-                prompt = f"""
-                Sen profesyonel bir YouTube Kripto Kanalı Stratejistisin.
-                Kanal Adı: {title}
-                Toplam İzlenme: {views}
-                Abone Sayısı: {subscribers}
-                Video Sayısı: {videos}
+                # Kullanılabilir modelleri API'den çek
+                model_list = [m.name for m in client.models.list()]
+                
+                # Uygun metin modelini bul (İçinde 'flash' veya 'pro' geçen ilk model)
+                selected_model = None
+                for m_name in model_list:
+                    if 'flash' in m_name or 'pro' in m_name or 'gemini' in m_name:
+                        selected_model = m_name
+                        break
+                
+                if not selected_model and len(model_list) > 0:
+                    selected_model = model_list[0]
 
-                Bu verilere göre:
-                1. Kanalın mevcut performansını değerlendir.
-                2. Kripto piyasasındaki son trendlere uygun çekilebilecek 3 spesifik video konusu öner (Başlık fikirleriyle birlikte).
-                3. Tıklama oranını (CTR) ve izleyici tutmayı artıracak 1 altın tavsiye ver.
-                """
-                
-                # Kararlı v1 modeli üzerinden çağrı yapılıyor
-                response = client.models.generate_content(
-                    model="gemini-1.5-flash",
-                    contents=prompt
-                )
-                st.markdown(response.text)
+                if not selected_model:
+                    st.error("Hesabınıza tanımlı aktif bir Gemini modeli bulunamadı.")
+                else:
+                    prompt = f"""
+                    Sen profesyonel bir YouTube Kripto Kanalı Stratejistisin.
+                    Kanal Adı: {title}
+                    Toplam İzlenme: {views}
+                    Abone Sayısı: {subscribers}
+                    Video Sayısı: {videos}
+
+                    Bu verilere göre:
+                    1. Kanalın mevcut performansını değerlendir.
+                    2. Kripto piyasasındaki son trendlere uygun çekilebilecek 3 spesifik video konusu öner (Başlık fikirleriyle birlikte).
+                    3. Tıklama oranını (CTR) ve izleyici tutmayı artıracak 1 altın tavsiye ver.
+                    """
+                    
+                    response = client.models.generate_content(
+                        model=selected_model,
+                        contents=prompt
+                    )
+                    st.markdown(response.text)
 
         except Exception as e:
             st.error(f"Bir hata oluştu: {e}")
