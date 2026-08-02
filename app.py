@@ -39,7 +39,7 @@ if st.sidebar.button("Analizi Başlat"):
 
             st.divider()
 
-            # 2. Gemini AI Analizi (Resmi Standart Model)
+            # 2. Gemini AI Analizi
             st.subheader("🤖 AI Ajanının Kanal Strateji Raporu")
             with st.spinner("Yapay zeka verileri inceliyor..."):
                 client = genai.Client(api_key=gemini_key)
@@ -57,9 +57,10 @@ if st.sidebar.button("Analizi Başlat"):
                 3. Tıklama oranını (CTR) ve izleyici tutmayı artıracak 1 altın tavsiye ver.
                 """
                 
+                # Model ismi yalın şekilde tanımlandı
                 response = client.models.generate_content(
-                    model='gemini-1.5-flash',
-                    contents=prompt,
+                    model="gemini-1.5-flash",
+                    contents=prompt
                 )
                 st.markdown(response.text)
 
