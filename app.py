@@ -24,12 +24,10 @@ st.markdown("""
         color: #f5f5f7;
     }
     
-    /* Ana Arka Plan Gradient */
     .stApp {
         background: radial-gradient(circle at 50% -20%, #1a1a2e 0%, #000000 80%);
     }
 
-    /* Glassmorphism Kartlar */
     .apple-card {
         background: rgba(255, 255, 255, 0.04);
         backdrop-filter: blur(20px);
@@ -41,7 +39,6 @@ st.markdown("""
         box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
     }
     
-    /* Metrik Değerleri */
     .metric-title {
         font-size: 13px;
         font-weight: 600;
@@ -65,13 +62,11 @@ st.markdown("""
         font-weight: 500;
     }
 
-    /* Sidebar Özelleştirme */
     section[data-testid="stSidebar"] {
         background-color: rgba(0, 0, 0, 0.6);
         border-right: 1px solid rgba(255, 255, 255, 0.08);
     }
     
-    /* Buton Tasarımı */
     .stButton>button {
         background: #0071e3;
         color: #ffffff;
@@ -87,7 +82,6 @@ st.markdown("""
         box-shadow: 0 0 18px rgba(0, 113, 227, 0.5);
     }
 
-    /* Sekme Yapısı */
     .stTabs [data-baseweb="tab-list"] {
         gap: 8px;
         background-color: rgba(255, 255, 255, 0.03);
@@ -128,7 +122,6 @@ if analyze_btn:
             # 1. API Veri Çekimi
             youtube = build('youtube', 'v3', developerKey=youtube_key)
             
-            # Kanal Ana Verileri
             ch_req = youtube.channels().list(
                 part='statistics,snippet,contentDetails',
                 id=channel_id
@@ -162,7 +155,6 @@ if analyze_btn:
                 likes = int(item['statistics'].get('likeCount', 0))
                 comments = int(item['statistics'].get('commentCount', 0))
                 
-                # Etkileşim Oranı Hesaplama
                 engagement_rate = ((likes + comments) / views * 100) if views > 0 else 0
                 
                 v_list.append({
@@ -193,7 +185,7 @@ if analyze_btn:
                 col_left, col_right = st.columns([2, 1])
                 
                 with col_left:
-                    st.markdown("<div class="apple-card">", unsafe_allow_html=True)
+                    st.markdown('<div class="apple-card">', unsafe_allow_html=True)
                     st.write("### View vs. Engagement Distribution")
                     fig = px.scatter(
                         df, 
@@ -211,10 +203,10 @@ if analyze_btn:
                         font=dict(family="SF Pro Display", color="#86868b")
                     )
                     st.plotly_chart(fig, use_container_width=True)
-                    st.markdown("</div>", unsafe_allow_html=True)
+                    st.markdown('</div>', unsafe_allow_html=True)
 
                 with col_right:
-                    st.markdown("<div class="apple-card">", unsafe_allow_html=True)
+                    st.markdown('<div class="apple-card">', unsafe_allow_html=True)
                     st.write("### Audience Interaction Ratio")
                     avg_likes = df['Likes'].mean()
                     avg_comments = df['Comments'].mean()
@@ -232,19 +224,19 @@ if analyze_btn:
                         font=dict(family="SF Pro Display", color="#86868b")
                     )
                     st.plotly_chart(fig_pie, use_container_width=True)
-                    st.markdown("</div>", unsafe_allow_html=True)
+                    st.markdown('</div>', unsafe_allow_html=True)
 
             with t2:
-                st.markdown("<div class="apple-card">", unsafe_allow_html=True)
+                st.markdown('<div class="apple-card">', unsafe_allow_html=True)
                 st.write("### Video Performance Records")
                 st.dataframe(
                     df.style.background_gradient(cmap="Blues", subset=["Views", "Engagement (%)"]),
                     use_container_width=True
                 )
-                st.markdown("</div>", unsafe_allow_html=True)
+                st.markdown('</div>', unsafe_allow_html=True)
 
             with t3:
-                st.markdown("<div class="apple-card">", unsafe_allow_html=True)
+                st.markdown('<div class="apple-card">', unsafe_allow_html=True)
                 st.write("### 🤖 Strategic Executive Summary")
                 with st.spinner("Analyzing channel patterns with Llama 3.3 Engine..."):
                     client = Groq(api_key=groq_key)
@@ -268,7 +260,7 @@ if analyze_btn:
                     )
 
                     st.markdown(chat_completion.choices[0].message.content)
-                st.markdown("</div>", unsafe_allow_html=True)
+                st.markdown('</div>', unsafe_allow_html=True)
 
         except Exception as e:
             st.error(f"Sistem Çalışma Hatası: {e}")
