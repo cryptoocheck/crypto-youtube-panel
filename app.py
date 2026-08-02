@@ -1,6 +1,7 @@
 import streamlit as st
 from googleapiclient.discovery import build
 from google import genai
+from google.genai import types
 
 # Streamlit Sayfa Ayarları
 st.set_page_config(page_title="Crypto Check AI Panel", page_icon="📈", layout="wide")
@@ -42,7 +43,11 @@ if st.sidebar.button("Analizi Başlat"):
             # 2. Gemini AI Analizi
             st.subheader("🤖 AI Ajanının Kanal Strateji Raporu")
             with st.spinner("Yapay zeka verileri inceliyor..."):
-                client = genai.Client(api_key=gemini_key)
+                # Client tanımını v1 API sürümüne zorluyoruz
+                client = genai.Client(
+                    api_key=gemini_key,
+                    http_options=types.HttpOptions(api_version='v1')
+                )
                 
                 prompt = f"""
                 Sen profesyonel bir YouTube Kripto Kanalı Stratejistisin.
@@ -57,7 +62,7 @@ if st.sidebar.button("Analizi Başlat"):
                 3. Tıklama oranını (CTR) ve izleyici tutmayı artıracak 1 altın tavsiye ver.
                 """
                 
-                # Model ismi yalın şekilde tanımlandı
+                # Kararlı v1 modeli üzerinden çağrı yapılıyor
                 response = client.models.generate_content(
                     model="gemini-1.5-flash",
                     contents=prompt
