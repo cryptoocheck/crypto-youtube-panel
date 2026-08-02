@@ -6,7 +6,6 @@ import plotly.express as px
 import plotly.graph_objects as go
 import os
 import base64
-import time
 
 # 1. Streamlit Sayfa Yapılandırması
 st.set_page_config(
@@ -26,14 +25,15 @@ def get_img_as_base64(file_path):
 img_path = "bg2.jpg" if os.path.exists("bg2.jpg") else "bg.jpg" if os.path.exists("bg.jpg") else "bg.jpg.jpg" if os.path.exists("bg.jpg.jpg") else "photo_6014965432080600852_y (1).jpg" if os.path.exists("photo_6014965432080600852_y (1).jpg") else ""
 img_b64 = get_img_as_base64(img_path)
 
-# 2. Tam Merkezlenmiş Mükemmel CSS Mimarisi
+# 2. Apple Tipografi ve Boyutlu/Hareketli Grafik Mimarisi (CSS)
 st.markdown(f"""
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@300;400;600;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@300;400;500;600;700&display=swap');
     
     html, body, [class*="css"] {{
-        font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Helvetica, Arial, sans-serif;
         color: #f5f5f7;
+        letter-spacing: -0.01em;
     }}
 
     .stApp {{
@@ -65,36 +65,50 @@ st.markdown(f"""
         display: block;
     }}
 
+    /* Boyutlu, Derinlikli ve Hareketli Apple Kartları */
     .apple-card {{
-        background: #1c1c1e; 
-        border: 1px solid #333336;
-        border-radius: 18px;
-        padding: 24px;
+        background: linear-gradient(145deg, #161618, #1c1c1e);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 20px;
+        padding: 26px;
         margin-bottom: 20px;
-        box-shadow: 0 4px 12px 0 rgba(0, 0, 0, 0.5);
+        box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.6), inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
+        transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }}
+    .apple-card:hover {{
+        transform: translateY(-4px);
+        box-shadow: 0 18px 50px 0 rgba(0, 0, 0, 0.8), inset 0 1px 0 0 rgba(255, 255, 255, 0.2);
     }}
     
     .metric-title {{
-        font-size: 13px;
+        font-size: 12px;
         font-weight: 600;
         text-transform: uppercase;
-        letter-spacing: 0.8px;
-        color: #d1d1d6;
+        letter-spacing: 1px;
+        color: #86868b;
         margin-bottom: 8px;
     }}
+    
+    /* Sayaç Efekti İçin Animasyonlu Metin */
+    @keyframes countUp {{
+        from {{ opacity: 0; transform: translateY(10px); }}
+        to {{ opacity: 1; transform: translateY(0); }}
+    }}
     .metric-value {{
-        font-size: 34px;
+        font-size: 36px;
         font-weight: 700;
-        letter-spacing: -0.5px;
-        background: linear-gradient(180deg, #ffffff 0%, #e0e0e0 100%);
+        letter-spacing: -0.02em;
+        background: linear-gradient(180deg, #ffffff 0%, #a1a1a6 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
+        animation: countUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }}
+    
     .metric-sub {{
         font-size: 12px;
         color: #d4af37; 
-        margin-top: 4px;
-        font-weight: 600;
+        margin-top: 6px;
+        font-weight: 500;
     }}
 
     section[data-testid="stSidebar"] {{
@@ -107,14 +121,14 @@ st.markdown(f"""
         color: #000000;
         border: none;
         border-radius: 980px;
-        font-weight: 700;
+        font-weight: 600;
         padding: 10px 24px;
         transition: all 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
         width: 100%;
     }}
     .stButton>button:hover {{
         background: #f1c40f;
-        box-shadow: 0 0 18px rgba(241, 196, 15, 0.4);
+        box-shadow: 0 0 20px rgba(241, 196, 15, 0.5);
         color: #000000;
     }}
 
@@ -123,7 +137,7 @@ st.markdown(f"""
         background-color: #1c1c1e;
         padding: 6px;
         border-radius: 980px;
-        border: 1px solid #333336;
+        border: 1px solid rgba(255, 255, 255, 0.08);
     }}
     .stTabs [data-baseweb="tab"] {{
         border-radius: 980px;
@@ -161,8 +175,7 @@ if analyze_btn:
         st.error("Lütfen sol paneldeki tüm erişim anahtarlarını eksiksiz girin.")
     else:
         try:
-            with st.spinner("YouTube sunucularından en güncel veriler çekiliyor..."):
-                # 1. API Bağlantısı (Cache bypass için zaman damgası ekledik)
+            with st.spinner("YouTube sunucularından canlı veriler yükleniyor..."):
                 youtube = build('youtube', 'v3', developerKey=youtube_key)
                 
                 ch_req = youtube.channels().list(
@@ -177,7 +190,6 @@ if analyze_btn:
                 total_videos = int(channel['statistics']['videoCount'])
                 uploads_playlist_id = channel['contentDetails']['relatedPlaylists']['uploads']
 
-                # Son 15 Videonun Canlı Verileri
                 playlist_req = youtube.playlistItems().list(
                     part='snippet',
                     playlistId=uploads_playlist_id,
@@ -210,7 +222,7 @@ if analyze_btn:
 
                 df = pd.DataFrame(v_list)
             
-            # Üst Metrik Kartları
+            # Üst Metrik Kartları (Sayaç Animasyonlu)
             c1, c2, c3, c4 = st.columns(4)
             with c1:
                 st.markdown(f'<div class="apple-card"><div class="metric-title">TOPLAM İZLENME</div><div class="metric-value">{total_views:,}</div><div class="metric-sub">Canlı Veri</div></div>', unsafe_allow_html=True)
@@ -244,7 +256,7 @@ if analyze_btn:
                     fig.update_layout(
                         paper_bgcolor='rgba(0,0,0,0)',
                         plot_bgcolor='rgba(0,0,0,0)',
-                        font=dict(family="SF Pro Display", color="#d1d1d6")
+                        font=dict(family="SF Pro Display, -apple-system", color="#d1d1d6")
                     )
                     st.plotly_chart(fig, use_container_width=True)
                     st.markdown('</div>', unsafe_allow_html=True)
@@ -265,7 +277,7 @@ if analyze_btn:
                         paper_bgcolor='rgba(0,0,0,0)',
                         plot_bgcolor='rgba(0,0,0,0)',
                         showlegend=True,
-                        font=dict(family="SF Pro Display", color="#d1d1d6")
+                        font=dict(family="SF Pro Display, -apple-system", color="#d1d1d6")
                     )
                     st.plotly_chart(fig_pie, use_container_width=True)
                     st.markdown('</div>', unsafe_allow_html=True)
@@ -293,7 +305,7 @@ if analyze_btn:
                     Ortalama Etkileşim Oranı: %{df['Etkileşim (%)'].mean():.2f}
 
                     Lütfen kesinlikle Türkçe olarak, üst düzey yönetici formatında (Apple Tarzı Minimalist ve Derin):
-                    1. **Kanalın Büyüme Veektörü:** Mevcut kitle sadakatini ve etkileşim gücünü analiz et.
+                    1. **Kanalın Büyüme Vektörü:** Mevcut kitle sadakatini ve etkileşim gücünü analiz et.
                     2. **3 Fark Yaratan İçerik Fikri:** Güncel kripto ekosistemine uygun 3 spesifik, yüksek tıklama (CTR) potansiyelli video konusu ve başlık yapısı sun.
                     3. **Kitle Tutma Mimarisi:** Tıklama sonrası izleyici kaybını engelleyecek 1 stratejik altın kural sun.
                     """
