@@ -44,28 +44,35 @@ if st.sidebar.button("Analizi Başlat"):
             with st.spinner("Yapay zeka verileri inceliyor..."):
                 genai.configure(api_key=gemini_key)
                 
-                prompt = f"""
-                Sen profesyonel bir YouTube Kripto Kanalı Stratejistisin.
-                Kanal Adı: {title}
-                Toplam İzlenme: {views}
-                Abone Sayısı: {subscribers}
-                Video Sayısı: {videos}
-
-                Bu verilere göre:
-                1. Kanalın mevcut performansını değerlendir.
-                2. Kripto piyasasındaki son trendlere uygun çekilebilecek 3 spesifik video konusu öner (Başlık fikirleriyle birlikte).
-                3. Tıklama oranını (CTR) ve izleyici tutmayı artıracak 1 altın tavsiye ver.
-                """
+                # Kullanılabilir modelleri otomatik bul
+                available_models = [m.name for m in genai.list_models() if 'generateContent' in m.supported_generation_methods]
                 
-                # Model ismi v1beta uyumlu hale getirildi
-                try:
-                    model = genai.GenerativeModel('models/gemini-1.5-flash')
-                    response = model.generate_content(prompt)
-                except:
-                    model = genai.GenerativeModel('gemini-pro')
-                    response = model.generate_content(prompt)
+                if not available_models:
+                    st.error("Hesabınızda kullanılabilir bir Gemini modeli bulunamadı.")
+                else:
+                    # En uygun modeli seç
+                    selected_model = available_models[0]
+                    for m in available_models:
+                        if 'flash' in m or 'pro' in m:
+                            selected_model = m
+                            break
+                    
+                    prompt = f"""
+                    Sen profesyonel bir YouTube Kripto Kanalı Stratejistisin.
+                    Kanal Adı: {title}
+                    Toplam İzlenme: {views}
+                    Abone Sayısı: {subscribers}
+                    Video Sayısı: {videos}
 
-                st.markdown(response.text)
+                    Bu verilere göre:
+                    1. Kanalın mevcut performansını değerlendir.
+                    2. Kripto piyasasındaki son trendlere uygun çekilebilecek 3 spesifik video konusu öner (Başlık fikirleriyle birlikte).
+                    3. Tıklama oranını (CTR) ve izleyici tutmayı artıracak 1 altın tavsiye ver.
+                    """
+                    
+                    model = genai.GenerativeModel(selected_model)
+                    response = model.generate_content(prompt)
+                    st.markdown(response.text)
 
         except Exception as e:
             st.error(f"Bir hata oluştu: {e}")
