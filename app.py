@@ -6,15 +6,15 @@ import plotly.express as px
 import plotly.graph_objects as go
 import os
 
-# 1. Streamlit Sayfa Yapılandırması
+# 1. Streamlit Sayfa Yapılandırması (Sol Menü Başlangıçta Kapalı/Collapsed)
 st.set_page_config(
     page_title="Crypto Check — Profesyonel Analiz Paneli",
     page_icon="📈",
     layout="wide",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="collapsed"
 )
 
-# 2. Apple Tasarım Sistemi - Tamamen Siyah Koyu Tema
+# 2. Apple Tarzı Özel Tasarım ve CSS Ayarları
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@300;400;600;700&display=swap');
@@ -26,6 +26,20 @@ st.markdown("""
 
     .stApp {
         background-color: #000000;
+    }
+
+    /* Logo Banner'ı Daha Büyük ve Ortalı Yapan Stil */
+    .logo-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-top: -20px;
+        margin-bottom: 0px;
+    }
+    .logo-container img {
+        width: 75% !important; /* Logonun boyutunu büyüttük */
+        max-width: 900px;
+        border-radius: 12px;
     }
 
     .apple-card {
@@ -101,19 +115,23 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# --- YENİ RESİM KONTROLÜ ---
+# --- BÜYÜTÜLMÜŞ LOGO BANNER (Boşluklar Minimuma İndirildi) ---
+st.markdown('<div class="logo-container">', unsafe_allow_html=True)
 if os.path.exists("bg2.jpg"):
-    st.image("bg2.jpg", use_container_width=True)
+    st.image("bg2.jpg", use_container_width=False)
 elif os.path.exists("bg.jpg"):
-    st.image("bg.jpg", use_container_width=True)
+    st.image("bg.jpg", use_container_width=False)
 elif os.path.exists("bg.jpg.jpg"):
-    st.image("bg.jpg.jpg", use_container_width=True)
+    st.image("bg.jpg.jpg", use_container_width=False)
+elif os.path.exists("photo_6014965432080600852_y (1).jpg"):
+    st.image("photo_6014965432080600852_y (1).jpg", use_container_width=False)
 else:
-    st.markdown("<h1 style='text-align: center; font-weight: 700; font-size: 48px; letter-spacing: -1px; margin-bottom: 0px;'>Crypto Check</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 style='text-align: center; font-weight: 700; font-size: 48px; letter-spacing: -1px;'>Crypto Check</h1>", unsafe_allow_html=True)
+st.markdown('</div>', unsafe_allow_html=True)
 
-st.markdown("<p style='text-align: center; color: #86868b; font-size: 19px; font-weight: 400; margin-bottom: 40px; margin-top: 10px;'>Yapay Zeka Destekli Kanal Analiz Stüdyosu</p>", unsafe_allow_html=True)
+st.markdown("<p style='text-align: center; color: #86868b; font-size: 15px; font-weight: 400; margin-bottom: 25px; margin-top: -10px;'>Yapay Zeka Destekli Kanal Analiz Stüdyosu</p>", unsafe_allow_html=True)
 
-# Sidebar
+# Sidebar (Kontrol Paneli)
 st.sidebar.markdown("### ⚙️ Kontrol Paneli")
 youtube_key = st.sidebar.text_input("YouTube Data API Anahtarı", type="password")
 groq_key = st.sidebar.text_input("Groq AI Anahtarı", type="password")
@@ -273,4 +291,4 @@ if analyze_btn:
         except Exception as e:
             st.error(f"Sistem Çalışma Hatası: {e}")
 else:
-    st.info("👈 Analiz motorunu başlatmak için sol taraftaki kontrol panelinden erişim anahtarlarınızı girin.")
+    st.info("👈 Sol üstteki küçük oka tıklayarak kontrol panelini açabilir ve analiz motorunu çalıştırabilirsiniz.")
