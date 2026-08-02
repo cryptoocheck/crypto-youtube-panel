@@ -7,8 +7,8 @@ import plotly.graph_objects as go
 
 # 1. Streamlit Sayfa Yapılandırması
 st.set_page_config(
-    page_title="Crypto Check — Pro Dashboard",
-    page_icon="🍎",
+    page_title="Crypto Check — Profesyonel Analiz Paneli",
+    page_icon="📈",
     layout="wide",
     initial_sidebar_state="expanded"
 )
@@ -104,15 +104,15 @@ st.markdown("""
 
 # Başlık
 st.markdown("<h1 style='text-align: center; font-weight: 700; font-size: 48px; letter-spacing: -1px; margin-bottom: 0px;'>Crypto Check</h1>", unsafe_allow_html=True)
-st.markdown("<p style='text-align: center; color: #86868b; font-size: 19px; font-weight: 400; margin-bottom: 40px;'>Intelligent Intelligence & Performance Studio</p>", unsafe_allow_html=True)
+st.markdown("<p style='text-align: center; color: #86868b; font-size: 19px; font-weight: 400; margin-bottom: 40px;'>Yapay Zeka Destekli Kanal Analiz Stüdyosu</p>", unsafe_allow_html=True)
 
 # Sidebar
-st.sidebar.markdown("### ⚙️ Control Center")
-youtube_key = st.sidebar.text_input("YouTube Data API Key", type="password")
-groq_key = st.sidebar.text_input("Groq AI Key", type="password")
-channel_id = st.sidebar.text_input("Channel ID")
+st.sidebar.markdown("### ⚙️ Kontrol Paneli")
+youtube_key = st.sidebar.text_input("YouTube Data API Anahtarı", type="password")
+groq_key = st.sidebar.text_input("Groq AI Anahtarı", type="password")
+channel_id = st.sidebar.text_input("Kanal ID")
 
-analyze_btn = st.sidebar.button("Run Intelligence Engine")
+analyze_btn = st.sidebar.button("Analiz Motorunu Çalıştır")
 
 if analyze_btn:
     if not youtube_key or not groq_key or not channel_id:
@@ -158,11 +158,11 @@ if analyze_btn:
                 engagement_rate = ((likes + comments) / views * 100) if views > 0 else 0
                 
                 v_list.append({
-                    "Title": title,
-                    "Views": views,
-                    "Likes": likes,
-                    "Comments": comments,
-                    "Engagement (%)": round(engagement_rate, 2)
+                    "Video Başlığı": title,
+                    "İzlenme": views,
+                    "Beğeni": likes,
+                    "Yorum": comments,
+                    "Etkileşim (%)": round(engagement_rate, 2)
                 })
 
             df = pd.DataFrame(v_list)
@@ -170,32 +170,33 @@ if analyze_btn:
             # Üst Metrik Kartları
             c1, c2, c3, c4 = st.columns(4)
             with c1:
-                st.markdown(f'<div class="apple-card"><div class="metric-title">TOTAL VIEWS</div><div class="metric-value">{total_views:,}</div><div class="metric-sub">Lifetime Metric</div></div>', unsafe_allow_html=True)
+                st.markdown(f'<div class="apple-card"><div class="metric-title">TOPLAM İZLENME</div><div class="metric-value">{total_views:,}</div><div class="metric-sub">Tüm Zamanlar</div></div>', unsafe_allow_html=True)
             with c2:
-                st.markdown(f'<div class="apple-card"><div class="metric-title">SUBSCRIBERS</div><div class="metric-value">{subscribers:,}</div><div class="metric-sub">Active Audience</div></div>', unsafe_allow_html=True)
+                st.markdown(f'<div class="apple-card"><div class="metric-title">ABONE SAYISI</div><div class="metric-value">{subscribers:,}</div><div class="metric-sub">Aktif İzleyici</div></div>', unsafe_allow_html=True)
             with c3:
-                st.markdown(f'<div class="apple-card"><div class="metric-title">AVG ENGAGEMENT</div><div class="metric-value">%{df["Engagement (%)"].mean():.2f}</div><div class="metric-sub">Benchmark Rate</div></div>', unsafe_allow_html=True)
+                st.markdown(f'<div class="apple-card"><div class="metric-title">ORTALAMA ETKİLEŞİM</div><div class="metric-value">%{df["Etkileşim (%)"].mean():.2f}</div><div class="metric-sub">Kanal Performansı</div></div>', unsafe_allow_html=True)
             with c4:
-                st.markdown(f'<div class="apple-card"><div class="metric-title">VIDEO INDEX</div><div class="metric-value">{total_videos}</div><div class="metric-sub">Published Assets</div></div>', unsafe_allow_html=True)
+                st.markdown(f'<div class="apple-card"><div class="metric-title">İÇERİK SAYISI</div><div class="metric-value">{total_videos}</div><div class="metric-sub">Yayınlanan Video</div></div>', unsafe_allow_html=True)
 
             # Sekmeli Panel Yapısı
-            t1, t2, t3 = st.tabs(["📊 Performance Matrix", "🔍 Deep Analytics", "🤖 AI Strategy Core"])
+            t1, t2, t3 = st.tabs(["📊 Performans Matrisi", "🔍 Detaylı Analiz", "🤖 AI Strateji Raporu"])
 
             with t1:
                 col_left, col_right = st.columns([2, 1])
                 
                 with col_left:
                     st.markdown('<div class="apple-card">', unsafe_allow_html=True)
-                    st.write("### View vs. Engagement Distribution")
+                    st.write("### İzlenme ve Etkileşim Dağılımı")
                     fig = px.scatter(
                         df, 
-                        x="Views", 
-                        y="Engagement (%)", 
-                        size="Likes", 
-                        hover_name="Title",
-                        color="Engagement (%)",
+                        x="İzlenme", 
+                        y="Etkileşim (%)", 
+                        size="Beğeni", 
+                        hover_name="Video Başlığı",
+                        color="Etkileşim (%)",
                         color_continuous_scale=px.colors.sequential.Bluered,
-                        template="plotly_dark"
+                        template="plotly_dark",
+                        labels={"İzlenme": "İzlenme Sayısı", "Etkileşim (%)": "Etkileşim Oranı (%)"}
                     )
                     fig.update_layout(
                         paper_bgcolor='rgba(0,0,0,0)',
@@ -207,12 +208,12 @@ if analyze_btn:
 
                 with col_right:
                     st.markdown('<div class="apple-card">', unsafe_allow_html=True)
-                    st.write("### Audience Interaction Ratio")
-                    avg_likes = df['Likes'].mean()
-                    avg_comments = df['Comments'].mean()
+                    st.write("### İzleyici Etkileşim Oranı")
+                    avg_likes = df['Beğeni'].mean()
+                    avg_comments = df['Yorum'].mean()
                     
                     fig_pie = go.Figure(data=[go.Pie(
-                        labels=['Likes', 'Comments'],
+                        labels=['Beğeniler', 'Yorumlar'],
                         values=[avg_likes, avg_comments],
                         hole=.6,
                         marker_colors=['#2997ff', '#30d158']
@@ -220,7 +221,7 @@ if analyze_btn:
                     fig_pie.update_layout(
                         paper_bgcolor='rgba(0,0,0,0)',
                         plot_bgcolor='rgba(0,0,0,0)',
-                        showlegend=False,
+                        showlegend=True,
                         font=dict(family="SF Pro Display", color="#86868b")
                     )
                     st.plotly_chart(fig_pie, use_container_width=True)
@@ -228,30 +229,30 @@ if analyze_btn:
 
             with t2:
                 st.markdown('<div class="apple-card">', unsafe_allow_html=True)
-                st.write("### Video Performance Records")
+                st.write("### Video Performans Kayıtları")
                 st.dataframe(
-                    df.style.background_gradient(cmap="Blues", subset=["Views", "Engagement (%)"]),
+                    df,
                     use_container_width=True
                 )
                 st.markdown('</div>', unsafe_allow_html=True)
 
             with t3:
                 st.markdown('<div class="apple-card">', unsafe_allow_html=True)
-                st.write("### 🤖 Strategic Executive Summary")
-                with st.spinner("Analyzing channel patterns with Llama 3.3 Engine..."):
+                st.write("### 🤖 Stratejik Yönetici Özeti")
+                with st.spinner("Kanal modelleri Llama 3.3 Motoru ile analiz ediliyor..."):
                     client = Groq(api_key=groq_key)
                     
                     prompt = f"""
-                    Sen Apple seviyesinde ürün stratejisi geliştiren lider bir YouTube Kripto Kanalı Danışmanısın.
+                    Sen Apple seviyesinde ürün ve içerik stratejisi geliştiren lider bir YouTube Kripto Kanalı Danışmanısın.
                     Kanal Adı: {ch_title}
-                    Toplam İzlenme: {total_views} | Abone: {subscribers}
-                    Son 15 Videonun Ortalama İzlenmesi: {df['Views'].mean():.0f}
-                    Ortalama Etkileşim Oranı: %{df['Engagement (%)'].mean():.2f}
+                    Toplam İzlenme: {total_views} | Abone Sayısı: {subscribers}
+                    Son 15 Videonun Ortalama İzlenmesi: {df['İzlenme'].mean():.0f}
+                    Ortalama Etkileşim Oranı: %{df['Etkileşim (%)'].mean():.2f}
 
-                    Lütfen üst düzey yönetici formatında (Apple Tarzı Minimalist ve Derin):
+                    Lütfen kesinlikle Türkçe olarak, üst düzey yönetici formatında (Apple Tarzı Minimalist ve Derin):
                     1. **Kanalın Büyüme Vektörü:** Mevcut kitle sadakatini ve etkileşim gücünü analiz et.
-                    2. **3 X-Factor İçerik Fikri:** Güncel kripto ekosistemine uygun 3 spesifik, yüksek CTR potansiyelli video konusu ve başlık mimarisi sun.
-                    3. **Kitle Tutma (Retention) Mimarisi:** Tıklama sonrası izleyici kaybetmeyi engelleyecek 1 stratejik altın kural sun.
+                    2. **3 Fark Yaratan İçerik Fikri:** Güncel kripto ekosistemine uygun 3 spesifik, yüksek tıklama (CTR) potansiyelli video konusu ve başlık yapısı sun.
+                    3. **Kitle Tutma Mimarisi:** Tıklama sonrası izleyici kaybını engelleyecek 1 stratejik altın kural sun.
                     """
                     
                     chat_completion = client.chat.completions.create(
@@ -265,4 +266,4 @@ if analyze_btn:
         except Exception as e:
             st.error(f"Sistem Çalışma Hatası: {e}")
 else:
-    st.info("👈 Analiz motorunu başlatmak için sol taraftaki kontrol merkezinden erişim kodlarınızı girin.")
+    st.info("👈 Analiz motorunu başlatmak için sol taraftaki kontrol panelinden erişim anahtarlarınızı girin.")
