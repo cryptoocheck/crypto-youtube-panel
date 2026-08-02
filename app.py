@@ -44,14 +44,15 @@ if st.sidebar.button("Analizi Başlat"):
             with st.spinner("Yapay zeka verileri inceliyor..."):
                 client = Groq(api_key=groq_key)
                 
+                # Türkçe karakter uyumu için açık UTF-8 prompt tanımı
                 prompt = f"""
-                Sen profesyonel bir YouTube Kripto Kanalı Stratejistisin.
-                Kanal Adı: {title}
-                Toplam İzlenme: {views}
-                Abone Sayısı: {subscribers}
-                Video Sayısı: {videos}
+                You are a professional YouTube Crypto Channel Strategist.
+                Channel Name: {title}
+                Total Views: {views}
+                Subscribers: {subscribers}
+                Video Count: {videos}
 
-                Bu verilere göre Türkçe olarak:
+                Please provide your detailed evaluation and strategy report strictly in Turkish:
                 1. Kanalın mevcut performansını değerlendir.
                 2. Kripto piyasasındaki son trendlere uygun çekilebilecek 3 spesifik video konusu öner (Başlık fikirleriyle birlikte).
                 3. Tıklama oranını (CTR) ve izleyici tutmayı artıracak 1 altın tavsiye ver.
