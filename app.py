@@ -6,6 +6,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 import os
 import base64
+import time
 
 # 1. Streamlit Sayfa Yapılandırması
 st.set_page_config(
@@ -15,7 +16,6 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# Resmi HTML içine gömmek için Base64 formatına çeviren fonksiyon
 def get_img_as_base64(file_path):
     if os.path.exists(file_path):
         with open(file_path, "rb") as f:
@@ -23,7 +23,6 @@ def get_img_as_base64(file_path):
         return base64.b64encode(data).decode()
     return None
 
-# Uygun resim dosyasını bul
 img_path = "bg2.jpg" if os.path.exists("bg2.jpg") else "bg.jpg" if os.path.exists("bg.jpg") else "bg.jpg.jpg" if os.path.exists("bg.jpg.jpg") else "photo_6014965432080600852_y (1).jpg" if os.path.exists("photo_6014965432080600852_y (1).jpg") else ""
 img_b64 = get_img_as_base64(img_path)
 
@@ -50,7 +49,6 @@ st.markdown(f"""
         max-width: 100% !important;
     }}
 
-    /* Resmi Kesinlikle Tam Merkezde ve İstediğin Boyutta Tutan HTML Alanı */
     .absolute-center-banner {{
         display: flex;
         justify-content: center;
@@ -140,7 +138,7 @@ st.markdown(f"""
 </style>
 """, unsafe_allow_html=True)
 
-# --- HTML İLE DOĞRUDAN MERKEZLENMİŞ BANNER ---
+# --- BANNER ---
 if img_b64:
     st.markdown(f'''
     <div class="absolute-center-banner">
@@ -156,65 +154,66 @@ youtube_key = st.sidebar.text_input("YouTube Data API Anahtarı", type="password
 groq_key = st.sidebar.text_input("Groq AI Anahtarı", type="password")
 channel_id = st.sidebar.text_input("Kanal ID")
 
-analyze_btn = st.sidebar.button("Analiz Motorunu Çalıştır")
+analyze_btn = st.sidebar.button("Canlı Verileri Getir")
 
 if analyze_btn:
     if not youtube_key or not groq_key or not channel_id:
         st.error("Lütfen sol paneldeki tüm erişim anahtarlarını eksiksiz girin.")
     else:
         try:
-            # 1. API Veri Çekimi
-            youtube = build('youtube', 'v3', developerKey=youtube_key)
-            
-            ch_req = youtube.channels().list(
-                part='statistics,snippet,contentDetails',
-                id=channel_id
-            ).execute()
-
-            channel = ch_req['items'][0]
-            ch_title = channel['snippet']['title']
-            total_views = int(channel['statistics']['viewCount'])
-            subscribers = int(channel['statistics']['subscriberCount'])
-            total_videos = int(channel['statistics']['videoCount'])
-            uploads_playlist_id = channel['contentDetails']['relatedPlaylists']['uploads']
-
-            # Son 15 Videonun Detay Verileri
-            playlist_req = youtube.playlistItems().list(
-                part='snippet',
-                playlistId=uploads_playlist_id,
-                maxResults=15
-            ).execute()
-
-            v_ids = [item['snippet']['resourceId']['videoId'] for item in playlist_req['items']]
-            
-            videos_req = youtube.videos().list(
-                part='statistics,snippet,contentDetails',
-                id=','.join(v_ids)
-            ).execute()
-
-            v_list = []
-            for item in videos_req['items']:
-                title = item['snippet']['title']
-                views = int(item['statistics'].get('viewCount', 0))
-                likes = int(item['statistics'].get('likeCount', 0))
-                comments = int(item['statistics'].get('commentCount', 0))
+            with st.spinner("YouTube sunucularından en güncel veriler çekiliyor..."):
+                # 1. API Bağlantısı (Cache bypass için zaman damgası ekledik)
+                youtube = build('youtube', 'v3', developerKey=youtube_key)
                 
-                engagement_rate = ((likes + comments) / views * 100) if views > 0 else 0
-                
-                v_list.append({
-                    "Video Başlığı": title,
-                    "İzlenme": views,
-                    "Beğeni": likes,
-                    "Yorum": comments,
-                    "Etkileşim (%)": round(engagement_rate, 2)
-                })
+                ch_req = youtube.channels().list(
+                    part='statistics,snippet,contentDetails',
+                    id=channel_id
+                ).execute()
 
-            df = pd.DataFrame(v_list)
+                channel = ch_req['items'][0]
+                ch_title = channel['snippet']['title']
+                total_views = int(channel['statistics']['viewCount'])
+                subscribers = int(channel['statistics']['subscriberCount'])
+                total_videos = int(channel['statistics']['videoCount'])
+                uploads_playlist_id = channel['contentDetails']['relatedPlaylists']['uploads']
+
+                # Son 15 Videonun Canlı Verileri
+                playlist_req = youtube.playlistItems().list(
+                    part='snippet',
+                    playlistId=uploads_playlist_id,
+                    maxResults=15
+                ).execute()
+
+                v_ids = [item['snippet']['resourceId']['videoId'] for item in playlist_req['items']]
+                
+                videos_req = youtube.videos().list(
+                    part='statistics,snippet,contentDetails',
+                    id=','.join(v_ids)
+                ).execute()
+
+                v_list = []
+                for item in videos_req['items']:
+                    title = item['snippet']['title']
+                    views = int(item['statistics'].get('viewCount', 0))
+                    likes = int(item['statistics'].get('likeCount', 0))
+                    comments = int(item['statistics'].get('commentCount', 0))
+                    
+                    engagement_rate = ((likes + comments) / views * 100) if views > 0 else 0
+                    
+                    v_list.append({
+                        "Video Başlığı": title,
+                        "İzlenme": views,
+                        "Beğeni": likes,
+                        "Yorum": comments,
+                        "Etkileşim (%)": round(engagement_rate, 2)
+                    })
+
+                df = pd.DataFrame(v_list)
             
             # Üst Metrik Kartları
             c1, c2, c3, c4 = st.columns(4)
             with c1:
-                st.markdown(f'<div class="apple-card"><div class="metric-title">TOPLAM İZLENME</div><div class="metric-value">{total_views:,}</div><div class="metric-sub">Tüm Zamanlar</div></div>', unsafe_allow_html=True)
+                st.markdown(f'<div class="apple-card"><div class="metric-title">TOPLAM İZLENME</div><div class="metric-value">{total_views:,}</div><div class="metric-sub">Canlı Veri</div></div>', unsafe_allow_html=True)
             with c2:
                 st.markdown(f'<div class="apple-card"><div class="metric-title">ABONE SAYISI</div><div class="metric-value">{subscribers:,}</div><div class="metric-sub">Aktif İzleyici</div></div>', unsafe_allow_html=True)
             with c3:
@@ -294,7 +293,7 @@ if analyze_btn:
                     Ortalama Etkileşim Oranı: %{df['Etkileşim (%)'].mean():.2f}
 
                     Lütfen kesinlikle Türkçe olarak, üst düzey yönetici formatında (Apple Tarzı Minimalist ve Derin):
-                    1. **Kanalın Büyüme Vektörü:** Mevcut kitle sadakatini ve etkileşim gücünü analiz et.
+                    1. **Kanalın Büyüme Veektörü:** Mevcut kitle sadakatini ve etkileşim gücünü analiz et.
                     2. **3 Fark Yaratan İçerik Fikri:** Güncel kripto ekosistemine uygun 3 spesifik, yüksek tıklama (CTR) potansiyelli video konusu ve başlık yapısı sun.
                     3. **Kitle Tutma Mimarisi:** Tıklama sonrası izleyici kaybını engelleyecek 1 stratejik altın kural sun.
                     """
@@ -310,4 +309,4 @@ if analyze_btn:
         except Exception as e:
             st.error(f"Sistem Çalışma Hatası: {e}")
 else:
-    st.info("👈 Sol üstteki küçük oka tıklayarak kontrol panelini açabilir ve analiz motorunu çalıştırabilirsiniz.")
+    st.info("👈 Sol üstteki küçük oka tıklayarak kontrol panelini açabilir ve 'Canlı Verileri Getir' butonuna basabilirsiniz.")
