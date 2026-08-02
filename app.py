@@ -1,4 +1,5 @@
 import streamlit as st
+import streamlit.components.v1 as components
 from googleapiclient.discovery import build
 from groq import Groq
 import pandas as pd
@@ -25,7 +26,7 @@ def get_img_as_base64(file_path):
 img_path = "bg2.jpg" if os.path.exists("bg2.jpg") else "bg.jpg" if os.path.exists("bg.jpg") else "bg.jpg.jpg" if os.path.exists("bg.jpg.jpg") else "photo_6014965432080600852_y (1).jpg" if os.path.exists("photo_6014965432080600852_y (1).jpg") else ""
 img_b64 = get_img_as_base64(img_path)
 
-# 2. Apple Tipografi, 2 Saniyelik Sayaç Mantığı (Python Süslü Parantez Çakışması Giderildi)
+# 2. Apple Tipografi ve 3D Kart Mimarisi (CSS)
 st.markdown(f"""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@300;400;500;600;700&display=swap');
@@ -154,45 +155,6 @@ st.markdown(f"""
         color: #000000 !important;
     }}
 </style>
-
-<script>
-document.addEventListener("DOMContentLoaded", function() {{
-    const counters = document.querySelectorAll('.counter-val');
-    const duration = 2000;
-
-    counters.forEach(counter => {{
-        const target = parseFloat(counter.getAttribute('data-target'));
-        const isFloat = counter.getAttribute('data-float') === 'true';
-        let startTime = null;
-
-        function updateCount(currentTime) {{
-            if (!startTime) startTime = currentTime;
-            const progress = currentTime - startTime;
-            const percentage = Math.min(progress / duration, 1);
-            
-            const easeProgress = percentage === 1 ? 1 : 1 - Math.pow(2, -10 * percentage);
-            const currentVal = target * easeProgress;
-
-            if (isFloat) {{
-                counter.innerText = '%' + currentVal.toFixed(2);
-            }} else {{
-                counter.innerText = Math.floor(currentVal).toLocaleString('en-US');
-            }}
-
-            if (percentage < 1) {{
-                requestAnimationFrame(updateCount);
-            }} else {{
-                if (isFloat) {{
-                    counter.innerText = '%' + target.toFixed(2);
-                }} else {{
-                    counter.innerText = target.toLocaleString('en-US');
-                }}
-            }}
-        }}
-        requestAnimationFrame(updateCount);
-    }});
-}});
-</script>
 """, unsafe_allow_html=True)
 
 # --- BANNER ---
@@ -266,16 +228,58 @@ if analyze_btn:
                 df = pd.DataFrame(v_list)
                 avg_eng = float(df["Etkileşim (%)"].mean())
             
-            # Üst Metrik Kartları (0'dan 2 Saniyede Artan Sayaç Mantığı)
+            # Üst Metrik Kartları ve 2 Saniyelik Sayaç Motoru (Bileşen Entegrasyonu)
             c1, c2, c3, c4 = st.columns(4)
             with c1:
-                st.markdown(f'<div class="metric-card-apple"><div class="metric-title">TOPLAM İZLENME</div><div class="metric-value"><span class="counter-val" data-target="{total_views}" data-float="false">0</span></div><div class="metric-sub">Canlı Veri</div></div>', unsafe_allow_html=True)
+                st.markdown(f'<div class="metric-card-apple"><div class="metric-title">TOPLAM İZLENME</div><div class="metric-value"><span id="counter-1">0</span></div><div class="metric-sub">Canlı Veri</div></div>', unsafe_allow_html=True)
             with c2:
-                st.markdown(f'<div class="metric-card-apple"><div class="metric-title">ABONE SAYISI</div><div class="metric-value"><span class="counter-val" data-target="{subscribers}" data-float="false">0</span></div><div class="metric-sub">Aktif İzleyici</div></div>', unsafe_allow_html=True)
+                st.markdown(f'<div class="metric-card-apple"><div class="metric-title">ABONE SAYISI</div><div class="metric-value"><span id="counter-2">0</span></div><div class="metric-sub">Aktif İzleyici</div></div>', unsafe_allow_html=True)
             with c3:
-                st.markdown(f'<div class="metric-card-apple"><div class="metric-title">ORTALAMA ETKİLEŞİM</div><div class="metric-value"><span class="counter-val" data-target="{avg_eng}" data-float="true">0.00</span></div><div class="metric-sub">Kanal Performansı</div></div>', unsafe_allow_html=True)
+                st.markdown(f'<div class="metric-card-apple"><div class="metric-title">ORTALAMA ETKİLEŞİM</div><div class="metric-value"><span id="counter-3">0.00</span></div><div class="metric-sub">Kanal Performansı</div></div>', unsafe_allow_html=True)
             with c4:
-                st.markdown(f'<div class="metric-card-apple"><div class="metric-title">İÇERİK SAYISI</div><div class="metric-value"><span class="counter-val" data-target="{total_videos}" data-float="false">0</span></div><div class="metric-sub">Yayınlanan Video</div></div>', unsafe_allow_html=True)
+                st.markdown(f'<div class="metric-card-apple"><div class="metric-title">İÇERİK SAYISI</div><div class="metric-value"><span id="counter-4">0</span></div><div class="metric-sub">Yayınlanan Video</div></div>', unsafe_allow_html=True)
+
+            # Sayaç animasyonunu çalıştıran güvenli JavaScript bileşeni
+            components.html(f"""
+            <script>
+            function runCounter(id, target, isFloat) {{
+                const el = window.parent.document.getElementById(id);
+                if (!el) return;
+                const duration = 2000;
+                let startTime = null;
+
+                function update(currentTime) {{
+                    if (!startTime) startTime = currentTime;
+                    const progress = currentTime - startTime;
+                    const percentage = Math.min(progress / duration, 1);
+                    const ease = percentage === 1 ? 1 : 1 - Math.pow(2, -10 * percentage);
+                    const currentVal = target * ease;
+
+                    if (isFloat) {{
+                        el.innerText = '%' + currentVal.toFixed(2);
+                    }} else {{
+                        el.innerText = Math.floor(currentVal).toLocaleString('en-US');
+                    }}
+
+                    if (percentage < 1) {{
+                        requestAnimationFrame(update);
+                    }} else {{
+                        if (isFloat) {{
+                            el.innerText = '%' + target.toFixed(2);
+                        }} else {{
+                            el.innerText = target.toLocaleString('en-US');
+                        }}
+                    }}
+                }}
+                requestAnimationFrame(update);
+            }}
+
+            runCounter('counter-1', {total_views}, false);
+            runCounter('counter-2', {subscribers}, false);
+            runCounter('counter-3', {avg_eng}, true);
+            runCounter('counter-4', {total_videos}, false);
+            </script>
+            """, height=0)
 
             # Sekmeli Panel Yapısı
             t1, t2, t3 = st.tabs(["📊 Performans Matrisi", "🔍 Detaylı Analiz", "🤖 AI Strateji Raporu"])
