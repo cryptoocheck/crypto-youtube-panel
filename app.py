@@ -4,6 +4,7 @@ from groq import Groq
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
+import base64
 
 # 1. Streamlit Sayfa Yapılandırması
 st.set_page_config(
@@ -13,30 +14,61 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# 2. Apple Tasarım Sistemi (Custom CSS)
+# --- 4K ARKA PLAN RESMİ AYARLAMASI ---
+def get_base64_of_bin_file(bin_file):
+    try:
+        with open(bin_file, 'rb') as f:
+            data = f.read()
+        return base64.b64encode(data).decode()
+    except FileNotFoundError:
+        return None
+
+# Yüklediğin resmi bg.jpg olarak okuyoruz
+bg_b64 = get_base64_of_bin_file('bg.jpg')
+
+if bg_b64:
+    st.markdown(f"""
+    <style>
+    .stApp {{
+        background-image: url("data:image/jpeg;base64,{bg_b64}");
+        background-size: cover;
+        background-position: center center;
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+    }}
+    </style>
+    """, unsafe_allow_html=True)
+else:
+    # Resim bulunamazsa varsayılan siyah/karanlık arka plan
+    st.markdown("""
+    <style>
+    .stApp {
+        background: radial-gradient(circle at 50% -20%, #1a1a2e 0%, #000000 80%);
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
+
+# 2. Apple Tasarım Sistemi ve Şeffaf Kartlar (Custom CSS)
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@300;400;600;700&display=swap');
     
     html, body, [class*="css"] {
         font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-        background-color: #000000;
         color: #f5f5f7;
     }
-    
-    .stApp {
-        background: radial-gradient(circle at 50% -20%, #1a1a2e 0%, #000000 80%);
-    }
 
+    /* Arka plan resmini göstermek için kartları Yarı Şeffaf/Cam yaptık */
     .apple-card {
-        background: rgba(255, 255, 255, 0.04);
-        backdrop-filter: blur(20px);
-        -webkit-backdrop-filter: blur(20px);
-        border: 1px solid rgba(255, 255, 255, 0.08);
+        background: rgba(0, 0, 0, 0.55) !important; /* Şeffaf siyah */
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1px solid rgba(255, 215, 0, 0.15); /* Altın sarısı çok hafif kenarlık */
         border-radius: 18px;
         padding: 24px;
         margin-bottom: 20px;
-        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.7);
     }
     
     .metric-title {
@@ -44,50 +76,51 @@ st.markdown("""
         font-weight: 600;
         text-transform: uppercase;
         letter-spacing: 0.8px;
-        color: #86868b;
+        color: #d1d1d6;
         margin-bottom: 8px;
     }
     .metric-value {
         font-size: 34px;
         font-weight: 700;
         letter-spacing: -0.5px;
-        background: linear-gradient(180deg, #ffffff 0%, #a1a1a6 100%);
+        background: linear-gradient(180deg, #ffffff 0%, #e0e0e0 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
     }
     .metric-sub {
         font-size: 12px;
-        color: #2997ff;
+        color: #ffd700; /* Logodaki altın sarısına uyumlu renk */
         margin-top: 4px;
-        font-weight: 500;
+        font-weight: 600;
     }
 
     section[data-testid="stSidebar"] {
-        background-color: rgba(0, 0, 0, 0.6);
-        border-right: 1px solid rgba(255, 255, 255, 0.08);
+        background-color: rgba(0, 0, 0, 0.75) !important;
+        border-right: 1px solid rgba(255, 215, 0, 0.1);
     }
     
     .stButton>button {
-        background: #0071e3;
-        color: #ffffff;
+        background: #d4af37; /* Altın Rengi Buton */
+        color: #000000;
         border: none;
         border-radius: 980px;
-        font-weight: 500;
+        font-weight: 700;
         padding: 10px 24px;
         transition: all 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
         width: 100%;
     }
     .stButton>button:hover {
-        background: #0077ed;
-        box-shadow: 0 0 18px rgba(0, 113, 227, 0.5);
+        background: #f1c40f;
+        box-shadow: 0 0 18px rgba(241, 196, 15, 0.4);
+        color: #000000;
     }
 
     .stTabs [data-baseweb="tab-list"] {
         gap: 8px;
-        background-color: rgba(255, 255, 255, 0.03);
+        background-color: rgba(0, 0, 0, 0.4);
         padding: 6px;
         border-radius: 980px;
-        border: 1px solid rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 215, 0, 0.15);
     }
     .stTabs [data-baseweb="tab"] {
         border-radius: 980px;
@@ -96,15 +129,14 @@ st.markdown("""
         padding: 8px 20px;
     }
     .stTabs [aria-selected="true"] {
-        background-color: #1d1d1f !important;
-        color: #f5f5f7 !important;
+        background-color: #d4af37 !important;
+        color: #000000 !important;
     }
 </style>
 """, unsafe_allow_html=True)
 
-# Başlık
-st.markdown("<h1 style='text-align: center; font-weight: 700; font-size: 48px; letter-spacing: -1px; margin-bottom: 0px;'>Crypto Check</h1>", unsafe_allow_html=True)
-st.markdown("<p style='text-align: center; color: #86868b; font-size: 19px; font-weight: 400; margin-bottom: 40px;'>Yapay Zeka Destekli Kanal Analiz Stüdyosu</p>", unsafe_allow_html=True)
+# Başlık (Sadeleştirdik, arka plandaki C harfi ön plana çıksın diye)
+st.markdown("<div style='height: 40px;'></div>", unsafe_allow_html=True) # Üstten boşluk
 
 # Sidebar
 st.sidebar.markdown("### ⚙️ Kontrol Paneli")
@@ -194,14 +226,14 @@ if analyze_btn:
                         size="Beğeni", 
                         hover_name="Video Başlığı",
                         color="Etkileşim (%)",
-                        color_continuous_scale=px.colors.sequential.Bluered,
+                        color_continuous_scale=px.colors.sequential.YlOrBr, # Sarılara uygun renk paleti
                         template="plotly_dark",
                         labels={"İzlenme": "İzlenme Sayısı", "Etkileşim (%)": "Etkileşim Oranı (%)"}
                     )
                     fig.update_layout(
                         paper_bgcolor='rgba(0,0,0,0)',
                         plot_bgcolor='rgba(0,0,0,0)',
-                        font=dict(family="SF Pro Display", color="#86868b")
+                        font=dict(family="SF Pro Display", color="#d1d1d6")
                     )
                     st.plotly_chart(fig, use_container_width=True)
                     st.markdown('</div>', unsafe_allow_html=True)
@@ -216,13 +248,13 @@ if analyze_btn:
                         labels=['Beğeniler', 'Yorumlar'],
                         values=[avg_likes, avg_comments],
                         hole=.6,
-                        marker_colors=['#2997ff', '#30d158']
+                        marker_colors=['#d4af37', '#ffffff'] # Altın ve Beyaz
                     )])
                     fig_pie.update_layout(
                         paper_bgcolor='rgba(0,0,0,0)',
                         plot_bgcolor='rgba(0,0,0,0)',
                         showlegend=True,
-                        font=dict(family="SF Pro Display", color="#86868b")
+                        font=dict(family="SF Pro Display", color="#d1d1d6")
                     )
                     st.plotly_chart(fig_pie, use_container_width=True)
                     st.markdown('</div>', unsafe_allow_html=True)
