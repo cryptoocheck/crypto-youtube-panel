@@ -101,13 +101,13 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# --- TEPEDEKİ LOGO BANNER KISMI ---
-if os.path.exists("bg.jpg"):
+# --- YENİ RESİM KONTROLÜ ---
+if os.path.exists("bg2.jpg"):
+    st.image("bg2.jpg", use_container_width=True)
+elif os.path.exists("bg.jpg"):
     st.image("bg.jpg", use_container_width=True)
 elif os.path.exists("bg.jpg.jpg"):
     st.image("bg.jpg.jpg", use_container_width=True)
-elif os.path.exists("photo_6014965432080600852_y (1).jpg"):
-    st.image("photo_6014965432080600852_y (1).jpg", use_container_width=True)
 else:
     st.markdown("<h1 style='text-align: center; font-weight: 700; font-size: 48px; letter-spacing: -1px; margin-bottom: 0px;'>Crypto Check</h1>", unsafe_allow_html=True)
 
