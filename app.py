@@ -4,7 +4,7 @@ from groq import Groq
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
-import base64
+import os
 
 # 1. Streamlit Sayfa Yapılandırması
 st.set_page_config(
@@ -14,42 +14,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# --- 4K ARKA PLAN RESMİ AYARLAMASI ---
-def get_base64_of_bin_file(bin_file):
-    try:
-        with open(bin_file, 'rb') as f:
-            data = f.read()
-        return base64.b64encode(data).decode()
-    except FileNotFoundError:
-        return None
-
-# Yüklediğin resmi bg.jpg olarak okuyoruz
-bg_b64 = get_base64_of_bin_file('bg.jpg')
-
-if bg_b64:
-    st.markdown(f"""
-    <style>
-    .stApp {{
-        background-image: url("data:image/jpeg;base64,{bg_b64}");
-        background-size: cover;
-        background-position: center center;
-        background-repeat: no-repeat;
-        background-attachment: fixed;
-    }}
-    </style>
-    """, unsafe_allow_html=True)
-else:
-    # Resim bulunamazsa varsayılan siyah/karanlık arka plan
-    st.markdown("""
-    <style>
-    .stApp {
-        background: radial-gradient(circle at 50% -20%, #1a1a2e 0%, #000000 80%);
-    }
-    </style>
-    """, unsafe_allow_html=True)
-
-
-# 2. Apple Tasarım Sistemi ve Şeffaf Kartlar (Custom CSS)
+# 2. Apple Tasarım Sistemi - Tamamen Siyah Koyu Tema
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@300;400;600;700&display=swap');
@@ -59,16 +24,17 @@ st.markdown("""
         color: #f5f5f7;
     }
 
-    /* Arka plan resmini göstermek için kartları Yarı Şeffaf/Cam yaptık */
+    .stApp {
+        background-color: #000000;
+    }
+
     .apple-card {
-        background: rgba(0, 0, 0, 0.55) !important; /* Şeffaf siyah */
-        backdrop-filter: blur(16px);
-        -webkit-backdrop-filter: blur(16px);
-        border: 1px solid rgba(255, 215, 0, 0.15); /* Altın sarısı çok hafif kenarlık */
+        background: #1c1c1e; 
+        border: 1px solid #333336;
         border-radius: 18px;
         padding: 24px;
         margin-bottom: 20px;
-        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.7);
+        box-shadow: 0 4px 12px 0 rgba(0, 0, 0, 0.5);
     }
     
     .metric-title {
@@ -89,18 +55,18 @@ st.markdown("""
     }
     .metric-sub {
         font-size: 12px;
-        color: #ffd700; /* Logodaki altın sarısına uyumlu renk */
+        color: #d4af37; 
         margin-top: 4px;
         font-weight: 600;
     }
 
     section[data-testid="stSidebar"] {
-        background-color: rgba(0, 0, 0, 0.75) !important;
-        border-right: 1px solid rgba(255, 215, 0, 0.1);
+        background-color: #09090b !important;
+        border-right: 1px solid #27272a;
     }
     
     .stButton>button {
-        background: #d4af37; /* Altın Rengi Buton */
+        background: #d4af37; 
         color: #000000;
         border: none;
         border-radius: 980px;
@@ -117,10 +83,10 @@ st.markdown("""
 
     .stTabs [data-baseweb="tab-list"] {
         gap: 8px;
-        background-color: rgba(0, 0, 0, 0.4);
+        background-color: #1c1c1e;
         padding: 6px;
         border-radius: 980px;
-        border: 1px solid rgba(255, 215, 0, 0.15);
+        border: 1px solid #333336;
     }
     .stTabs [data-baseweb="tab"] {
         border-radius: 980px;
@@ -135,8 +101,17 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# Başlık (Sadeleştirdik, arka plandaki C harfi ön plana çıksın diye)
-st.markdown("<div style='height: 40px;'></div>", unsafe_allow_html=True) # Üstten boşluk
+# --- TEPEDEKİ LOGO BANNER KISMI ---
+if os.path.exists("bg.jpg"):
+    st.image("bg.jpg", use_container_width=True)
+elif os.path.exists("bg.jpg.jpg"):
+    st.image("bg.jpg.jpg", use_container_width=True)
+elif os.path.exists("photo_6014965432080600852_y (1).jpg"):
+    st.image("photo_6014965432080600852_y (1).jpg", use_container_width=True)
+else:
+    st.markdown("<h1 style='text-align: center; font-weight: 700; font-size: 48px; letter-spacing: -1px; margin-bottom: 0px;'>Crypto Check</h1>", unsafe_allow_html=True)
+
+st.markdown("<p style='text-align: center; color: #86868b; font-size: 19px; font-weight: 400; margin-bottom: 40px; margin-top: 10px;'>Yapay Zeka Destekli Kanal Analiz Stüdyosu</p>", unsafe_allow_html=True)
 
 # Sidebar
 st.sidebar.markdown("### ⚙️ Kontrol Paneli")
@@ -226,7 +201,7 @@ if analyze_btn:
                         size="Beğeni", 
                         hover_name="Video Başlığı",
                         color="Etkileşim (%)",
-                        color_continuous_scale=px.colors.sequential.YlOrBr, # Sarılara uygun renk paleti
+                        color_continuous_scale=px.colors.sequential.YlOrBr,
                         template="plotly_dark",
                         labels={"İzlenme": "İzlenme Sayısı", "Etkileşim (%)": "Etkileşim Oranı (%)"}
                     )
@@ -248,7 +223,7 @@ if analyze_btn:
                         labels=['Beğeniler', 'Yorumlar'],
                         values=[avg_likes, avg_comments],
                         hole=.6,
-                        marker_colors=['#d4af37', '#ffffff'] # Altın ve Beyaz
+                        marker_colors=['#d4af37', '#48484a'] 
                     )])
                     fig_pie.update_layout(
                         paper_bgcolor='rgba(0,0,0,0)',
