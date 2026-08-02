@@ -14,7 +14,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# 2. Tam Merkezlenmiş ve Büyütülmüş Mükemmel Tasarım CSS
+# 2. Tam Merkezlenmiş ve Tam İstediğin Boyutta Banner CSS Mimarisi
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@300;400;600;700&display=swap');
@@ -37,21 +37,22 @@ st.markdown("""
         max-width: 100% !important;
     }
 
-    /* Logoyu Kesinlikle Sayfanın Tam Merkezine Kilitleyen Konteyner */
-    .logo-center-wrapper {
+    /* Tam İstediğin Büyük ve Merkezde Alan */
+    .banner-container {
         display: flex;
         justify-content: center;
         align-items: center;
         width: 100%;
-        margin-top: 5px;
-        margin-bottom: 5px;
+        padding: 10px 0px;
+        margin-bottom: 0px;
     }
-    .logo-center-wrapper img {
-        width: 85% !important;
-        max-width: 1700px !important;
+    .banner-container img {
+        width: 75% !important; /* Sarı çerçevenin kapsadığı alan kadar büyük */
+        max-width: 1100px !important;
         height: auto;
         display: block;
         margin: 0 auto;
+        border-radius: 16px;
     }
 
     .apple-card {
@@ -127,8 +128,8 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# --- KESİN MERKEZLENMİŞ BÜYÜK LOGO ---
-st.markdown('<div class="logo-center-wrapper">', unsafe_allow_html=True)
+# --- TAM MERKEZDE VE İSTEDİĞİN BOYUTTA BANNER ---
+st.markdown('<div class="banner-container">', unsafe_allow_html=True)
 if os.path.exists("bg2.jpg"):
     st.image("bg2.jpg", use_container_width=False)
 elif os.path.exists("bg.jpg"):
