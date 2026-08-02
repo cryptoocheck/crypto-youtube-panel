@@ -25,7 +25,7 @@ def get_img_as_base64(file_path):
 img_path = "bg2.jpg" if os.path.exists("bg2.jpg") else "bg.jpg" if os.path.exists("bg.jpg") else "bg.jpg.jpg" if os.path.exists("bg.jpg.jpg") else "photo_6014965432080600852_y (1).jpg" if os.path.exists("photo_6014965432080600852_y (1).jpg") else ""
 img_b64 = get_img_as_base64(img_path)
 
-# 2. Apple Tipografi, Sayaç Animasyonu ve 3D Boyutlu/Hareketli Tablo Mimarisi (CSS)
+# 2. Apple Tipografi, 2 Saniyelik 0'dan Artan Sayaç Mantığı ve 3D Kart Mimarisi (CSS + JS)
 st.markdown(f"""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@300;400;500;600;700&display=swap');
@@ -65,13 +65,7 @@ st.markdown(f"""
         display: block;
     }}
 
-    /* Sayaç Animasyonu (Count-up) */
-    @keyframes countUpAnimation {{
-        0% {{ opacity: 0; transform: translateY(15px) scale(0.95); }}
-        100% {{ opacity: 1; transform: translateY(0) scale(1); }}
-    }}
-
-    /* Boyutlu, Derinlikli ve Hareketli Apple Tablo/Grafik Kartları */
+    /* Boyutlu, Derinlikli ve Hareketli Apple Kartları */
     .apple-card-3d {{
         background: linear-gradient(145deg, #121214, #1b1b1e);
         border: 1px solid rgba(255, 255, 255, 0.08);
@@ -95,7 +89,6 @@ st.markdown(f"""
         padding: 26px;
         margin-bottom: 20px;
         box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.6), inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
-        animation: countUpAnimation 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }}
 
     .metric-title {{
@@ -162,6 +155,47 @@ st.markdown(f"""
         color: #000000 !important;
     }}
 </style>
+
+<script>
+// 0'dan hedef değere tam 2 saniyede (2000ms) ulaştıran sayaç motoru
+document.addEventListener("DOMContentLoaded", function() {{
+    const counters = document.querySelectorAll('.counter-val');
+    const duration = 2000; // 2 Saniye
+
+    counters.forEach(counter => {{
+        const target = parseFloat(counter.getAttribute('data-target'));
+        const isFloat = counter.getAttribute('data-float') === 'true';
+        let startTime = null;
+
+        function updateCount(currentTime) {
+            if (!startTime) startTime = currentTime;
+            const progress = currentTime - startTime;
+            const percentage = Math.min(progress / duration, 1);
+            
+            // Apple tarzı yavaşlayan (easeOutExpo) geçiş eğrisi
+            const easeProgress = percentage === 1 ? 1 : 1 - Math.pow(2, -10 * percentage);
+            const currentVal = target * easeProgress;
+
+            if (isFloat) {
+                counter.innerText = '%' + currentVal.toFixed(2);
+            } else {
+                counter.innerText = Math.floor(currentVal).toLocaleString('en-US');
+            }
+
+            if (percentage < 1) {
+                requestAnimationFrame(updateCount);
+            } else {
+                if (isFloat) {
+                    counter.innerText = '%' + target.toFixed(2);
+                } else {
+                    counter.innerText = target.toLocaleString('en-US');
+                }
+            }
+        }
+        requestAnimationFrame(updateCount);
+    }});
+}});
+</script>
 """, unsafe_allow_html=True)
 
 # --- BANNER ---
@@ -233,17 +267,18 @@ if analyze_btn:
                     })
 
                 df = pd.DataFrame(v_list)
+                avg_eng = float(df["Etkileşim (%)"].mean())
             
-            # Üst Metrik Kartları (Sayaç Animasyonlu)
+            # Üst Metrik Kartları (0'dan 2 Saniyede Artan Sayaç Mantığı)
             c1, c2, c3, c4 = st.columns(4)
             with c1:
-                st.markdown(f'<div class="metric-card-apple"><div class="metric-title">TOPLAM İZLENME</div><div class="metric-value">{total_views:,}</div><div class="metric-sub">Canlı Veri</div></div>', unsafe_allow_html=True)
+                st.markdown(f'<div class="metric-card-apple"><div class="metric-title">TOPLAM İZLENME</div><div class="metric-value"><span class="counter-val" data-target="{total_views}" data-float="false">0</span></div><div class="metric-sub">Canlı Veri</div></div>', unsafe_allow_html=True)
             with c2:
-                st.markdown(f'<div class="metric-card-apple"><div class="metric-title">ABONE SAYISI</div><div class="metric-value">{subscribers:,}</div><div class="metric-sub">Aktif İzleyici</div></div>', unsafe_allow_html=True)
+                st.markdown(f'<div class="metric-card-apple"><div class="metric-title">ABONE SAYISI</div><div class="metric-value"><span class="counter-val" data-target="{subscribers}" data-float="false">0</span></div><div class="metric-sub">Aktif İzleyici</div></div>', unsafe_allow_html=True)
             with c3:
-                st.markdown(f'<div class="metric-card-apple"><div class="metric-title">ORTALAMA ETKİLEŞİM</div><div class="metric-value">%{df["Etkileşim (%)"].mean():.2f}</div><div class="metric-sub">Kanal Performansı</div></div>', unsafe_allow_html=True)
+                st.markdown(f'<div class="metric-card-apple"><div class="metric-title">ORTALAMA ETKİLEŞİM</div><div class="metric-value"><span class="counter-val" data-target="{avg_eng}" data-float="true">0.00</span></div><div class="metric-sub">Kanal Performansı</div></div>', unsafe_allow_html=True)
             with c4:
-                st.markdown(f'<div class="metric-card-apple"><div class="metric-title">İÇERİK SAYISI</div><div class="metric-value">{total_videos}</div><div class="metric-sub">Yayınlanan Video</div></div>', unsafe_allow_html=True)
+                st.markdown(f'<div class="metric-card-apple"><div class="metric-title">İÇERİK SAYISI</div><div class="metric-value"><span class="counter-val" data-target="{total_videos}" data-float="false">0</span></div><div class="metric-sub">Yayınlanan Video</div></div>', unsafe_allow_html=True)
 
             # Sekmeli Panel Yapısı
             t1, t2, t3 = st.tabs(["📊 Performans Matrisi", "🔍 Detaylı Analiz", "🤖 AI Strateji Raporu"])
