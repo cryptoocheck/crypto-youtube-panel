@@ -25,7 +25,7 @@ def get_img_as_base64(file_path):
 img_path = "bg2.jpg" if os.path.exists("bg2.jpg") else "bg.jpg" if os.path.exists("bg.jpg") else "bg.jpg.jpg" if os.path.exists("bg.jpg.jpg") else "photo_6014965432080600852_y (1).jpg" if os.path.exists("photo_6014965432080600852_y (1).jpg") else ""
 img_b64 = get_img_as_base64(img_path)
 
-# 2. Apple Tipografi, 2 Saniyelik 0'dan Artan Sayaç Mantığı ve 3D Kart Mimarisi (CSS + JS)
+# 2. Apple Tipografi, 2 Saniyelik Sayaç Mantığı (Python Süslü Parantez Çakışması Giderildi)
 st.markdown(f"""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@300;400;500;600;700&display=swap');
@@ -65,7 +65,6 @@ st.markdown(f"""
         display: block;
     }}
 
-    /* Boyutlu, Derinlikli ve Hareketli Apple Kartları */
     .apple-card-3d {{
         background: linear-gradient(145deg, #121214, #1b1b1e);
         border: 1px solid rgba(255, 255, 255, 0.08);
@@ -157,41 +156,39 @@ st.markdown(f"""
 </style>
 
 <script>
-// 0'dan hedef değere tam 2 saniyede (2000ms) ulaştıran sayaç motoru
 document.addEventListener("DOMContentLoaded", function() {{
     const counters = document.querySelectorAll('.counter-val');
-    const duration = 2000; // 2 Saniye
+    const duration = 2000;
 
     counters.forEach(counter => {{
         const target = parseFloat(counter.getAttribute('data-target'));
         const isFloat = counter.getAttribute('data-float') === 'true';
         let startTime = null;
 
-        function updateCount(currentTime) {
+        function updateCount(currentTime) {{
             if (!startTime) startTime = currentTime;
             const progress = currentTime - startTime;
             const percentage = Math.min(progress / duration, 1);
             
-            // Apple tarzı yavaşlayan (easeOutExpo) geçiş eğrisi
             const easeProgress = percentage === 1 ? 1 : 1 - Math.pow(2, -10 * percentage);
             const currentVal = target * easeProgress;
 
-            if (isFloat) {
+            if (isFloat) {{
                 counter.innerText = '%' + currentVal.toFixed(2);
-            } else {
+            }} else {{
                 counter.innerText = Math.floor(currentVal).toLocaleString('en-US');
-            }
+            }}
 
-            if (percentage < 1) {
+            if (percentage < 1) {{
                 requestAnimationFrame(updateCount);
-            } else {
-                if (isFloat) {
+            }} else {{
+                if (isFloat) {{
                     counter.innerText = '%' + target.toFixed(2);
-                } else {
+                }} else {{
                     counter.innerText = target.toLocaleString('en-US');
-                }
-            }
-        }
+                }}
+            }}
+        }}
         requestAnimationFrame(updateCount);
     }});
 }});
