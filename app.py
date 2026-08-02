@@ -43,7 +43,7 @@ if st.sidebar.button("Analizi Başlat"):
             st.subheader("🤖 AI Ajanının Kanal Strateji Raporu")
             with st.spinner("Yapay zeka verileri inceliyor..."):
                 genai.configure(api_key=gemini_key)
-                model = genai.GenerativeModel('gemini-2.5-flash')
+                model = genai.GenerativeModel('gemini-2.0-flash')
                 
                 prompt = f"""
                 Sen profesyonel bir YouTube Kripto Kanalı Stratejistisin.
