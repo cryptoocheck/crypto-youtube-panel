@@ -14,7 +14,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# 2. Kusursuz Ortalama ve Maksimum Boyut CSS
+# 2. Tam Merkezlenmiş ve Büyütülmüş Mükemmel Tasarım CSS
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@300;400;600;700&display=swap');
@@ -32,24 +32,26 @@ st.markdown("""
     footer {visibility: hidden;}
 
     .block-container {
-        padding-top: 0.5rem !important;
+        padding-top: 0rem !important;
         padding-bottom: 0rem !important;
         max-width: 100% !important;
     }
 
-    /* Logoyu Tam Ortada ve Muazzam Boyutta Tutan Konteyner */
-    .logo-container {
+    /* Logoyu Kesinlikle Sayfanın Tam Merkezine Kilitleyen Konteyner */
+    .logo-center-wrapper {
         display: flex;
         justify-content: center;
         align-items: center;
         width: 100%;
-        margin-top: -10px;
-        margin-bottom: -15px;
+        margin-top: 5px;
+        margin-bottom: 5px;
     }
-    .logo-container img {
-        width: 100% !important;
-        max-width: 1600px !important;
-        object-fit: contain;
+    .logo-center-wrapper img {
+        width: 85% !important;
+        max-width: 1700px !important;
+        height: auto;
+        display: block;
+        margin: 0 auto;
     }
 
     .apple-card {
@@ -125,8 +127,8 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# --- KUSURSUZ ORTALANMIŞ DEV LOGO ---
-st.markdown('<div class="logo-container">', unsafe_allow_html=True)
+# --- KESİN MERKEZLENMİŞ BÜYÜK LOGO ---
+st.markdown('<div class="logo-center-wrapper">', unsafe_allow_html=True)
 if os.path.exists("bg2.jpg"):
     st.image("bg2.jpg", use_container_width=False)
 elif os.path.exists("bg.jpg"):
