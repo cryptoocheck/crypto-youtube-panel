@@ -5,6 +5,7 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 import os
+import base64
 
 # 1. Streamlit Sayfa Yapılandırması
 st.set_page_config(
@@ -14,85 +15,96 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# 2. Tam Merkezlenmiş ve Tam İstediğin Boyutta Banner CSS Mimarisi
-st.markdown("""
+# Resmi HTML içine gömmek için Base64 formatına çeviren fonksiyon
+def get_img_as_base64(file_path):
+    if os.path.exists(file_path):
+        with open(file_path, "rb") as f:
+            data = f.read()
+        return base64.b64encode(data).decode()
+    return None
+
+# Uygun resim dosyasını bul
+img_path = "bg2.jpg" if os.path.exists("bg2.jpg") else "bg.jpg" if os.path.exists("bg.jpg") else "bg.jpg.jpg" if os.path.exists("bg.jpg.jpg") else "photo_6014965432080600852_y (1).jpg" if os.path.exists("photo_6014965432080600852_y (1).jpg") else ""
+img_b64 = get_img_as_base64(img_path)
+
+# 2. Tam Merkezlenmiş Mükemmel CSS Mimarisi
+st.markdown(f"""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@300;400;600;700&display=swap');
     
-    html, body, [class*="css"] {
+    html, body, [class*="css"] {{
         font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         color: #f5f5f7;
-    }
+    }}
 
-    .stApp {
+    .stApp {{
         background-color: #000000;
-    }
+    }}
 
-    #MainMenu {visibility: hidden;}
-    footer {visibility: hidden;}
+    #MainMenu {{visibility: hidden;}}
+    footer {{visibility: hidden;}}
 
-    .block-container {
+    .block-container {{
         padding-top: 0rem !important;
         padding-bottom: 0rem !important;
         max-width: 100% !important;
-    }
+    }}
 
-    /* Tam İstediğin Büyük ve Merkezde Alan */
-    .banner-container {
+    /* Resmi Kesinlikle Tam Merkezde ve İstediğin Boyutta Tutan HTML Alanı */
+    .absolute-center-banner {{
         display: flex;
         justify-content: center;
         align-items: center;
         width: 100%;
-        padding: 10px 0px;
-        margin-bottom: 0px;
-    }
-    .banner-container img {
-        width: 75% !important; /* Sarı çerçevenin kapsadığı alan kadar büyük */
-        max-width: 1100px !important;
+        margin-top: 10px;
+        margin-bottom: 10px;
+    }}
+    .absolute-center-banner img {{
+        width: 75% !important;
+        max-width: 1200px !important;
         height: auto;
-        display: block;
-        margin: 0 auto;
         border-radius: 16px;
-    }
+        display: block;
+    }}
 
-    .apple-card {
+    .apple-card {{
         background: #1c1c1e; 
         border: 1px solid #333336;
         border-radius: 18px;
         padding: 24px;
         margin-bottom: 20px;
         box-shadow: 0 4px 12px 0 rgba(0, 0, 0, 0.5);
-    }
+    }}
     
-    .metric-title {
+    .metric-title {{
         font-size: 13px;
         font-weight: 600;
         text-transform: uppercase;
         letter-spacing: 0.8px;
         color: #d1d1d6;
         margin-bottom: 8px;
-    }
-    .metric-value {
+    }}
+    .metric-value {{
         font-size: 34px;
         font-weight: 700;
         letter-spacing: -0.5px;
         background: linear-gradient(180deg, #ffffff 0%, #e0e0e0 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
-    }
-    .metric-sub {
+    }}
+    .metric-sub {{
         font-size: 12px;
         color: #d4af37; 
         margin-top: 4px;
         font-weight: 600;
-    }
+    }}
 
-    section[data-testid="stSidebar"] {
+    section[data-testid="stSidebar"] {{
         background-color: #09090b !important;
         border-right: 1px solid #27272a;
-    }
+    }}
     
-    .stButton>button {
+    .stButton>button {{
         background: #d4af37; 
         color: #000000;
         border: none;
@@ -101,46 +113,42 @@ st.markdown("""
         padding: 10px 24px;
         transition: all 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
         width: 100%;
-    }
-    .stButton>button:hover {
+    }}
+    .stButton>button:hover {{
         background: #f1c40f;
         box-shadow: 0 0 18px rgba(241, 196, 15, 0.4);
         color: #000000;
-    }
+    }}
 
-    .stTabs [data-baseweb="tab-list"] {
+    .stTabs [data-baseweb="tab-list"] {{
         gap: 8px;
         background-color: #1c1c1e;
         padding: 6px;
         border-radius: 980px;
         border: 1px solid #333336;
-    }
-    .stTabs [data-baseweb="tab"] {
+    }}
+    .stTabs [data-baseweb="tab"] {{
         border-radius: 980px;
         color: #86868b;
         font-weight: 500;
         padding: 8px 20px;
-    }
-    .stTabs [aria-selected="true"] {
+    }}
+    .stTabs [aria-selected="true"] {{
         background-color: #d4af37 !important;
         color: #000000 !important;
-    }
+    }}
 </style>
 """, unsafe_allow_html=True)
 
-# --- TAM MERKEZDE VE İSTEDİĞİN BOYUTTA BANNER ---
-st.markdown('<div class="banner-container">', unsafe_allow_html=True)
-if os.path.exists("bg2.jpg"):
-    st.image("bg2.jpg", use_container_width=False)
-elif os.path.exists("bg.jpg"):
-    st.image("bg.jpg", use_container_width=False)
-elif os.path.exists("bg.jpg.jpg"):
-    st.image("bg.jpg.jpg", use_container_width=False)
-elif os.path.exists("photo_6014965432080600852_y (1).jpg"):
-    st.image("photo_6014965432080600852_y (1).jpg", use_container_width=False)
+# --- HTML İLE DOĞRUDAN MERKEZLENMİŞ BANNER ---
+if img_b64:
+    st.markdown(f'''
+    <div class="absolute-center-banner">
+        <img src="data:image/jpeg;base64,{img_b64}" alt="Crypto Check Logo">
+    </div>
+    ''', unsafe_allow_html=True)
 else:
     st.markdown("<h1 style='text-align: center; font-weight: 700; font-size: 48px;'>Crypto Check</h1>", unsafe_allow_html=True)
-st.markdown('</div>', unsafe_allow_html=True)
 
 # Sidebar (Kontrol Paneli)
 st.sidebar.markdown("### ⚙️ Kontrol Paneli")
