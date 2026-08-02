@@ -6,7 +6,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 import os
 
-# 1. Streamlit Sayfa Yapılandırması (Sol Menü Kapalı Başlar)
+# 1. Streamlit Sayfa Yapılandırması
 st.set_page_config(
     page_title="Crypto Check — Profesyonel Analiz Paneli",
     page_icon="📈",
@@ -14,7 +14,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# 2. Apple Tarzı Özel Tasarım ve Boşlukları Sıfırlayan CSS Ayarları
+# 2. Kusursuz Ortalama ve Maksimum Boyut CSS
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@300;400;600;700&display=swap');
@@ -31,24 +31,25 @@ st.markdown("""
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
 
-    /* Streamlit'in üst boşluğunu tamamen kaldırma */
     .block-container {
-        padding-top: 1rem !important;
+        padding-top: 0.5rem !important;
         padding-bottom: 0rem !important;
+        max-width: 100% !important;
     }
 
-    /* Logoyu Maksimum Boyuta Getiren ve Ortalayan Stil */
+    /* Logoyu Tam Ortada ve Muazzam Boyutta Tutan Konteyner */
     .logo-container {
         display: flex;
         justify-content: center;
         align-items: center;
-        margin-top: -30px;
-        margin-bottom: -10px;
+        width: 100%;
+        margin-top: -10px;
+        margin-bottom: -15px;
     }
     .logo-container img {
-        width: 95% !important; /* Ekranı neredeyse tamamen kaplayacak dev boyut */
-        max-width: 1400px !important;
-        border-radius: 12px;
+        width: 100% !important;
+        max-width: 1600px !important;
+        object-fit: contain;
     }
 
     .apple-card {
@@ -124,7 +125,7 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# --- MAKSİMOUM BOYUTLU LOGO BANNER ---
+# --- KUSURSUZ ORTALANMIŞ DEV LOGO ---
 st.markdown('<div class="logo-container">', unsafe_allow_html=True)
 if os.path.exists("bg2.jpg"):
     st.image("bg2.jpg", use_container_width=False)
