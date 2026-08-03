@@ -32,11 +32,12 @@ def get_img_as_base64(file_path):
         return base64.b64encode(data).decode()
     return None
 
-possible_files = ["bg2.jpg.jpg", "bg2.jpg", "bg.jpg"]
+# Tüm olası dosya adlarını sırayla test ediyoruz
+possible_files = ["bg2.jpg.jpg", "bg2.jpg", "bg.jpg", "photo_6014965432080600852_y (1).jpg"]
 banner_file = next((f for f in possible_files if os.path.exists(f)), None)
 img_b64 = get_img_as_base64(banner_file) if banner_file else None
 
-# 2. Diğer Kutularla Birebir Aynı Tasarıma Sahip Banner Mimarisi (CSS)
+# 2. Kusursuz Çerçeveli ve Cam Efektli Tasarım Mimarisi (CSS)
 st.markdown(f"""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&display=swap');
@@ -64,7 +65,7 @@ st.markdown(f"""
         max-width: 100% !important;
     }}
 
-    /* --- DİĞER KUTULARLA AYNı HİZAYA VE ÇERÇEVEYE SAHİP BANNER --- */
+    /* --- DİĞER KUTULARLA BİREBİR AYNI ÇERÇEVELİ BANNER --- */
     .absolute-center-banner {{
         display: flex;
         justify-content: center;
@@ -95,7 +96,7 @@ st.markdown(f"""
     .banner-ondo-box img {{
         width: 100% !important;
         height: auto !important;
-        max-height: 400px !important;
+        max-height: 420px !important;
         object-fit: cover !important;
         border-radius: 16px;
         display: block;
@@ -239,7 +240,7 @@ st.markdown(f"""
 </style>
 """, unsafe_allow_html=True)
 
-# --- BANNER (Diğer Kutularla Tam Uyumlu Çerçeve) ---
+# --- BANNER ---
 if img_b64:
     st.markdown(f'''
     <div class="absolute-center-banner">
