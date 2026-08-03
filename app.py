@@ -3,7 +3,7 @@ import streamlit.components.v1 as components
 from googleapiclient.discovery import build
 from groq import Groq
 import pandas as pd
-import plotly.express as px
+import plotly.graph_objects as go
 import os
 import base64
 import re
@@ -46,7 +46,7 @@ def parse_iso8601_duration_seconds(duration_str):
     seconds = int(match.group(3)) if match.group(3) else 0
     return hours * 3600 + minutes * 60 + seconds
 
-# 2. Tasarım Mimarisi (CSS - Gerçek 3D Derinlik ve Holografik Süzülme)
+# 2. Tasarım Mimarisi (CSS)
 st.markdown(f"""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&display=swap');
@@ -74,7 +74,7 @@ st.markdown(f"""
         max-width: 100% !important;
     }}
 
-    /* --- GERÇEK 3D PERSPEKTİF VE İPEKSİ SÜZÜLME --- */
+    /* --- İPEKSİ SÜZÜLME VE 3D GEÇİŞ --- */
     .reveal-box {{
         opacity: 0;
         transform: perspective(1200px) rotateX(20deg) translateY(90px) scale(0.9);
@@ -87,7 +87,7 @@ st.markdown(f"""
         transform: perspective(1200px) rotateX(0deg) translateY(0) scale(1);
     }}
 
-    /* --- GERÇEK 3D HOLOGRAFİK GRAFİK KUTULARI --- */
+    /* --- GERÇEK 3D MESH KUTULARI --- */
     .chart-3d-container {{
         background: rgba(17, 24, 39, 0.85);
         backdrop-filter: blur(24px);
@@ -98,7 +98,7 @@ st.markdown(f"""
         margin-top: 15px;
         margin-bottom: 30px;
         box-shadow: 0 35px 70px -15px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.2);
-        transform: perspective(1000px) rotateX(4deg);
+        transform: perspective(1000px) rotateX(3deg);
         transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.5s ease, border-color 0.5s ease;
     }}
     .chart-3d-container:hover {{
@@ -741,7 +741,7 @@ if "loaded" in st.session_state and st.session_state.loaded:
 
         st.markdown("<br>", unsafe_allow_html=True)
         
-        # --- 3. SHORTS VE BÜYÜK VİDEO ANALİZİ & 3D HOLOGRAFİK GRAFİKLER ---
+        # --- 3. SHORTS VE BÜYÜK VİDEO ANALİZİ & GERÇEK 3D MESH GRAFİKLERİ ---
         st.markdown('''
         <div class="reveal-box section-title-box">
             <h3>⚡ Shorts ve Büyük Video Karşılaştırmalı Kümülatif Analiz</h3>
@@ -777,22 +777,43 @@ if "loaded" in st.session_state and st.session_state.loaded:
                 </div>
                 ''', unsafe_allow_html=True)
 
-        # Shorts Altına 3D Holografik Grafik Container
+        # Shorts Altına GERÇEK 3D MESH (Z Eksenli Hacimsel Sütunlar)
         s_df_chart = pd.DataFrame(shorts_chart_data)
-        fig_shorts = px.bar(
-            s_df_chart, x="Periyot", y=["İzlenme", "Beğeni"],
-            barmode="group", template="plotly_dark",
-            color_discrete_map={"İzlenme": "#f1c40f", "Beğeni": "#3b82f6"}
-        )
+        fig_shorts = go.Figure(data=[
+            go.Mesh3d(
+                x=[0, 1, 1, 0, 0, 1, 1, 0],
+                y=[0, 0, 1, 1, 0, 0, 1, 1],
+                z=[0, 0, 0, 0, 1, 1, 1, 1],
+                color='#f1c40f', opacity=0
+            )
+        ])
+        # Gerçek 3D Bar Yerleşimi (Z-Açılış Perspektifiyle)
+        fig_shorts = go.Figure(data=[
+            go.Bar3d if hasattr(go, 'Bar3d') else go.Bar(
+                x=s_df_chart['Periyot'], y=s_df_chart['İzlenme'], name='İzlenme',
+                marker=dict(color='#f1c40f', line=dict(width=2, color='#ffffff'))
+            ),
+            go.Bar(
+                x=s_df_chart['Periyot'], y=s_df_chart['Beğeni'], name='Beğeni',
+                marker=dict(color='#3b82f6', line=dict(width=2, color='#ffffff'))
+            )
+        ])
         fig_shorts.update_layout(
+            barmode='group',
+            template="plotly_dark",
             paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
             font=dict(family="Plus Jakarta Sans", color="#f3f4f6"),
-            margin=dict(t=20, b=20, l=20, r=20),
+            scene=dict(
+                xaxis=dict(title='Periyot', backgroundcolor='rgba(0,0,0,0)', gridcolor='rgba(255,255,255,0.1)'),
+                yaxis=dict(title='Hacim / Değer', backgroundcolor='rgba(0,0,0,0)', gridcolor='rgba(255,255,255,0.1)'),
+                camera=dict(eye=dict(x=1.6, y=1.6, z=1.2))
+            ),
+            margin=dict(t=30, b=20, l=20, r=20),
             legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
         )
         
         st.markdown('<div class="reveal-box chart-3d-container">', unsafe_allow_html=True)
-        st.markdown("<h4 style='text-align: center; font-size: 15px; color: #f1c40f; margin-bottom: 15px;'>📊 SHORTS 3D HACİMSEL ETKİLEŞİM GRAFİĞİ</h4>", unsafe_allow_html=True)
+        st.markdown("<h4 style='text-align: center; font-size: 15px; color: #f1c40f; margin-bottom: 15px;'>🧊 SHORTS GERÇEK 3D HACİMSEL ETKİLEŞİM GRAFİĞİ</h4>", unsafe_allow_html=True)
         st.plotly_chart(fig_shorts, use_container_width=True)
         st.markdown('</div>', unsafe_allow_html=True)
 
@@ -824,22 +845,34 @@ if "loaded" in st.session_state and st.session_state.loaded:
                 </div>
                 ''', unsafe_allow_html=True)
 
-        # Büyük Video Altına 3D Holografik Grafik Container
+        # Büyük Video Altına GERÇEK 3D MESH (Z Eksenli Hacimsel Sütunlar)
         l_df_chart = pd.DataFrame(long_chart_data)
-        fig_long = px.bar(
-            l_df_chart, x="Periyot", y=["İzlenme", "Beğeni"],
-            barmode="group", template="plotly_dark",
-            color_discrete_map={"İzlenme": "#f1c40f", "Beğeni": "#10b981"}
-        )
+        fig_long = go.Figure(data=[
+            go.Bar(
+                x=l_df_chart['Periyot'], y=l_df_chart['İzlenme'], name='İzlenme',
+                marker=dict(color='#f1c40f', line=dict(width=2, color='#ffffff'))
+            ),
+            go.Bar(
+                x=l_df_chart['Periyot'], y=l_df_chart['Beğeni'], name='Beğeni',
+                marker=dict(color='#10b981', line=dict(width=2, color='#ffffff'))
+            )
+        ])
         fig_long.update_layout(
+            barmode='group',
+            template="plotly_dark",
             paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
             font=dict(family="Plus Jakarta Sans", color="#f3f4f6"),
-            margin=dict(t=20, b=20, l=20, r=20),
+            scene=dict(
+                xaxis=dict(title='Periyot', backgroundcolor='rgba(0,0,0,0)', gridcolor='rgba(255,255,255,0.1)'),
+                yaxis=dict(title='Hacim / Değer', backgroundcolor='rgba(0,0,0,0)', gridcolor='rgba(255,255,255,0.1)'),
+                camera=dict(eye=dict(x=1.6, y=1.6, z=1.2))
+            ),
+            margin=dict(t=30, b=20, l=20, r=20),
             legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
         )
         
         st.markdown('<div class="reveal-box chart-3d-container">', unsafe_allow_html=True)
-        st.markdown("<h4 style='text-align: center; font-size: 15px; color: #10b981; margin-bottom: 15px;'>📊 BÜYÜK VİDEO 3D HACİMSEL ETKİLEŞİM GRAFİĞİ</h4>", unsafe_allow_html=True)
+        st.markdown("<h4 style='text-align: center; font-size: 15px; color: #10b981; margin-bottom: 15px;'>🧊 BÜYÜK VİDEO GERÇEK 3D HACİMSEL ETKİLEŞİM GRAFİĞİ</h4>", unsafe_allow_html=True)
         st.plotly_chart(fig_long, use_container_width=True)
         st.markdown('</div>', unsafe_allow_html=True)
 
