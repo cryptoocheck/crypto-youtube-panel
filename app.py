@@ -35,7 +35,7 @@ def get_img_as_base64(file_path):
 img_path = "bg2.jpg" if os.path.exists("bg2.jpg") else "bg.jpg" if os.path.exists("bg.jpg") else "bg.jpg.jpg" if os.path.exists("bg.jpg.jpg") else "photo_6014965432080600852_y (1).jpg" if os.path.exists("photo_6014965432080600852_y (1).jpg") else ""
 img_b64 = get_img_as_base64(img_path)
 
-# 2. Sayfadaki TÜM Butonlara ve Kutucuklara Hover Büyüme ve Parlayan Altın Sarısı Efekti (CSS)
+# 2. Banner Dahil TÜM Elementlere Hover Büyüme ve Parlayan Altın Sarısı Efekti (CSS)
 st.markdown(f"""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&display=swap');
@@ -63,6 +63,7 @@ st.markdown(f"""
         max-width: 100% !important;
     }}
 
+    /* BANNER BÜYÜME VE PARLAMA EFEKTİ */
     .absolute-center-banner {{
         display: flex;
         justify-content: center;
@@ -78,9 +79,16 @@ st.markdown(f"""
         border-radius: 20px;
         box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), 0 0 40px rgba(212, 175, 55, 0.15);
         display: block;
+        transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+    }}
+    .absolute-center-banner img:hover {{
+        transform: translateY(-6px) scale(1.015);
+        border-color: rgba(212, 175, 55, 0.7);
+        box-shadow: 0 30px 70px -15px rgba(212, 175, 55, 0.4), 0 0 40px rgba(212, 175, 55, 0.3);
     }}
 
-    /* Evrensel Grafik ve İçerik Kutuları */
+    /* Grafik ve İçerik Kutuları */
     .ondo-glass-card {{
         background: rgba(17, 24, 39, 0.7);
         backdrop-filter: blur(16px);
@@ -155,7 +163,7 @@ st.markdown(f"""
         border-right: 1px solid rgba(255, 255, 255, 0.05);
     }}
     
-    /* --- SOL PANEL VE SEKME BUTONLARI İÇİN CAM EFEKTİ VE BÜYÜME HOWER MİMARİSİ --- */
+    /* Sol Panel ve Sekme Butonları */
     .stButton>button {{
         background: linear-gradient(135deg, rgba(212, 175, 55, 0.85) 0%, rgba(170, 140, 44, 0.85) 100%); 
         color: #030712;
