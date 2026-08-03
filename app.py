@@ -36,7 +36,7 @@ possible_files = ["bg2.jpg.jpg", "bg2.jpg", "bg.jpg"]
 banner_file = next((f for f in possible_files if os.path.exists(f)), None)
 img_b64 = get_img_as_base64(banner_file) if banner_file else None
 
-# 2. Gereksiz Boş Kutuları Kaldırılmış Tasarım Mimarisi (CSS)
+# 2. Profesyonel Web3 Tasarım Mimarisi (CSS)
 st.markdown(f"""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&display=swap');
@@ -449,21 +449,23 @@ if "loaded" in st.session_state and st.session_state.loaded:
         )
 
     elif current_tab == "AI Strateji Raporu":
-        st.write("### 🤖 Stratejik Yönetici Özeti")
-        with st.spinner("Web3 finans modelleri Llama 3.3 Motoru ile analiz ediliyor..."):
+        st.write("### 🤖 Profesyonel Kripto & Kanal Büyüme Raporu (Ağustos 2026)")
+        with st.spinner("Kanal verileri ve Ağustos 2026 kripto trendleri Llama 3.3 motoru ile sentezleniyor..."):
             client = Groq(api_key=st.session_state.groq_key)
             
             prompt = f"""
-            Sen kurumsal düzeyde Web3 ve kripto varlık stratejisi geliştiren lider bir finansal analistsin.
+            Sen kurumsal düzeyde Web3, kripto varlık ve YouTube kanal büyüme stratejisi geliştiren üst düzey bir analistsin.
+            Mevcut Tarih: Ağustos 2026.
             Kanal Adı: {ch_title}
-            Toplam İzlenme: {total_views} | Abone Sayısı: {subscribers}
+            Toplam İzlenme: {total_views} | Abone Sayısı: {subscribers} | Toplam Video: {total_videos}
             Son 15 Videonun Ortalama İzlenmesi: {df['İzlenme'].mean():.0f}
             Ortalama Etkileşim Oranı: %{df['Etkileşim (%)'].mean():.2f}
 
-            Lütfen kesinlikle Türkçe olarak, üst düzey kurumsal DeFi formatında:
-            1. **Kanalın Likidite & Kitle Vektörü:** Mevcut kitle sadakatini ve etkileşim gücünü analiz et.
-            2. **3 Kurumsal İçerik Fikri:** Güncel kripto ekosistemine uygun 3 spesifik, yüksek CTR potansiyelli video konusu sun.
-            3. **Kitle Tutma Mimarisi:** İzleyici kaybını engelleyecek 1 stratejik altın kural sun.
+            Lütfen kesinlikle Türkçe olarak, profesyonel yatırım fonu raporu formatında şu başlıkları detaylıca sun:
+            1. **Kanalın Kitle ve Etkileşim Sağlığı:** Mevcut verilerin profesyonel analizi.
+            2. **Ağustos 2026 Yüksek İzlenme Getirecek 3 Trend & Coin:** (Örn: CLARITY Act regülasyonları, AI altcoinleri/TAO, RWA tokenizasyonu, Solana/Sui ekosistemi veya BTC Q4 beklentileri üzerinden nokta atışı coin ve konu önerileri).
+            3. **Yüksek CTR ve İzlenme Süresi İçin Algoritma Taktikleri:** İzleyiciyi ilk 15 saniyede tutacak kanca (hook) stratejisi ve başlık önerileri.
+            4. **Otomasyon & İçerik Üretim Hattı:** Bu analizleri sürekli kılmak için bir YouTube içerik üreticisinin izlemesi gereken operasyonel yol haritası.
             """
             
             chat_completion = client.chat.completions.create(
