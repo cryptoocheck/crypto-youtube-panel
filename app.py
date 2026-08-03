@@ -3,8 +3,6 @@ import streamlit.components.v1 as components
 from googleapiclient.discovery import build
 from groq import Groq
 import pandas as pd
-import plotly.express as px
-import plotly.graph_objects as go
 import os
 import base64
 import re
@@ -47,7 +45,7 @@ def parse_iso8601_duration_seconds(duration_str):
     seconds = int(match.group(3)) if match.group(3) else 0
     return hours * 3600 + minutes * 60 + seconds
 
-# 2. Tasarım Mimarisi (CSS)
+# 2. Tasarım Mimarisi (CSS - Gerçek 3D Perspektif ve Akıcı Animasyonlar)
 st.markdown(f"""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&display=swap');
@@ -75,17 +73,37 @@ st.markdown(f"""
         max-width: 100% !important;
     }}
 
-    /* --- İPEKSİ SÜZÜLME VE 3D GEÇİŞ --- */
+    /* --- GERÇEK 3D PERSPEKTİF VE İPEKSİ SÜZÜLME --- */
     .reveal-box {{
         opacity: 0;
-        transform: translateY(50px) scale(0.97);
-        transition: opacity 1.5s cubic-bezier(0.16, 1, 0.3, 1), transform 1.5s cubic-bezier(0.16, 1, 0.3, 1);
+        transform: perspective(1000px) rotateX(15deg) translateY(80px) scale(0.92);
+        transition: opacity 1.6s cubic-bezier(0.16, 1, 0.3, 1), transform 1.6s cubic-bezier(0.16, 1, 0.3, 1);
         will-change: opacity, transform;
     }}
 
     .reveal-box.active {{
         opacity: 1;
-        transform: translateY(0) scale(1);
+        transform: perspective(1000px) rotateX(0deg) translateY(0) scale(1);
+    }}
+
+    /* --- 3D GRAFİK KARTLARI (HOLO-CAM EFEKTİ) ---
+    .chart-3d-container {{
+        background: rgba(17, 24, 39, 0.8);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 24px;
+        padding: 30px;
+        margin-top: 15px;
+        margin-bottom: 30px;
+        box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        transform-style: preserve-3d;
+        transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.5s ease, border-color 0.5s ease;
+    }}
+    .chart-3d-container:hover {{
+        transform: translateY(-8px) scale(1.01) perspective(1000px) rotateX(2deg);
+        border-color: rgba(241, 196, 15, 0.8);
+        box-shadow: 0 40px 90px -20px rgba(241, 196, 15, 0.35), 0 0 40px rgba(241, 196, 15, 0.25);
     }}
 
     /* --- BANNER --- */
@@ -726,7 +744,7 @@ if "loaded" in st.session_state and st.session_state.loaded:
 
         st.markdown("<br>", unsafe_allow_html=True)
         
-        # --- 3. SHORTS VE BÜYÜK VİDEO ANALİZİ & GERÇEK 3D AKICI GRAFİKLER ---
+        # --- 3. SHORTS VE BÜYÜK VİDEO ANALİZİ & 3D HOLO GRAFİKLER ---
         st.markdown('''
         <div class="reveal-box section-title-box">
             <h3>⚡ Shorts ve Büyük Video Karşılaştırmalı Kümülatif Analiz</h3>
@@ -762,26 +780,22 @@ if "loaded" in st.session_state and st.session_state.loaded:
                 </div>
                 ''', unsafe_allow_html=True)
 
-        # Shorts Altına 3 Boyutlu (3D Görsel Efektli) Akıcı Grafik
-        st.markdown('<div class="reveal-box">', unsafe_allow_html=True)
+        # Shorts Altına Gerçek 3D Perspektifli Holo Grafik (Container İçinde)
         s_df_chart = pd.DataFrame(shorts_chart_data)
-        fig_shorts = go.Figure(data=[
-            go.Bar(name='İzlenme', x=s_df_chart['Periyot'], y=s_df_chart['İzlenme'], marker_color='#f1c40f', marker=dict(line=dict(width=1, color='#ffffff'))),
-            go.Bar(name='Beğeni', x=s_df_chart['Periyot'], y=s_df_chart['Beğeni'], marker_color='#3b82f6', marker=dict(line=dict(width=1, color='#ffffff')))
-        ])
-        fig_shorts.update_layout(
-            barmode='group',
-            template="plotly_dark",
-            title="Shorts 3D Periyot Bazlı Etkileşim Analizi",
-            paper_bgcolor='rgba(0,0,0,0)',
-            plot_bgcolor='rgba(0,0,0,0)',
-            font=dict(family="Plus Jakarta Sans", color="#f3f4f6"),
-            scene=dict(
-                camera=dict(eye=dict(x=1.8, y=1.8, z=1.4))
-            ),
-            margin=dict(t=50, b=20, l=20, r=20),
-            transition=dict(duration=1000, easing="cubic-in-out")
+        fig_shorts = px.bar(
+            s_df_chart, x="Periyot", y=["İzlenme", "Beğeni"],
+            barmode="group", template="plotly_dark",
+            color_discrete_map={"İzlenme": "#f1c40f", "Beğeni": "#3b82f6"}
         )
+        fig_shorts.update_layout(
+            paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
+            font=dict(family="Plus Jakarta Sans", color="#f3f4f6"),
+            margin=dict(t=20, b=20, l=20, r=20),
+            legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
+        )
+        
+        st.markdown('<div class="reveal-box chart-3d-container">', unsafe_allow_html=True)
+        st.markdown("<h4 style='text-align: center; font-size: 15px; color: #f1c40f; margin-bottom: 15px;'>📊 SHORTS 3D HACİMSEL ETKİLEŞİM GRAFİĞİ</h4>", unsafe_allow_html=True)
         st.plotly_chart(fig_shorts, use_container_width=True)
         st.markdown('</div>', unsafe_allow_html=True)
 
@@ -813,26 +827,22 @@ if "loaded" in st.session_state and st.session_state.loaded:
                 </div>
                 ''', unsafe_allow_html=True)
 
-        # Büyük Video Altına 3 Boyutlu (3D Görsel Efektli) Akıcı Grafik
-        st.markdown('<div class="reveal-box">', unsafe_allow_html=True)
+        # Büyük Video Altına Gerçek 3D Perspektifli Holo Grafik (Container İçinde)
         l_df_chart = pd.DataFrame(long_chart_data)
-        fig_long = go.Figure(data=[
-            go.Bar(name='İzlenme', x=l_df_chart['Periyot'], y=l_df_chart['İzlenme'], marker_color='#f1c40f', marker=dict(line=dict(width=1, color='#ffffff'))),
-            go.Bar(name='Beğeni', x=l_df_chart['Periyot'], y=l_df_chart['Beğeni'], marker_color='#10b981', marker=dict(line=dict(width=1, color='#ffffff')))
-        ])
-        fig_long.update_layout(
-            barmode='group',
-            template="plotly_dark",
-            title="Büyük Video 3D Periyot Bazlı Etkileşim Analizi",
-            paper_bgcolor='rgba(0,0,0,0)',
-            plot_bgcolor='rgba(0,0,0,0)',
-            font=dict(family="Plus Jakarta Sans", color="#f3f4f6"),
-            scene=dict(
-                camera=dict(eye=dict(x=1.8, y=1.8, z=1.4))
-            ),
-            margin=dict(t=50, b=20, l=20, r=20),
-            transition=dict(duration=1000, easing="cubic-in-out")
+        fig_long = px.bar(
+            l_df_chart, x="Periyot", y=["İzlenme", "Beğeni"],
+            barmode="group", template="plotly_dark",
+            color_discrete_map={"İzlenme": "#f1c40f", "Beğeni": "#10b981"}
         )
+        fig_long.update_layout(
+            paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
+            font=dict(family="Plus Jakarta Sans", color="#f3f4f6"),
+            margin=dict(t=20, b=20, l=20, r=20),
+            legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
+        )
+        
+        st.markdown('<div class="reveal-box chart-3d-container">', unsafe_allow_html=True)
+        st.markdown("<h4 style='text-align: center; font-size: 15px; color: #10b981; margin-bottom: 15px;'>📊 BÜYÜK VİDEO 3D HACİMSEL ETKİLEŞİM GRAFİĞİ</h4>", unsafe_allow_html=True)
         st.plotly_chart(fig_long, use_container_width=True)
         st.markdown('</div>', unsafe_allow_html=True)
 
