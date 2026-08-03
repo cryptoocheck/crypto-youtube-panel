@@ -36,7 +36,7 @@ possible_files = ["bg2.jpg.jpg", "bg2.jpg", "bg.jpg"]
 banner_file = next((f for f in possible_files if os.path.exists(f)), None)
 img_b64 = get_img_as_base64(banner_file) if banner_file else None
 
-# 2. Üst Kenar Boşluğu ve Çerçeve Senkronizasyonu (CSS)
+# 2. Boyutu Küçültülmüş ve Üst Boşluğu Dengelenmiş Banner Mimarisi (CSS)
 st.markdown(f"""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&display=swap');
@@ -64,13 +64,13 @@ st.markdown(f"""
         max-width: 100% !important;
     }}
 
-    /* --- ÜST ÇİZGİNİN GÖRÜNMESİNİ SAĞLAYAN İÇ BOŞLUK MİMARİSİ --- */
+    /* --- KÜÇÜLTÜLMÜŞ BOYUT VE 360 DERECE EŞİT ÇERÇEVELİ BANNER --- */
     .absolute-center-banner {{
         display: flex;
         justify-content: center;
         align-items: center;
         width: 100%;
-        margin-top: 30px;
+        margin-top: 25px;
         margin-bottom: 25px;
     }}
     .banner-ondo-box {{
@@ -79,7 +79,7 @@ st.markdown(f"""
         -webkit-backdrop-filter: blur(16px);
         border: 1px solid rgba(255, 255, 255, 0.12);
         border-radius: 24px;
-        padding: 24px 28px;
+        padding: 24px;
         box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.7);
         transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
         width: 75%;
@@ -96,9 +96,9 @@ st.markdown(f"""
     .banner-ondo-box img {{
         width: 100% !important;
         height: auto !important;
-        max-height: 340px !important;
-        object-fit: contain !important;
-        border-radius: 14px;
+        max-height: 280px !important;
+        object-fit: cover !important;
+        border-radius: 16px;
         display: block;
         margin: 0 auto;
     }}
