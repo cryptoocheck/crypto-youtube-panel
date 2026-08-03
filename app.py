@@ -756,7 +756,7 @@ if "loaded" in st.session_state and st.session_state.loaded:
                 </div>
                 ''', unsafe_allow_html=True)
 
-        # Shorts Altına 3D Hacimsel Sütun Grafiği (Güvenli Components HTML)
+        # Shorts Altına Yavaşça Uzayan 3D Sütun Grafiği (Intersection Observer Animasyonlu)
         max_s_val = max([max(d["İzlenme"], d["Beğeni"]) for d in shorts_chart_data] + [1])
         
         s_bar_html = f'''
@@ -764,7 +764,7 @@ if "loaded" in st.session_state and st.session_state.loaded:
         <html>
         <head>
         <style>
-            body {{ background: transparent; margin: 0; font-family: 'Plus Jakarta Sans', sans-serif; color: #f3f4f6; }}
+            body {{ background: transparent; margin: 0; font-family: 'Plus Jakarta Sans', sans-serif; color: #f3f4f6; overflow: hidden; }}
             .chart-3d-wrapper {{
                 background: rgba(17, 24, 39, 0.85);
                 backdrop-filter: blur(24px);
@@ -800,12 +800,13 @@ if "loaded" in st.session_state and st.session_state.loaded:
             }}
             .css-3d-bar {{
                 width: 40px;
+                height: 0px; /* Başlangıçta sıfır, animasyonla uzayacak */
                 border-radius: 6px 6px 0 0;
                 position: relative;
                 transform-style: preserve-3d;
                 transform: perspective(600px) rotateY(-15deg);
                 box-shadow: -12px 12px 25px rgba(0,0,0,0.7), inset 2px 2px 5px rgba(255,255,255,0.3);
-                transition: transform 0.4s ease, filter 0.4s ease;
+                transition: height 1.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.4s ease, filter 0.4s ease;
             }}
             .css-3d-bar:hover {{
                 transform: perspective(600px) rotateY(0deg) scaleY(1.05) translateY(-5px);
@@ -823,6 +824,11 @@ if "loaded" in st.session_state and st.session_state.loaded:
                 font-weight: 800;
                 color: #ffffff;
                 text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+                opacity: 0;
+                transition: opacity 1s ease 1s;
+            }}
+            .animated .bar-val-label {{
+                opacity: 1;
             }}
             .css-3d-label {{
                 margin-top: 12px;
@@ -847,7 +853,7 @@ if "loaded" in st.session_state and st.session_state.loaded:
         </style>
         </head>
         <body>
-        <div class="chart-3d-wrapper">
+        <div class="chart-3d-wrapper" id="chartCard1">
             <h4 style="text-align: center; font-size: 15px; color: #f1c40f; margin-bottom: 10px;">🧊 SHORTS GERÇEK 3D HACİMSEL ETKİLEŞİM GRAFİĞİ</h4>
             <div class="css-3d-chart-container">
         '''
@@ -857,10 +863,10 @@ if "loaded" in st.session_state and st.session_state.loaded:
             s_bar_html += f'''
                 <div class="css-3d-group">
                     <div class="css-3d-bars-flex">
-                        <div class="css-3d-bar bar-yellow" style="height: {h_iz}px;">
+                        <div class="css-3d-bar bar-yellow" data-height="{h_iz}">
                             <div class="bar-val-label">{d["İzlenme"]:,}</div>
                         </div>
-                        <div class="css-3d-bar bar-blue" style="height: {h_bg}px;">
+                        <div class="css-3d-bar bar-blue" data-height="{h_bg}">
                             <div class="bar-val-label">{d["Beğeni"]:,}</div>
                         </div>
                     </div>
@@ -874,6 +880,15 @@ if "loaded" in st.session_state and st.session_state.loaded:
                 <div class="legend-item"><div class="legend-dot-b"></div><span>Beğeni</span></div>
             </div>
         </div>
+        <script>
+            setTimeout(() => {
+                const card = document.getElementById('chartCard1');
+                card.classList.add('animated');
+                document.querySelectorAll('#chartCard1 .css-3d-bar').forEach(bar => {
+                    bar.style.height = bar.getAttribute('data-height') + 'px';
+                });
+            }, 300);
+        </script>
         </body>
         </html>
         '''
@@ -907,7 +922,7 @@ if "loaded" in st.session_state and st.session_state.loaded:
                 </div>
                 ''', unsafe_allow_html=True)
 
-        # Büyük Video Altına 3D Hacimsel Sütun Grafiği (Güvenli Components HTML)
+        # Büyük Video Altına Yavaşça Uzayan 3D Sütun Grafiği
         max_l_val = max([max(d["İzlenme"], d["Beğeni"]) for d in long_chart_data] + [1])
         
         l_bar_html = f'''
@@ -915,7 +930,7 @@ if "loaded" in st.session_state and st.session_state.loaded:
         <html>
         <head>
         <style>
-            body {{ background: transparent; margin: 0; font-family: 'Plus Jakarta Sans', sans-serif; color: #f3f4f6; }}
+            body {{ background: transparent; margin: 0; font-family: 'Plus Jakarta Sans', sans-serif; color: #f3f4f6; overflow: hidden; }}
             .chart-3d-wrapper {{
                 background: rgba(17, 24, 39, 0.85);
                 backdrop-filter: blur(24px);
@@ -951,12 +966,13 @@ if "loaded" in st.session_state and st.session_state.loaded:
             }}
             .css-3d-bar {{
                 width: 40px;
+                height: 0px;
                 border-radius: 6px 6px 0 0;
                 position: relative;
                 transform-style: preserve-3d;
                 transform: perspective(600px) rotateY(-15deg);
                 box-shadow: -12px 12px 25px rgba(0,0,0,0.7), inset 2px 2px 5px rgba(255,255,255,0.3);
-                transition: transform 0.4s ease, filter 0.4s ease;
+                transition: height 1.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.4s ease, filter 0.4s ease;
             }}
             .css-3d-bar:hover {{
                 transform: perspective(600px) rotateY(0deg) scaleY(1.05) translateY(-5px);
@@ -973,6 +989,11 @@ if "loaded" in st.session_state and st.session_state.loaded:
                 font-weight: 800;
                 color: #ffffff;
                 text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+                opacity: 0;
+                transition: opacity 1s ease 1s;
+            }}
+            .animated .bar-val-label {{
+                opacity: 1;
             }}
             .css-3d-label {{
                 margin-top: 12px;
@@ -996,7 +1017,7 @@ if "loaded" in st.session_state and st.session_state.loaded:
         </style>
         </head>
         <body>
-        <div class="chart-3d-wrapper">
+        <div class="chart-3d-wrapper" id="chartCard2">
             <h4 style="text-align: center; font-size: 15px; color: #10b981; margin-bottom: 10px;">🧊 BÜYÜK VİDEO GERÇEK 3D HACİMSEL ETKİLEŞİM GRAFİĞİ</h4>
             <div class="css-3d-chart-container">
         '''
@@ -1006,10 +1027,10 @@ if "loaded" in st.session_state and st.session_state.loaded:
             l_bar_html += f'''
                 <div class="css-3d-group">
                     <div class="css-3d-bars-flex">
-                        <div class="css-3d-bar bar-yellow" style="height: {h_iz}px;">
+                        <div class="css-3d-bar bar-yellow" data-height="{h_iz}">
                             <div class="bar-val-label">{d["İzlenme"]:,}</div>
                         </div>
-                        <div class="css-3d-bar bar-green" style="height: {h_bg}px;">
+                        <div class="css-3d-bar bar-green" data-height="{h_bg}">
                             <div class="bar-val-label">{d["Beğeni"]:,}</div>
                         </div>
                     </div>
@@ -1023,6 +1044,15 @@ if "loaded" in st.session_state and st.session_state.loaded:
                 <div class="legend-item"><div class="legend-dot-g"></div><span>Beğeni</span></div>
             </div>
         </div>
+        <script>
+            setTimeout(() => {
+                const card = document.getElementById('chartCard2');
+                card.classList.add('animated');
+                document.querySelectorAll('#chartCard2 .css-3d-bar').forEach(bar => {
+                    bar.style.height = bar.getAttribute('data-height') + 'px';
+                });
+            }, 300);
+        </script>
         </body>
         </html>
         '''
