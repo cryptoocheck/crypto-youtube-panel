@@ -148,7 +148,7 @@ st.markdown(f"""
     }}
     .section-title-box h3 {{
         margin: 0;
-        font-size: 18px;
+        font-size: 17px;
         font-weight: 800;
         letter-spacing: 0.5px;
         color: #f3f4f6;
@@ -740,9 +740,12 @@ if "loaded" in st.session_state and st.session_state.loaded:
         shorts_df = df[df["Tür"] == "Shorts"]
         long_df = df[df["Tür"] == "Büyük Video"]
 
-        st.markdown('<div class="reveal-box">', unsafe_allow_html=True)
-        st.markdown("#### 📱 Shorts (Dikey) İçerik Performansı")
-        st.markdown('</div>', unsafe_allow_html=True)
+        # Shorts İçerik Performansı Başlık Kutusu
+        st.markdown('''
+        <div class="reveal-box section-title-box" style="max-width: 800px; padding: 12px 20px; margin: 20px auto 15px auto;">
+            <h3 style="font-size: 15px;">📱 Shorts (Dikey) İçerik Performansı</h3>
+        </div>
+        ''', unsafe_allow_html=True)
 
         s_c1, s_c2, s_c3 = st.columns(3)
         for periyot_isim, gun_siniri, col in zip(["Son 24 Saat", "Son 7 Gün", "Son 30 Gün"], [1, 7, 30], [s_c1, s_c2, s_c3]):
@@ -760,9 +763,13 @@ if "loaded" in st.session_state and st.session_state.loaded:
                 ''', unsafe_allow_html=True)
 
         st.markdown("<br>", unsafe_allow_html=True)
-        st.markdown('<div class="reveal-box">', unsafe_allow_html=True)
-        st.markdown("#### 🖥️ Büyük Video (Long-form) İçerik Performansı")
-        st.markdown('</div>', unsafe_allow_html=True)
+
+        # Büyük Video İçerik Performansı Başlık Kutusu
+        st.markdown('''
+        <div class="reveal-box section-title-box" style="max-width: 800px; padding: 12px 20px; margin: 20px auto 15px auto;">
+            <h3 style="font-size: 15px;">🖥️ Büyük Video (Long-form) İçerik Performansı</h3>
+        </div>
+        ''', unsafe_allow_html=True)
 
         l_c1, l_c2, l_c3 = st.columns(3)
         for periyot_isim, gun_siniri, col in zip(["Son 24 Saat", "Son 7 Gün", "Son 30 Gün"], [1, 7, 30], [l_c1, l_c2, l_c3]):
