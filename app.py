@@ -35,7 +35,7 @@ def get_img_as_base64(file_path):
 img_path = "bg2.jpg" if os.path.exists("bg2.jpg") else "bg.jpg" if os.path.exists("bg.jpg") else "bg.jpg.jpg" if os.path.exists("bg.jpg.jpg") else "photo_6014965432080600852_y (1).jpg" if os.path.exists("photo_6014965432080600852_y (1).jpg") else ""
 img_b64 = get_img_as_base64(img_path)
 
-# 2. Sayfadaki TÜM Kutucuklara Hover Büyüme ve Parlayan Altın Sarısı Cam Efekti Mimarisi (CSS)
+# 2. Sayfadaki TÜM Butonlara ve Kutucuklara Hover Büyüme ve Parlayan Altın Sarısı Efekti (CSS)
 st.markdown(f"""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&display=swap');
@@ -80,7 +80,7 @@ st.markdown(f"""
         display: block;
     }}
 
-    /* SAYFADAKİ TÜM KUTULAR (Grafikler, Tablolar, AI Raporu) İÇİN EVRENSEL HOVER EFEKTİ */
+    /* Evrensel Grafik ve İçerik Kutuları */
     .ondo-glass-card {{
         background: rgba(17, 24, 39, 0.7);
         backdrop-filter: blur(16px);
@@ -100,7 +100,7 @@ st.markdown(f"""
         box-shadow: 0 30px 70px -15px rgba(212, 175, 55, 0.35), 0 0 35px rgba(212, 175, 55, 0.25);
     }}
 
-    /* Üst Metrik Kartları (Fare Yaklaşınca Büyüyen ve Parlayan Altın Sarısı Efekt) */
+    /* Üst Metrik Kartları */
     .metric-card-ondo {{
         background: rgba(17, 24, 39, 0.75);
         backdrop-filter: blur(16px);
@@ -155,9 +155,27 @@ st.markdown(f"""
         border-right: 1px solid rgba(255, 255, 255, 0.05);
     }}
     
-    /* Sekme Butonları (Cam Efekti ve Büyüme) */
+    /* --- SOL PANEL VE SEKME BUTONLARI İÇİN CAM EFEKTİ VE BÜYÜME HOWER MİMARİSİ --- */
+    .stButton>button {{
+        background: linear-gradient(135deg, rgba(212, 175, 55, 0.85) 0%, rgba(170, 140, 44, 0.85) 100%); 
+        color: #030712;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-radius: 9999px;
+        font-weight: 700;
+        padding: 12px 28px;
+        transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        width: 100%;
+        box-shadow: 0 4px 20px rgba(212, 175, 55, 0.3);
+    }}
+    .stButton>button:hover {{
+        background: linear-gradient(135deg, #f1c40f 0%, #d4af37 100%);
+        box-shadow: 0 10px 30px rgba(241, 196, 15, 0.6), 0 0 20px rgba(241, 196, 15, 0.4);
+        transform: translateY(-3px) scale(1.02);
+        color: #030712;
+    }}
+
     .tab-active button {{
-        background: linear-gradient(135deg, rgba(212, 175, 55, 0.9) 0%, rgba(184, 134, 11, 0.9) 100%) !important;
+        background: linear-gradient(135deg, rgba(212, 175, 55, 0.95) 0%, rgba(184, 134, 11, 0.95) 100%) !important;
         backdrop-filter: blur(16px) !important;
         -webkit-backdrop-filter: blur(16px) !important;
         color: #030712 !important;
@@ -165,10 +183,14 @@ st.markdown(f"""
         font-size: 15px !important;
         letter-spacing: 0.5px !important;
         border-radius: 9999px !important;
-        border: 1px solid rgba(255, 255, 255, 0.4) !important;
-        box-shadow: 0 8px 30px rgba(212, 175, 55, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.5) !important;
+        border: 1px solid rgba(255, 255, 255, 0.5) !important;
+        box-shadow: 0 8px 30px rgba(212, 175, 55, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.6) !important;
         padding: 14px 24px !important;
         transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    }}
+    .tab-active button:hover {{
+        transform: translateY(-3px) scale(1.02);
+        box-shadow: 0 12px 40px rgba(212, 175, 55, 0.7), 0 0 25px rgba(212, 175, 55, 0.4) !important;
     }}
     
     .tab-inactive button {{
