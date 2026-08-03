@@ -332,7 +332,7 @@ if analyze_btn:
                         "Süre (Dk)": duration_min
                     })
 
-                    # Yorumları Çek (Eğer yorum varsa)
+                    # Yorumları Çek
                     if comments_count > 0:
                         try:
                             c_req = youtube.commentThreads().list(
@@ -356,7 +356,7 @@ if analyze_btn:
                                     "Yorum": text,
                                     "Tarih": c_date,
                                     "Durum": status
-                               ссов
+                                })
                         except Exception:
                             pass
 
@@ -569,7 +569,6 @@ if "loaded" in st.session_state and st.session_state.loaded:
         st.write("### 💬 YouTube Kanalı Canlı Yorum Yönetim Merkezi")
         
         if not df_comments.empty:
-            # Filtreleme Seçenekleri
             filter_choice = st.radio("Yorum Durumu Filtresi", ["Tümü", "Cevap Bekliyor", "Cevaplanan"], horizontal=True)
             
             if filter_choice == "Cevap Bekliyor":
