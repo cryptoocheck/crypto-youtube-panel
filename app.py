@@ -35,7 +35,7 @@ def get_img_as_base64(file_path):
 img_path = "bg2.jpg" if os.path.exists("bg2.jpg") else "bg.jpg" if os.path.exists("bg.jpg") else "bg.jpg.jpg" if os.path.exists("bg.jpg.jpg") else "photo_6014965432080600852_y (1).jpg" if os.path.exists("photo_6014965432080600852_y (1).jpg") else ""
 img_b64 = get_img_as_base64(img_path)
 
-# 2. Metrik Kartlarını Tam Merkezleyen Tasarım Mimarisi (CSS)
+# 2. Fare Yaklaşınca Büyüyen ve Parlayan Altın Sarısı Cam Efekti Mimarisi (CSS)
 st.markdown(f"""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&display=swap');
@@ -80,6 +80,7 @@ st.markdown(f"""
         display: block;
     }}
 
+    /* Grafik ve İçerik Kartları (Hover Efektli Cam Tasarımı) */
     .ondo-glass-card {{
         background: rgba(17, 24, 39, 0.7);
         backdrop-filter: blur(16px);
@@ -94,15 +95,16 @@ st.markdown(f"""
         overflow: hidden;
     }}
     .ondo-glass-card:hover {{
-        transform: translateY(-6px);
-        border-color: rgba(212, 175, 55, 0.3);
-        box-shadow: 0 30px 60px -20px rgba(212, 175, 55, 0.15);
+        transform: translateY(-6px) scale(1.01);
+        border-color: rgba(212, 175, 55, 0.6);
+        box-shadow: 0 30px 70px -15px rgba(212, 175, 55, 0.3), 0 0 30px rgba(212, 175, 55, 0.2);
     }}
 
-    /* --- İÇERİĞİ KUTUNUN TAM MERKEZİNE KİLİTLEYEN METRİK KARTI --- */
+    /* Üst Metrik Kartları (Fare Yaklaşınca Büyüyen ve Parlayan Altın Sarısı Efekt) */
     .metric-card-ondo {{
         background: rgba(17, 24, 39, 0.75);
         backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
         border: 1px solid rgba(255, 255, 255, 0.07);
         border-radius: 20px;
         padding: 28px 20px;
@@ -114,11 +116,12 @@ st.markdown(f"""
         justify-content: center;
         text-align: center;
         min-height: 140px;
-        transition: all 0.3s ease;
+        transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
     }}
     .metric-card-ondo:hover {{
-        border-color: rgba(212, 175, 55, 0.4);
-        transform: translateY(-3px);
+        transform: translateY(-6px) scale(1.03);
+        border-color: rgba(212, 175, 55, 0.7);
+        box-shadow: 0 25px 60px -12px rgba(212, 175, 55, 0.4), 0 0 25px rgba(212, 175, 55, 0.25);
     }}
 
     .metric-title {{
@@ -152,37 +155,43 @@ st.markdown(f"""
         border-right: 1px solid rgba(255, 255, 255, 0.05);
     }}
     
+    /* Sekme Butonları (Cam Efekti ve Büyüme) */
     .tab-active button {{
-        background: linear-gradient(135deg, #d4af37 0%, #b8860b 100%) !important;
+        background: linear-gradient(135deg, rgba(212, 175, 55, 0.9) 0%, rgba(184, 134, 11, 0.9) 100%) !important;
+        backdrop-filter: blur(16px) !important;
+        -webkit-backdrop-filter: blur(16px) !important;
         color: #030712 !important;
         font-weight: 800 !important;
         font-size: 15px !important;
         letter-spacing: 0.5px !important;
         border-radius: 9999px !important;
-        border: 1px solid rgba(255, 255, 255, 0.3) !important;
-        box-shadow: 0 0 25px rgba(212, 175, 55, 0.5) !important;
+        border: 1px solid rgba(255, 255, 255, 0.4) !important;
+        box-shadow: 0 8px 30px rgba(212, 175, 55, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.5) !important;
         padding: 14px 24px !important;
         transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
     }}
     
     .tab-inactive button {{
-        background: rgba(17, 24, 39, 0.85) !important;
+        background: rgba(17, 24, 39, 0.65) !important;
+        backdrop-filter: blur(16px) !important;
+        -webkit-backdrop-filter: blur(16px) !important;
         color: #e5e7eb !important;
         font-weight: 700 !important;
         font-size: 14px !important;
         letter-spacing: 0.5px !important;
         border-radius: 9999px !important;
-        border: 1px solid rgba(255, 255, 255, 0.1) !important;
-        backdrop-filter: blur(12px) !important;
+        border: 1px solid rgba(255, 255, 255, 0.08) !important;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
         padding: 14px 24px !important;
         transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
     }}
     
     .tab-inactive button:hover {{
-        background: rgba(31, 41, 55, 0.95) !important;
-        border-color: rgba(212, 175, 55, 0.4) !important;
+        background: rgba(31, 41, 55, 0.85) !important;
+        border-color: rgba(212, 175, 55, 0.6) !important;
+        box-shadow: 0 12px 35px rgba(212, 175, 55, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
         color: #ffffff !important;
-        transform: translateY(-2px);
+        transform: translateY(-3px) scale(1.02);
     }}
 </style>
 """, unsafe_allow_html=True)
@@ -278,7 +287,7 @@ if "loaded" in st.session_state and st.session_state.loaded:
     ch_title = st.session_state.ch_title
     df = st.session_state.df
 
-    # Üst Metrik Kartları (Tam Ortalanmış)
+    # Üst Metrik Kartları (Hover Efektli)
     c1, c2, c3, c4 = st.columns(4)
     with c1:
         st.markdown(f'<div class="metric-card-ondo"><div class="metric-title">TOPLAM İZLENME</div><div class="metric-value"><span id="counter-1">0</span></div><div class="metric-sub">Canlı Veri</div></div>', unsafe_allow_html=True)
