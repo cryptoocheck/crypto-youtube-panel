@@ -47,7 +47,7 @@ def parse_iso8601_duration_seconds(duration_str):
     seconds = int(match.group(3)) if match.group(3) else 0
     return hours * 3600 + minutes * 60 + seconds
 
-# 2. Belirgin, Çok Yavaş ve Akıcı Soldan Sağa Süzülme Animasyon Mimarisi (CSS)
+# 2. Dinamik Kaydırma Yönlü İpeksi Süzülme Animasyon Mimarisi (CSS)
 st.markdown(f"""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&display=swap');
@@ -75,17 +75,22 @@ st.markdown(f"""
         max-width: 100% !important;
     }}
 
-    /* --- BELİRGİN, AĞIR VE AKICI SOLDAN SAĞA SÜZÜLME --- */
+    /* --- ÇOK YAVAŞ, AĞIR VE DİNAMİK SÜZÜLME --- */
     .reveal-box {{
         opacity: 0;
-        transform: translateX(-120px);
-        transition: opacity 2.2s cubic-bezier(0.16, 1, 0.3, 1), transform 2.2s cubic-bezier(0.16, 1, 0.3, 1);
+        transform: translateX(-150px);
+        transition: opacity 2.5s cubic-bezier(0.16, 1, 0.3, 1), transform 2.5s cubic-bezier(0.16, 1, 0.3, 1);
         will-change: opacity, transform;
     }}
 
-    .reveal-box.active {{
+    .reveal-box.scroll-down {{
         opacity: 1;
         transform: translateX(0);
+    }}
+
+    .reveal-box.scroll-up {{
+        opacity: 1;
+        transform: translateX(150px);
     }}
 
     /* --- BANNER --- */
@@ -247,30 +252,36 @@ st.markdown(f"""
 </style>
 """, unsafe_allow_html=True)
 
-# --- GARANTİLİ SCROLL-REVEAL JS ENJEKSİYONU ---
+# --- YÖNE DUYARLI SÜrekli SCROLL-REVEAL JS ENJEKSİYONU ---
 components.html("""
 <script>
-function initReveal() {
-    const observerOptions = {
-        root: null,
-        rootMargin: '0px 0px 0px 0px',
-        threshold: 0.01
-    };
+let lastScrollTop = window.parent.pageYOffset || window.parent.document.documentElement.scrollTop;
 
-    const observer = new IntersectionObserver((entries, observer) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.classList.add('active');
+function initDirectionalReveal() {
+    const boxes = window.parent.document.querySelectorAll('.reveal-box');
+    
+    window.parent.addEventListener('scroll', function() {
+        let st = window.parent.pageYOffset || window.parent.document.documentElement.scrollTop;
+        let direction = st > lastScrollTop ? 'down' : 'up';
+        lastScrollTop = st <= 0 ? 0 : st;
+
+        boxes.forEach(box => {
+            const rect = box.getBoundingClientRect();
+            // Ekrana girdiğinde yönüne göre sınıf ekle
+            if (rect.top < window.parent.innerHeight * 0.95 && rect.bottom >= 0) {
+                if (direction === 'down') {
+                    box.classList.add('scroll-down');
+                    box.classList.remove('scroll-up');
+                } else {
+                    box.classList.add('scroll-up');
+                    box.classList.remove('scroll-down');
+                }
             }
         });
-    }, observerOptions);
-
-    const boxes = window.parent.document.querySelectorAll('.reveal-box');
-    boxes.forEach(box => observer.observe(box));
+    }, { passive: true });
 }
 
-setTimeout(initReveal, 500);
-setInterval(initReveal, 1000);
+setTimeout(initDirectionalReveal, 600);
 </script>
 """, height=0)
 
