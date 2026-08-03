@@ -299,7 +299,7 @@ if analyze_btn:
         st.error("Lütfen sol paneldeki tüm erişim anahtarlarını eksiksiz girin.")
     else:
         try:
-            with st.spinner("YouTube API üzerinden tüm veriler ve özel abone takibi yapılıyor..."):
+            with st.spinner("YouTube API üzerinden tüm geçmiş videolar ve yorumlar taranıyor..."):
                 youtube = build('youtube', 'v3', developerKey=st.session_state.youtube_key)
                 
                 ch_req = youtube.channels().list(
@@ -320,7 +320,6 @@ if analyze_btn:
                     if os.path.exists(tracker_file):
                         tracker_df = pd.read_csv(tracker_file)
                         if not tracker_df.empty:
-                            # Önceki kayıtlı abone sayısını al
                             last_recorded_subs = int(tracker_df.iloc[-1]['Subscribers'])
                         else:
                             last_recorded_subs = subscribers
@@ -330,7 +329,6 @@ if analyze_btn:
                         
                     subs_diff = subscribers - last_recorded_subs
                     
-                    # Güncel veriyi dosyaya kaydet
                     today_str = datetime.utcnow().strftime("%Y-%m-%d")
                     if not tracker_df.empty and tracker_df.iloc[-1]['Date'] == today_str:
                         tracker_df.loc[tracker_df.index[-1], 'Subscribers'] = subscribers
@@ -420,6 +418,7 @@ if analyze_btn:
                         else:
                             time_frame = "Arşiv"
 
+                        # DİKKAT: Yorum sütunu adı "Yorum" olarak düzeltildi.
                         v_list.append({
                             "Video Başlığı": title,
                             "Yayın Tarihi": published_str[:10],
@@ -427,11 +426,11 @@ if analyze_btn:
                             "Periyot": time_frame,
                             "İzlenme": views,
                             "Beğeni": likes,
-                            "Yorum Sayısı": comments_count,
+                            "Yorum": comments_count,
                             "Süre (Dk)": duration_min
                         })
 
-                        # Yorumları çek
+                        # Geçmişe dayalı TÜM yorumları sayfalandırma ile çek
                         if comments_count > 0:
                             try:
                                 c_next_token = None
@@ -469,7 +468,9 @@ if analyze_btn:
                 df = pd.DataFrame(v_list)
                 df_comments = pd.DataFrame(comment_list) if comment_list else pd.DataFrame(columns=["Video", "Yazar", "Yorum", "Tarih", "Durum"])
                 
-                avg_eng = float(((df['Beğeni'] + df['Yorum Sayısı']).sum() / max(df['İzlenme'].sum(), 1)) * 100)
+                # Etkileşim hesabı da orijinal sütun adı olan "Yorum" ile yapılıyor
+                yorum_col_name = "Yorum" if "Yorum" in df.columns else "Yorum Sayısı"
+                avg_eng = float(((df['Beğeni'] + df[yorum_col_name]).sum() / max(df['İzlenme'].sum(), 1)) * 100) if not df.empty else 0.0
                 
                 st.session_state.df = df
                 st.session_state.df_comments = df_comments
@@ -759,7 +760,15 @@ if "loaded" in st.session_state and st.session_state.loaded:
     elif current_tab == "Detaylı Analiz":
         st.markdown('<div class="ondo-glass-card reveal-box">', unsafe_allow_html=True)
         st.write("### 🔍 Tüm İçeriklerin Tür ve Periyot Arşivi")
-        df_show = df[["Video Başlığı", "Yayın Tarihi", "Tür", "Periyot", "İzlenme", "Beğeni", "Yorum Sayısı", "Süre (Dk)"]]
+        
+        # Dinamik Güvenlik Kontrolü (Hata vermemesi için)
+        yorum_sutunu = "Yorum" if "Yorum" in df.columns else ("Yorum Sayısı" if "Yorum Sayısı" in df.columns else None)
+        gosterilecek_sutunlar = ["Video Başlığı", "Yayın Tarihi", "Tür", "Periyot", "İzlenme", "Beğeni"]
+        if yorum_sutunu:
+            gosterilecek_sutunlar.append(yorum_sutunu)
+        gosterilecek_sutunlar.append("Süre (Dk)")
+        
+        df_show = df[gosterilecek_sutunlar]
         st.dataframe(df_show, use_container_width=True)
         st.markdown('</div>', unsafe_allow_html=True)
 
