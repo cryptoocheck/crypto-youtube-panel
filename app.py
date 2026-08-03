@@ -305,10 +305,8 @@ if analyze_btn:
                     duration_sec = parse_iso8601_duration_seconds(duration_iso)
                     duration_min = round(duration_sec / 60, 2)
 
-                    # İçerik Türü Tespiti (60 sn altı Shorts, üstü Büyük Video)
                     content_type = "Shorts" if duration_sec <= 60 else "Büyük Video"
 
-                    # Zaman aralığı tespiti (Günlük, Haftalık, Aylık)
                     delta = now - published_dt
                     if delta.days <= 1:
                         time_frame = "Günlük"
@@ -352,6 +350,14 @@ if "loaded" in st.session_state and st.session_state.loaded:
     avg_eng = st.session_state.avg_eng
     ch_title = st.session_state.ch_title
     df = st.session_state.df
+
+    # Güvenlik Kontrolü: Eski session state verilerinde sütun eksikliğini önle
+    if "Tür" not in df.columns:
+        df["Tür"] = "Büyük Video"
+    if "Periyot" not in df.columns:
+        df["Periyot"] = "Arşiv"
+    if "Süre (Dk)" not in df.columns:
+        df["Süre (Dk)"] = 5.0
 
     # Üst Metrik Kartları
     c1, c2, c3, c4 = st.columns(4)
@@ -441,7 +447,6 @@ if "loaded" in st.session_state and st.session_state.loaded:
     if current_tab == "Performans Matrisi":
         st.write("### ⚡ Shorts ve Büyük Video Karşılaştırmalı Periyot Analizi")
         
-        # Filtreleme için veri setini ayır
         shorts_df = df[df["Tür"] == "Shorts"]
         long_df = df[df["Tür"] == "Büyük Video"]
 
@@ -468,7 +473,6 @@ if "loaded" in st.session_state and st.session_state.loaded:
 
         st.markdown("<br>", unsafe_allow_html=True)
         
-        # Grafikler
         col_g1, col_g2 = st.columns(2)
         with col_g1:
             st.write("### 📊 İçerik Türüne Göre İzlenme Dağılımı")
