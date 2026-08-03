@@ -33,7 +33,7 @@ def get_img_as_base64(file_path):
 img_path = "bg2.jpg" if os.path.exists("bg2.jpg") else "bg.jpg" if os.path.exists("bg.jpg") else "bg.jpg.jpg" if os.path.exists("bg.jpg.jpg") else "photo_6014965432080600852_y (1).jpg" if os.path.exists("photo_6014965432080600852_y (1).jpg") else ""
 img_b64 = get_img_as_base64(img_path)
 
-# 2. Ondo.Finance Tarzı Profesyonel Butonçuluk ve Merkezlenmiş Sekme Mimarisi (CSS)
+# 2. Kesin Merkezlenmiş Butonçuk Sekme Mimarisi (CSS)
 st.markdown(f"""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
@@ -76,10 +76,6 @@ st.markdown(f"""
         border-radius: 20px;
         box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), 0 0 40px rgba(212, 175, 55, 0.15);
         display: block;
-        transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-    }}
-    .absolute-center-banner img:hover {{
-        transform: scale(1.01);
     }}
 
     .ondo-glass-card {{
@@ -95,24 +91,10 @@ st.markdown(f"""
         position: relative;
         overflow: hidden;
     }}
-    .ondo-glass-card::before {{
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 2px;
-        background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.5), transparent);
-        opacity: 0;
-        transition: opacity 0.4s ease;
-    }}
     .ondo-glass-card:hover {{
         transform: translateY(-6px);
         border-color: rgba(212, 175, 55, 0.3);
         box-shadow: 0 30px 60px -20px rgba(212, 175, 55, 0.15);
-    }}
-    .ondo-glass-card:hover::before {{
-        opacity: 1;
     }}
 
     .metric-card-ondo {{
@@ -123,11 +105,6 @@ st.markdown(f"""
         padding: 26px;
         margin-bottom: 20px;
         box-shadow: 0 15px 35px -10px rgba(0, 0, 0, 0.5);
-        transition: all 0.3s ease;
-    }}
-    .metric-card-ondo:hover {{
-        border-color: rgba(212, 175, 55, 0.4);
-        transform: translateY(-3px);
     }}
 
     .metric-title {{
@@ -167,56 +144,50 @@ st.markdown(f"""
         border-radius: 9999px;
         font-weight: 700;
         padding: 12px 28px;
-        transition: all 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
+        transition: all 0.3s ease;
         width: 100%;
         box-shadow: 0 4px 20px rgba(212, 175, 55, 0.3);
     }}
     .stButton>button:hover {{
         background: linear-gradient(135deg, #f1c40f 0%, #d4af37 100%);
-        box-shadow: 0 0 30px rgba(241, 196, 15, 0.6);
         transform: translateY(-2px);
-        color: #030712;
     }}
 
-    /* --- SEKME BAŞLIKLARINI ORTALAYAN VE BUTONÇUK YAPAN PROFESYONEL CSS --- */
-    .stTabs {{
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        width: 100%;
+    /* KESİN ÇÖZÜM: Sekme Butonlarını Tam Ortaya Sabitleyen Flex Mimarisi */
+    div[data-baseweb="tab-list"] {{
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        margin: 0 auto 30px auto !important;
+        background-color: rgba(17, 24, 39, 0.85) !important;
+        padding: 8px 16px !important;
+        border-radius: 9999px !important;
+        border: 1px solid rgba(255, 255, 255, 0.08) !important;
+        backdrop-filter: blur(12px) !important;
+        width: fit-content !important;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6) !important;
     }}
-    .stTabs [data-baseweb="tab-list"] {{
-        display: flex;
-        justify-content: center;
-        gap: 12px;
-        background-color: rgba(17, 24, 39, 0.85);
-        padding: 8px 16px;
-        border-radius: 9999px;
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        backdrop-filter: blur(12px);
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-        margin: 10px auto 25px auto;
-        width: fit-content;
+
+    div[data-baseweb="tab"] {{
+        border-radius: 9999px !important;
+        color: #9ca3af !important;
+        font-weight: 700 !important;
+        font-size: 14px !important;
+        padding: 10px 28px !important;
+        background: transparent !important;
+        border: none !important;
+        transition: all 0.3s ease !important;
     }}
-    .stTabs [data-baseweb="tab"] {{
-        border-radius: 9999px;
-        color: #9ca3af;
-        font-weight: 700;
-        font-size: 14px;
-        padding: 10px 24px;
-        transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-        background: transparent;
-        border: 1px solid transparent;
+
+    div[data-baseweb="tab"]:hover {{
+        color: #ffffff !important;
+        background: rgba(255, 255, 255, 0.05) !important;
     }}
-    .stTabs [data-baseweb="tab"]:hover {{
-        color: #ffffff;
-        background: rgba(255, 255, 255, 0.05);
-    }}
-    .stTabs [aria-selected="true"] {{
+
+    div[aria-selected="true"] {{
         background: linear-gradient(135deg, #d4af37 0%, #aa8c2c 100%) !important;
         color: #030712 !important;
-        box-shadow: 0 4px 20px rgba(212, 175, 55, 0.4);
-        border-color: rgba(255, 255, 255, 0.2);
+        box-shadow: 0 4px 20px rgba(212, 175, 55, 0.4) !important;
     }}
 </style>
 """, unsafe_allow_html=True)
@@ -344,7 +315,7 @@ if analyze_btn:
             </script>
             """, height=0)
 
-            # --- ORTALANMIŞ VE PROFESYONEL BUTONÇUK SEKMELER ---
+            # --- KESİN ORTALANMIŞ SEKMELER ---
             t1, t2, t3 = st.tabs(["📊 Performans Matrisi", "🔍 Detaylı Analiz", "🤖 AI Strateji Raporu"])
 
             with t1:
