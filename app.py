@@ -45,7 +45,7 @@ def parse_iso8601_duration_seconds(duration_str):
     seconds = int(match.group(3)) if match.group(3) else 0
     return hours * 3600 + minutes * 60 + seconds
 
-# 2. Tasarım Mimarisi (CSS - Gerçek 3D Donanım Hızlandırmalı Hacimsel Sütunlar)
+# 2. Tasarım Mimarisi (CSS)
 st.markdown(f"""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&display=swap');
@@ -85,116 +85,6 @@ st.markdown(f"""
         opacity: 1;
         transform: perspective(1200px) rotateX(0deg) translateY(0) scale(1);
     }}
-
-    /* --- GERÇEK 3D HTML5 / CSS HOLOGRAFİK GRAFİK MOTORU --- */
-    .chart-3d-wrapper {{
-        background: rgba(17, 24, 39, 0.85);
-        backdrop-filter: blur(24px);
-        -webkit-backdrop-filter: blur(24px);
-        border: 1px solid rgba(255, 255, 255, 0.15);
-        border-radius: 24px;
-        padding: 35px 25px 25px 25px;
-        margin-top: 15px;
-        margin-bottom: 30px;
-        box-shadow: 0 40px 80px -15px rgba(0, 0, 0, 0.9), inset 0 1px 0 rgba(255, 255, 255, 0.2);
-        transform: perspective(1200px) rotateX(6deg) rotateY(-2deg);
-        transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.5s ease, border-color 0.5s ease;
-    }}
-    .chart-3d-wrapper:hover {{
-        transform: perspective(1200px) rotateX(0deg) rotateY(0deg) translateY(-8px) scale(1.01);
-        border-color: rgba(241, 196, 15, 0.9);
-        box-shadow: 0 50px 110px -20px rgba(241, 196, 15, 0.45), 0 0 45px rgba(241, 196, 15, 0.35);
-    }}
-
-    .css-3d-chart-container {{
-        display: flex;
-        justify-content: space-around;
-        align-items: flex-end;
-        height: 260px;
-        padding-top: 40px;
-        border-bottom: 2px solid rgba(255, 255, 255, 0.15);
-        position: relative;
-    }}
-
-    .css-3d-group {{
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        width: 30%;
-        height: 100%;
-        justify-content: flex-end;
-    }}
-
-    .css-3d-bars-flex {{
-        display: flex;
-        gap: 12px;
-        align-items: flex-end;
-        height: 85%;
-        justify-content: center;
-        width: 100%;
-    }}
-
-    /* 3D Hacimli Sütun Tasarımı */
-    .css-3d-bar {{
-        width: 38px;
-        border-radius: 6px 6px 0 0;
-        position: relative;
-        transform-style: preserve-3d;
-        transform: perspective(600px) rotateY(-15deg);
-        box-shadow: -10px 10px 20px rgba(0,0,0,0.6), inset 2px 2px 5px rgba(255,255,255,0.3);
-        transition: transform 0.4s ease, filter 0.4s ease;
-    }}
-    .css-3d-bar:hover {{
-        transform: perspective(600px) rotateY(0deg) scaleY(1.05) translateY(-5px);
-        filter: brightness(1.25);
-    }}
-
-    .bar-yellow {{
-        background: linear-gradient(135deg, #f1c40f 0%, #b7950b 100%);
-    }}
-    .bar-blue {{
-        background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
-    }}
-    .bar-green {{
-        background: linear-gradient(135deg, #10b981 0%, #047857 100%);
-    }}
-
-    .bar-val-label {{
-        position: absolute;
-        top: -24px;
-        width: 100%;
-        text-align: center;
-        font-size: 11px;
-        font-weight: 800;
-        color: #ffffff;
-        text-shadow: 0 2px 4px rgba(0,0,0,0.8);
-    }}
-
-    .css-3d-label {{
-        margin-top: 12px;
-        font-size: 13px;
-        font-weight: 700;
-        color: #9ca3af;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-    }}
-
-    .chart-legend {{
-        display: flex;
-        justify-content: center;
-        gap: 25px;
-        margin-top: 15px;
-        font-size: 12px;
-        font-weight: 700;
-    }}
-    .legend-item {{
-        display: flex;
-        align-items: center;
-        gap: 8px;
-    }}
-    .legend-dot-y {{ width: 12px; height: 12px; background: #f1c40f; border-radius: 3px; box-shadow: 0 0 8px #f1c40f; }}
-    .legend-dot-b {{ width: 12px; height: 12px; background: #3b82f6; border-radius: 3px; box-shadow: 0 0 8px #3b82f6; }}
-    .legend-dot-g {{ width: 12px; height: 12px; background: #10b981; border-radius: 3px; box-shadow: 0 0 8px #10b981; }}
 
     /* --- BANNER --- */
     .absolute-center-banner {{
@@ -830,7 +720,7 @@ if "loaded" in st.session_state and st.session_state.loaded:
 
         st.markdown("<br>", unsafe_allow_html=True)
         
-        # --- 3. SHORTS VE BÜYÜK VİDEO ANALİZİ & GERÇEK 3D HACİMSEL SÜTUNLAR ---
+        # --- 3. SHORTS VE BÜYÜK VİDEO ANALİZİ ---
         st.markdown('''
         <div class="reveal-box section-title-box">
             <h3>⚡ Shorts ve Büyük Video Karşılaştırmalı Kümülatif Analiz</h3>
@@ -866,17 +756,104 @@ if "loaded" in st.session_state and st.session_state.loaded:
                 </div>
                 ''', unsafe_allow_html=True)
 
-        # Shorts Altına GERÇEK 3D HTML5 Hacimsel Sütun Grafiği
-        max_s_val = max([max(d["İzlenme"], d["BeGeni"] if "BeGeni" in d else d["Beğeni"]) for d in shorts_chart_data] + [1])
+        # Shorts Altına 3D Hacimsel Sütun Grafiği (Güvenli Components HTML)
+        max_s_val = max([max(d["İzlenme"], d["Beğeni"]) for d in shorts_chart_data] + [1])
         
         s_bar_html = f'''
-        <div class="reveal-box chart-3d-wrapper">
+        <!DOCTYPE html>
+        <html>
+        <head>
+        <style>
+            body {{ background: transparent; margin: 0; font-family: 'Plus Jakarta Sans', sans-serif; color: #f3f4f6; }}
+            .chart-3d-wrapper {{
+                background: rgba(17, 24, 39, 0.85);
+                backdrop-filter: blur(24px);
+                border: 1px solid rgba(255, 255, 255, 0.15);
+                border-radius: 24px;
+                padding: 25px;
+                margin: 10px 0;
+                box-shadow: 0 40px 80px -15px rgba(0, 0, 0, 0.9);
+            }}
+            .css-3d-chart-container {{
+                display: flex;
+                justify-content: space-around;
+                align-items: flex-end;
+                height: 220px;
+                padding-top: 35px;
+                border-bottom: 2px solid rgba(255, 255, 255, 0.15);
+            }}
+            .css-3d-group {{
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                width: 30%;
+                height: 100%;
+                justify-content: flex-end;
+            }}
+            .css-3d-bars-flex {{
+                display: flex;
+                gap: 14px;
+                align-items: flex-end;
+                height: 85%;
+                justify-content: center;
+                width: 100%;
+            }}
+            .css-3d-bar {{
+                width: 40px;
+                border-radius: 6px 6px 0 0;
+                position: relative;
+                transform-style: preserve-3d;
+                transform: perspective(600px) rotateY(-15deg);
+                box-shadow: -12px 12px 25px rgba(0,0,0,0.7), inset 2px 2px 5px rgba(255,255,255,0.3);
+                transition: transform 0.4s ease, filter 0.4s ease;
+            }}
+            .css-3d-bar:hover {{
+                transform: perspective(600px) rotateY(0deg) scaleY(1.05) translateY(-5px);
+                filter: brightness(1.25);
+            }}
+            .bar-yellow {{ background: linear-gradient(135deg, #f1c40f 0%, #b7950b 100%); }}
+            .bar-blue {{ background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); }}
+            .bar-green {{ background: linear-gradient(135deg, #10b981 0%, #047857 100%); }}
+            .bar-val-label {{
+                position: absolute;
+                top: -24px;
+                width: 100%;
+                text-align: center;
+                font-size: 11px;
+                font-weight: 800;
+                color: #ffffff;
+                text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+            }}
+            .css-3d-label {{
+                margin-top: 12px;
+                font-size: 13px;
+                font-weight: 700;
+                color: #9ca3af;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+            }}
+            .chart-legend {{
+                display: flex;
+                justify-content: center;
+                gap: 25px;
+                margin-top: 15px;
+                font-size: 12px;
+                font-weight: 700;
+            }}
+            .legend-item {{ display: flex; align-items: center; gap: 8px; }}
+            .legend-dot-y {{ width: 12px; height: 12px; background: #f1c40f; border-radius: 3px; box-shadow: 0 0 8px #f1c40f; }}
+            .legend-dot-b {{ width: 12px; height: 12px; background: #3b82f6; border-radius: 3px; box-shadow: 0 0 8px #3b82f6; }}
+            .legend-dot-g {{ width: 12px; height: 12px; background: #10b981; border-radius: 3px; box-shadow: 0 0 8px #10b981; }}
+        </style>
+        </head>
+        <body>
+        <div class="chart-3d-wrapper">
             <h4 style="text-align: center; font-size: 15px; color: #f1c40f; margin-bottom: 10px;">🧊 SHORTS GERÇEK 3D HACİMSEL ETKİLEŞİM GRAFİĞİ</h4>
             <div class="css-3d-chart-container">
         '''
         for d in shorts_chart_data:
-            h_iz = int((d["İzlenme"] / max_s_val) * 180) + 15
-            h_bg = int((d["Beğeni"] / max_s_val) * 180) + 15
+            h_iz = int((d["İzlenme"] / max_s_val) * 150) + 15
+            h_bg = int((d["Beğeni"] / max_s_val) * 150) + 15
             s_bar_html += f'''
                 <div class="css-3d-group">
                     <div class="css-3d-bars-flex">
@@ -897,8 +874,10 @@ if "loaded" in st.session_state and st.session_state.loaded:
                 <div class="legend-item"><div class="legend-dot-b"></div><span>Beğeni</span></div>
             </div>
         </div>
+        </body>
+        </html>
         '''
-        st.markdown(s_bar_html, unsafe_allow_html=True)
+        components.html(s_bar_html, height=340)
 
         st.markdown("<br>", unsafe_allow_html=True)
 
@@ -928,17 +907,102 @@ if "loaded" in st.session_state and st.session_state.loaded:
                 </div>
                 ''', unsafe_allow_html=True)
 
-        # Büyük Video Altına GERÇEK 3D HTML5 Hacimsel Sütun Grafiği
+        # Büyük Video Altına 3D Hacimsel Sütun Grafiği (Güvenli Components HTML)
         max_l_val = max([max(d["İzlenme"], d["Beğeni"]) for d in long_chart_data] + [1])
         
         l_bar_html = f'''
-        <div class="reveal-box chart-3d-wrapper">
+        <!DOCTYPE html>
+        <html>
+        <head>
+        <style>
+            body {{ background: transparent; margin: 0; font-family: 'Plus Jakarta Sans', sans-serif; color: #f3f4f6; }}
+            .chart-3d-wrapper {{
+                background: rgba(17, 24, 39, 0.85);
+                backdrop-filter: blur(24px);
+                border: 1px solid rgba(255, 255, 255, 0.15);
+                border-radius: 24px;
+                padding: 25px;
+                margin: 10px 0;
+                box-shadow: 0 40px 80px -15px rgba(0, 0, 0, 0.9);
+            }}
+            .css-3d-chart-container {{
+                display: flex;
+                justify-content: space-around;
+                align-items: flex-end;
+                height: 220px;
+                padding-top: 35px;
+                border-bottom: 2px solid rgba(255, 255, 255, 0.15);
+            }}
+            .css-3d-group {{
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                width: 30%;
+                height: 100%;
+                justify-content: flex-end;
+            }}
+            .css-3d-bars-flex {{
+                display: flex;
+                gap: 14px;
+                align-items: flex-end;
+                height: 85%;
+                justify-content: center;
+                width: 100%;
+            }}
+            .css-3d-bar {{
+                width: 40px;
+                border-radius: 6px 6px 0 0;
+                position: relative;
+                transform-style: preserve-3d;
+                transform: perspective(600px) rotateY(-15deg);
+                box-shadow: -12px 12px 25px rgba(0,0,0,0.7), inset 2px 2px 5px rgba(255,255,255,0.3);
+                transition: transform 0.4s ease, filter 0.4s ease;
+            }}
+            .css-3d-bar:hover {{
+                transform: perspective(600px) rotateY(0deg) scaleY(1.05) translateY(-5px);
+                filter: brightness(1.25);
+            }}
+            .bar-yellow {{ background: linear-gradient(135deg, #f1c40f 0%, #b7950b 100%); }}
+            .bar-green {{ background: linear-gradient(135deg, #10b981 0%, #047857 100%); }}
+            .bar-val-label {{
+                position: absolute;
+                top: -24px;
+                width: 100%;
+                text-align: center;
+                font-size: 11px;
+                font-weight: 800;
+                color: #ffffff;
+                text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+            }}
+            .css-3d-label {{
+                margin-top: 12px;
+                font-size: 13px;
+                font-weight: 700;
+                color: #9ca3af;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+            }}
+            .chart-legend {{
+                display: flex;
+                justify-content: center;
+                gap: 25px;
+                margin-top: 15px;
+                font-size: 12px;
+                font-weight: 700;
+            }}
+            .legend-item {{ display: flex; align-items: center; gap: 8px; }}
+            .legend-dot-y {{ width: 12px; height: 12px; background: #f1c40f; border-radius: 3px; box-shadow: 0 0 8px #f1c40f; }}
+            .legend-dot-g {{ width: 12px; height: 12px; background: #10b981; border-radius: 3px; box-shadow: 0 0 8px #10b981; }}
+        </style>
+        </head>
+        <body>
+        <div class="chart-3d-wrapper">
             <h4 style="text-align: center; font-size: 15px; color: #10b981; margin-bottom: 10px;">🧊 BÜYÜK VİDEO GERÇEK 3D HACİMSEL ETKİLEŞİM GRAFİĞİ</h4>
             <div class="css-3d-chart-container">
         '''
         for d in long_chart_data:
-            h_iz = int((d["İzlenme"] / max_l_val) * 180) + 15
-            h_bg = int((d["Beğeni"] / max_l_val) * 180) + 15
+            h_iz = int((d["İzlenme"] / max_l_val) * 150) + 15
+            h_bg = int((d["Beğeni"] / max_l_val) * 150) + 15
             l_bar_html += f'''
                 <div class="css-3d-group">
                     <div class="css-3d-bars-flex">
@@ -959,8 +1023,10 @@ if "loaded" in st.session_state and st.session_state.loaded:
                 <div class="legend-item"><div class="legend-dot-g"></div><span>Beğeni</span></div>
             </div>
         </div>
+        </body>
+        </html>
         '''
-        st.markdown(l_bar_html, unsafe_allow_html=True)
+        components.html(l_bar_html, height=340)
 
         # --- 4. KANAL DETAYLI PERFORMANS ÖZETİ ---
         st.markdown('''
@@ -1039,7 +1105,7 @@ if "loaded" in st.session_state and st.session_state.loaded:
             Toplam İzlenme: {total_views} | Abone Sayısı: {subscribers} | Toplam Video: {total_videos}
             Shorts ve Büyük Video Performansları sisteme entegre edilmiştir.
 
-            Lütfen kesinlikle Türkçe olarak, profesyonel yatırım fonu raporu formatında şu başlıkları detaylıca sun:
+            Lütfen kesinlikle Türkçe olarak, profesyonel yatırım fonu formatında şu başlıkları detaylıca sun:
             1. **Kanalın Kitle ve Etkileşim Sağlığı:** Shorts ve klasik video dağılımının analizi.
             2. **Ağustos 2026 Yüksek İzlenme Getirecek 3 Trend & Coin:** (Örn: CLARITY Act regülasyonları, AI altcoinleri/TAO, RWA tokenizasyonu, Solana/Sui ekosistemi veya BTC Q4 beklentileri).
             3. **Yüksek CTR ve İzlenme Süresi İçin Algoritma Taktikleri.**
