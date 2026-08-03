@@ -3,6 +3,8 @@ import streamlit.components.v1 as components
 from googleapiclient.discovery import build
 from groq import Groq
 import pandas as pd
+import plotly.express as px
+import plotly.graph_objects as go
 import os
 import base64
 import re
@@ -45,7 +47,7 @@ def parse_iso8601_duration_seconds(duration_str):
     seconds = int(match.group(3)) if match.group(3) else 0
     return hours * 3600 + minutes * 60 + seconds
 
-# 2. Tasarım Mimarisi (CSS - Neon Sarı Hover & Şeffaf Cam Başlık Kutuları)
+# 2. Tasarım Mimarisi (CSS - 3D Grafik Kartları & Şeffaf Cam Başlıklar)
 st.markdown(f"""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&display=swap');
@@ -73,17 +75,17 @@ st.markdown(f"""
         max-width: 100% !important;
     }}
 
-    /* --- ÇOK YAVAŞ, AĞIR VE AKICI İKİ YÖNLÜ GEÇİŞ --- */
+    /* --- ÇOK YAVAŞ, AĞIR VE AKICI İKİ YÖNLÜ GEÇİŞ (3D EFFECT) --- */
     .reveal-box {{
         opacity: 0;
-        transform: translateX(-150px);
-        transition: opacity 1.8s cubic-bezier(0.25, 1, 0.5, 1), transform 1.8s cubic-bezier(0.25, 1, 0.5, 1);
+        transform: translateY(60px) scale(0.96);
+        transition: opacity 1.6s cubic-bezier(0.16, 1, 0.3, 1), transform 1.6s cubic-bezier(0.16, 1, 0.3, 1);
         will-change: opacity, transform;
     }}
 
     .reveal-box.active {{
         opacity: 1;
-        transform: translateX(0);
+        transform: translateY(0) scale(1);
     }}
 
     /* --- BANNER --- */
@@ -159,7 +161,7 @@ st.markdown(f"""
         text-shadow: 0 0 10px rgba(241, 196, 15, 0.6);
     }}
 
-    /* --- KUTULAR VE MERKEZLEME --- */
+    /* --- 3 BOYUTLU GRAFİK VE KUTU ALANLARI --- */
     .metric-card-ondo, .ondo-glass-card {{
         background: rgba(17, 24, 39, 0.75);
         backdrop-filter: blur(16px);
@@ -168,19 +170,19 @@ st.markdown(f"""
         border-radius: 20px;
         padding: 28px 20px;
         margin-bottom: 20px;
-        box-shadow: 0 15px 35px -10px rgba(0, 0, 0, 0.5);
+        box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.6);
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
         text-align: center;
         min-height: 140px;
-        transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s ease, box-shadow 0.3s ease;
+        transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.4s ease, box-shadow 0.4s ease;
     }}
     .metric-card-ondo:hover, .ondo-glass-card:hover {{
-        transform: translateY(-6px) scale(1.01);
-        border-color: rgba(212, 175, 55, 0.7);
-        box-shadow: 0 25px 60px -12px rgba(212, 175, 55, 0.4), 0 0 25px rgba(212, 175, 55, 0.25);
+        transform: translateY(-8px) scale(1.01) perspective(1000px) rotateX(1deg);
+        border-color: rgba(241, 196, 15, 0.7);
+        box-shadow: 0 30px 70px -12px rgba(241, 196, 15, 0.4), 0 0 30px rgba(241, 196, 15, 0.25);
     }}
 
     .metric-title {{
@@ -222,13 +224,8 @@ st.markdown(f"""
         border: 1px solid rgba(255, 255, 255, 0.08) !important;
         border-radius: 20px !important;
         padding: 15px !important;
-        box-shadow: 0 15px 35px -10px rgba(0, 0, 0, 0.5) !important;
+        box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.6) !important;
         transition: transform 0.3s ease, border-color 0.3s ease !important;
-    }}
-    .stDataFrame:hover {{
-        transform: translateY(-4px) scale(1.005);
-        border-color: rgba(212, 175, 55, 0.7) !important;
-        box-shadow: 0 25px 60px -12px rgba(212, 175, 55, 0.3), 0 0 25px rgba(212, 175, 55, 0.2) !important;
     }}
 
     section[data-testid="stSidebar"] {{
@@ -660,7 +657,7 @@ if "loaded" in st.session_state and st.session_state.loaded:
     current_tab = st.session_state.active_tab
 
     if current_tab == "Performans Matrisi":
-        # --- 1. GENEL BAKIŞ (Şeffaf Cam & Neon Sarı Hover Başlık Kutusu) ---
+        # --- 1. GENEL BAKIŞ ---
         st.markdown('''
         <div class="reveal-box section-title-box">
             <h3>🌐 GENEL BAKIŞ</h3>
@@ -695,7 +692,7 @@ if "loaded" in st.session_state and st.session_state.loaded:
 
         st.markdown("<br>", unsafe_allow_html=True)
 
-        # --- 2. İÇERİK (Şeffaf Cam & Neon Sarı Hover Başlık Kutusu) ---
+        # --- 2. İÇERİK ---
         st.markdown('''
         <div class="reveal-box section-title-box">
             <h3>📈 İÇERİK (Önceki 28 Güne Kıyasla & Özel Takip)</h3>
@@ -730,7 +727,7 @@ if "loaded" in st.session_state and st.session_state.loaded:
 
         st.markdown("<br>", unsafe_allow_html=True)
         
-        # --- 3. SHORTS VE BÜYÜK VİDEO ANALİZİ (Şeffaf Cam & Neon Sarı Hover Başlık Kutusu) ---
+        # --- 3. SHORTS VE BÜYÜK VİDEO ANALİZİ & 3D GRAFİKLER ---
         st.markdown('''
         <div class="reveal-box section-title-box">
             <h3>⚡ Shorts ve Büyük Video Karşılaştırmalı Kümülatif Analiz</h3>
@@ -740,7 +737,7 @@ if "loaded" in st.session_state and st.session_state.loaded:
         shorts_df = df[df["Tür"] == "Shorts"]
         long_df = df[df["Tür"] == "Büyük Video"]
 
-        # Shorts İçerik Performansı Başlık Kutusu
+        # Shorts Başlık Kutusu
         st.markdown('''
         <div class="reveal-box section-title-box" style="max-width: 800px; padding: 12px 20px; margin: 20px auto 15px auto;">
             <h3 style="font-size: 15px;">📱 Shorts (Dikey) İçerik Performansı</h3>
@@ -748,11 +745,15 @@ if "loaded" in st.session_state and st.session_state.loaded:
         ''', unsafe_allow_html=True)
 
         s_c1, s_c2, s_c3 = st.columns(3)
+        shorts_chart_data = []
         for periyot_isim, gun_siniri, col in zip(["Son 24 Saat", "Son 7 Gün", "Son 30 Gün"], [1, 7, 30], [s_c1, s_c2, s_c3]):
             p_data = shorts_df[shorts_df["Yaş (Gün)"] <= gun_siniri]
             p_views = p_data["İzlenme"].sum()
             p_likes = p_data["Beğeni"].sum()
             p_watch_time = p_data["İzlenme Süresi (Dk)"].sum()
+            
+            shorts_chart_data.append({"Periyot": periyot_isim, "İzlenme": p_views, "Beğeni": p_likes, "İzlenme Süresi (Dk)": p_watch_time})
+            
             with col:
                 st.markdown(f'''
                 <div class="metric-card-ondo reveal-box" style="min-height: 120px; padding: 18px;">
@@ -762,9 +763,27 @@ if "loaded" in st.session_state and st.session_state.loaded:
                 </div>
                 ''', unsafe_allow_html=True)
 
+        # Shorts Altına 3 Boyutlu Akıcı Grafik
+        st.markdown('<div class="reveal-box">', unsafe_allow_html=True)
+        s_df_chart = pd.DataFrame(shorts_chart_data)
+        fig_shorts = px.bar(
+            s_df_chart, x="Periyot", y=["İzlenme", "Beğeni"],
+            barmode="group", template="plotly_dark",
+            color_discrete_map={"İzlenme": "#f1c40f", "Beğeni": "#3b82f6"},
+            title="Shorts Periyot Bazlı Etkileşim Grafiği"
+        )
+        fig_shorts.update_layout(
+            paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
+            font=dict(family="Plus Jakarta Sans", color="#f3f4f6"),
+            margin=dict(t=40, b=20, l=20, r=20),
+            scene=dict(camera=dict(eye=dict(x=1.5, y=1.5, z=1.2)))
+        )
+        st.plotly_chart(fig_shorts, use_container_width=True)
+        st.markdown('</div>', unsafe_allow_html=True)
+
         st.markdown("<br>", unsafe_allow_html=True)
 
-        # Büyük Video İçerik Performansı Başlık Kutusu
+        # Büyük Video Başlık Kutusu
         st.markdown('''
         <div class="reveal-box section-title-box" style="max-width: 800px; padding: 12px 20px; margin: 20px auto 15px auto;">
             <h3 style="font-size: 15px;">🖥️ Büyük Video (Long-form) İçerik Performansı</h3>
@@ -772,11 +791,15 @@ if "loaded" in st.session_state and st.session_state.loaded:
         ''', unsafe_allow_html=True)
 
         l_c1, l_c2, l_c3 = st.columns(3)
+        long_chart_data = []
         for periyot_isim, gun_siniri, col in zip(["Son 24 Saat", "Son 7 Gün", "Son 30 Gün"], [1, 7, 30], [l_c1, l_c2, l_c3]):
             p_data = long_df[long_df["Yaş (Gün)"] <= gun_siniri]
             p_views = p_data["İzlenme"].sum()
             p_likes = p_data["Beğeni"].sum()
             p_watch_time = p_data["İzlenme Süresi (Dk)"].sum()
+            
+            long_chart_data.append({"Periyot": periyot_isim, "İzlenme": p_views, "Beğeni": p_likes, "İzlenme Süresi (Dk)": p_watch_time})
+            
             with col:
                 st.markdown(f'''
                 <div class="metric-card-ondo reveal-box" style="min-height: 120px; padding: 18px;">
@@ -786,7 +809,24 @@ if "loaded" in st.session_state and st.session_state.loaded:
                 </div>
                 ''', unsafe_allow_html=True)
 
-        # --- 4. KANAL DETAYLI PERFORMANS ÖZETİ (Şeffaf Cam & Neon Sarı Hover Başlık Kutusu) ---
+        # Büyük Video Altına 3 Boyutlu Akıcı Grafik
+        st.markdown('<div class="reveal-box">', unsafe_allow_html=True)
+        l_df_chart = pd.DataFrame(long_chart_data)
+        fig_long = px.bar(
+            l_df_chart, x="Periyot", y=["İzlenme", "Beğeni"],
+            barmode="group", template="plotly_dark",
+            color_discrete_map={"İzlenme": "#f1c40f", "Beğeni": "#10b981"},
+            title="Büyük Video Periyot Bazlı Etkileşim Grafiği"
+        )
+        fig_long.update_layout(
+            paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
+            font=dict(family="Plus Jakarta Sans", color="#f3f4f6"),
+            margin=dict(t=40, b=20, l=20, r=20)
+        )
+        st.plotly_chart(fig_long, use_container_width=True)
+        st.markdown('</div>', unsafe_allow_html=True)
+
+        # --- 4. KANAL DETAYLI PERFORMANS ÖZETİ ---
         st.markdown('''
         <div class="reveal-box section-title-box">
             <h3>🎯 KANAL DETAYLI PERFORMANS ÖZETİ</h3>
