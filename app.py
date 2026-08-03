@@ -47,7 +47,7 @@ def parse_iso8601_duration_seconds(duration_str):
     seconds = int(match.group(3)) if match.group(3) else 0
     return hours * 3600 + minutes * 60 + seconds
 
-# 2. Tasarım Mimarisi (CSS)
+# 2. Kusursuz Tasarım ve Kayma Efekti Mimarisi (CSS)
 st.markdown(f"""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&display=swap');
@@ -73,6 +73,19 @@ st.markdown(f"""
         padding-top: 0rem !important;
         padding-bottom: 3rem !important;
         max-width: 100% !important;
+    }}
+
+    /* --- ÇOK YAVAŞ, AĞIR VE AKICI İKİ YÖNLÜ GEÇİŞ --- */
+    .reveal-box {{
+        opacity: 0;
+        transform: translateX(-150px);
+        transition: opacity 1.8s cubic-bezier(0.25, 1, 0.5, 1), transform 1.8s cubic-bezier(0.25, 1, 0.5, 1);
+        will-change: opacity, transform;
+    }}
+
+    .reveal-box.active {{
+        opacity: 1;
+        transform: translateX(0);
     }}
 
     /* --- BANNER --- */
@@ -114,7 +127,7 @@ st.markdown(f"""
         margin: 0 auto;
     }}
 
-    /* --- KUTULAR --- */
+    /* --- KUTULAR VE MERKEZLEME --- */
     .metric-card-ondo, .ondo-glass-card {{
         background: rgba(17, 24, 39, 0.75);
         backdrop-filter: blur(16px);
@@ -234,6 +247,35 @@ st.markdown(f"""
 </style>
 """, unsafe_allow_html=True)
 
+# --- ÇİFT YÖNLÜ İPEKSİ SÜZÜLME JS ---
+components.html("""
+<script>
+function initDualWayReveal() {
+    const observerOptions = {
+        root: null,
+        rootMargin: '0px 0px -50px 0px',
+        threshold: 0.1
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('active');
+            } else {
+                entry.target.classList.remove('active');
+            }
+        });
+    }, observerOptions);
+
+    const boxes = window.parent.document.querySelectorAll('.reveal-box');
+    boxes.forEach(box => observer.observe(box));
+}
+
+setTimeout(initDualWayReveal, 500);
+setInterval(initDualWayReveal, 1000);
+</script>
+""", height=0)
+
 # --- BANNER ---
 if img_b64:
     st.markdown(f'''
@@ -259,7 +301,7 @@ if analyze_btn:
         st.error("Lütfen sol paneldeki tüm erişim anahtarlarını eksiksiz girin.")
     else:
         try:
-            with st.spinner("YouTube API üzerinden kanal verileri ve yorumlar taranıyor..."):
+            with st.spinner("YouTube API üzerinden tüm geçmiş videolar ve yorumlar taranıyor..."):
                 youtube = build('youtube', 'v3', developerKey=st.session_state.youtube_key)
                 
                 ch_req = youtube.channels().list(
@@ -274,91 +316,111 @@ if analyze_btn:
                 total_videos = int(channel['statistics']['videoCount'])
                 uploads_playlist_id = channel['contentDetails']['relatedPlaylists']['uploads']
 
-                playlist_req = youtube.playlistItems().list(
-                    part='snippet,contentDetails',
-                    playlistId=uploads_playlist_id,
-                    maxResults=50
-                ).execute()
+                # Geçmişe dayalı TÜM videoları sayfalandırma (pagination) ile çek
+                v_ids = []
+                next_page_token = None
+                while True:
+                    playlist_req = youtube.playlistItems().list(
+                        part='snippet,contentDetails',
+                        playlistId=uploads_playlist_id,
+                        maxResults=50,
+                        pageToken=next_page_token
+                    ).execute()
 
-                v_ids = [item['contentDetails']['videoId'] for item in playlist_req['items']]
-                
-                videos_req = youtube.videos().list(
-                    part='statistics,snippet,contentDetails,status',
-                    id=','.join(v_ids)
-                ).execute()
+                    for item in playlist_req.get('items', []):
+                        v_ids.append(item['contentDetails']['videoId'])
+
+                    next_page_token = playlist_req.get('nextPageToken')
+                    if not next_page_token:
+                        break
 
                 v_list = []
                 comment_list = []
                 now = datetime.utcnow()
 
-                for item in videos_req['items']:
-                    snippet = item['snippet']
-                    stats = item['statistics']
-                    content = item['contentDetails']
+                # Videoları 50'şerli gruplar halinde detaylı çek
+                for i in range(0, len(v_ids), 50):
+                    chunk_ids = v_ids[i:i+50]
+                    videos_req = youtube.videos().list(
+                        part='statistics,snippet,contentDetails,status',
+                        id=','.join(chunk_ids)
+                    ).execute()
 
-                    v_id = item['id']
-                    title = snippet['title']
-                    published_str = snippet['publishedAt']
-                    published_dt = datetime.strptime(published_str[:19], "%Y-%m-%dT%H:%M:%S")
-                    
-                    views = int(stats.get('viewCount', 0))
-                    likes = int(stats.get('likeCount', 0))
-                    comments_count = int(stats.get('commentCount', 0))
-                    
-                    duration_iso = content.get('duration', 'PT0M')
-                    duration_sec = parse_iso8601_duration_seconds(duration_iso)
-                    duration_min = round(duration_sec / 60, 2)
+                    for item in videos_req.get('items', []):
+                        snippet = item['snippet']
+                        stats = item['statistics']
+                        content = item['contentDetails']
 
-                    content_type = "Shorts" if duration_sec <= 60 else "Büyük Video"
+                        v_id = item['id']
+                        title = snippet['title']
+                        published_str = snippet['publishedAt']
+                        published_dt = datetime.strptime(published_str[:19], "%Y-%m-%dT%H:%M:%S")
+                        
+                        views = int(stats.get('viewCount', 0))
+                        likes = int(stats.get('likeCount', 0))
+                        comments_count = int(stats.get('commentCount', 0))
+                        
+                        duration_iso = content.get('duration', 'PT0M')
+                        duration_sec = parse_iso8601_duration_seconds(duration_iso)
+                        duration_min = round(duration_sec / 60, 2)
 
-                    delta = now - published_dt
-                    if delta.days <= 1:
-                        time_frame = "Günlük"
-                    elif delta.days <= 7:
-                        time_frame = "Haftalık"
-                    elif delta.days <= 30:
-                        time_frame = "Aylık"
-                    else:
-                        time_frame = "Arşiv"
+                        content_type = "Shorts" if duration_sec <= 60 else "Büyük Video"
 
-                    v_list.append({
-                        "Video Başlığı": title,
-                        "Yayın Tarihi": published_str[:10],
-                        "Tür": content_type,
-                        "Periyot": time_frame,
-                        "İzlenme": views,
-                        "Beğeni": likes,
-                        "Yorum": comments_count,
-                        "Süre (Dk)": duration_min
-                    })
+                        delta = now - published_dt
+                        if delta.days <= 1:
+                            time_frame = "Günlük"
+                        elif delta.days <= 7:
+                            time_frame = "Haftalık"
+                        elif delta.days <= 30:
+                            time_frame = "Aylık"
+                        else:
+                            time_frame = "Arşiv"
 
-                    # Yorumları Çek
-                    if comments_count > 0:
-                        try:
-                            c_req = youtube.commentThreads().list(
-                                part='snippet',
-                                videoId=v_id,
-                                maxResults=20
-                            ).execute()
+                        v_list.append({
+                            "Video Başlığı": title,
+                            "Yayın Tarihi": published_str[:10],
+                            "Tür": content_type,
+                            "Periyot": time_frame,
+                            "İzlenme": views,
+                            "Beğeni": likes,
+                            "Yorum": comments_count,
+                            "Süre (Dk)": duration_min
+                        })
 
-                            for thread in c_req.get('items', []):
-                                c_snippet = thread['snippet']['topLevelComment']['snippet']
-                                author = c_snippet['authorDisplayName']
-                                text = c_snippet['textDisplay']
-                                c_date = c_snippet['publishedAt'][:10]
-                                total_replies = thread['snippet']['totalReplyCount']
-                                
-                                status = "Cevaplanan" if total_replies > 0 else "Cevap Bekliyor"
+                        # Geçmişe dayalı TÜM yorumları sayfalandırma ile çek
+                        if comments_count > 0:
+                            try:
+                                c_next_token = None
+                                while True:
+                                    c_req = youtube.commentThreads().list(
+                                        part='snippet',
+                                        videoId=v_id,
+                                        maxResults=100,
+                                        pageToken=c_next_token
+                                    ).execute()
 
-                                comment_list.append({
-                                    "Video": title,
-                                    "Yazar": author,
-                                    "Yorum": text,
-                                    "Tarih": c_date,
-                                    "Durum": status
-                                })
-                        except Exception:
-                            pass
+                                    for thread in c_req.get('items', []):
+                                        c_snippet = thread['snippet']['topLevelComment']['snippet']
+                                        author = c_snippet['authorDisplayName']
+                                        text = c_snippet['textDisplay']
+                                        c_date = c_snippet['publishedAt'][:10]
+                                        total_replies = thread['snippet']['totalReplyCount']
+                                        
+                                        status = "Cevaplanan" if total_replies > 0 else "Cevap Bekliyor"
+
+                                        comment_list.append({
+                                            "Video": title,
+                                            "Yazar": author,
+                                            "Yorum": text,
+                                            "Tarih": c_date,
+                                            "Durum": status
+                                        })
+
+                                    c_next_token = c_req.get('nextPageToken')
+                                    if not c_next_token:
+                                        break
+                            except Exception:
+                                pass
 
                 df = pd.DataFrame(v_list)
                 df_comments = pd.DataFrame(comment_list) if comment_list else pd.DataFrame(columns=["Video", "Yazar", "Yorum", "Tarih", "Durum"])
@@ -398,13 +460,13 @@ if "loaded" in st.session_state and st.session_state.loaded:
     # Üst Metrik Kartları
     c1, c2, c3, c4 = st.columns(4)
     with c1:
-        st.markdown(f'<div class="metric-card-ondo"><div class="metric-title">TOPLAM İZLENME</div><div class="metric-value"><span id="counter-1">0</span></div><div class="metric-sub">Canlı Veri</div></div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="metric-card-ondo reveal-box"><div class="metric-title">TOPLAM İZLENME</div><div class="metric-value"><span id="counter-1">0</span></div><div class="metric-sub">Canlı Veri</div></div>', unsafe_allow_html=True)
     with c2:
-        st.markdown(f'<div class="metric-card-ondo"><div class="metric-title">ABONE SAYISI</div><div class="metric-value"><span id="counter-2">0</span></div><div class="metric-sub">Aktif İzleyici</div></div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="metric-card-ondo reveal-box"><div class="metric-title">ABONE SAYISI</div><div class="metric-value"><span id="counter-2">0</span></div><div class="metric-sub">Aktif İzleyici</div></div>', unsafe_allow_html=True)
     with c3:
-        st.markdown(f'<div class="metric-card-ondo"><div class="metric-title">ORTALAMA ETKİLEŞİM</div><div class="metric-value"><span id="counter-3">0.00</span></div><div class="metric-sub">Kanal Performansı</div></div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="metric-card-ondo reveal-box"><div class="metric-title">ORTALAMA ETKİLEŞİM</div><div class="metric-value"><span id="counter-3">0.00</span></div><div class="metric-sub">Kanal Performansı</div></div>', unsafe_allow_html=True)
     with c4:
-        st.markdown(f'<div class="metric-card-ondo"><div class="metric-title">İÇERİK SAYISI</div><div class="metric-value"><span id="counter-4">0</span></div><div class="metric-sub">Yayınlanan Video</div></div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="metric-card-ondo reveal-box"><div class="metric-title">İÇERİK SAYISI</div><div class="metric-value"><span id="counter-4">0</span></div><div class="metric-sub">Yayınlanan Video</div></div>', unsafe_allow_html=True)
 
     components.html(f"""
     <script>
@@ -489,12 +551,17 @@ if "loaded" in st.session_state and st.session_state.loaded:
     current_tab = st.session_state.active_tab
 
     if current_tab == "Performans Matrisi":
+        st.markdown('<div class="reveal-box">', unsafe_allow_html=True)
         st.write("### ⚡ Shorts ve Büyük Video Karşılaştırmalı Periyot Analizi")
+        st.markdown('</div>', unsafe_allow_html=True)
         
         shorts_df = df[df["Tür"] == "Shorts"]
         long_df = df[df["Tür"] == "Büyük Video"]
 
+        st.markdown('<div class="reveal-box">', unsafe_allow_html=True)
         st.markdown("#### 📱 Shorts (Dikey) İçerik Performansı")
+        st.markdown('</div>', unsafe_allow_html=True)
+
         s_c1, s_c2, s_c3 = st.columns(3)
         for periyot, col in zip(["Günlük", "Haftalık", "Aylık"], [s_c1, s_c2, s_c3]):
             p_data = shorts_df[shorts_df["Periyot"] == periyot]
@@ -503,7 +570,7 @@ if "loaded" in st.session_state and st.session_state.loaded:
             p_time = p_data["Süre (Dk)"].sum()
             with col:
                 st.markdown(f'''
-                <div class="metric-card-ondo" style="min-height: 120px; padding: 18px;">
+                <div class="metric-card-ondo reveal-box" style="min-height: 120px; padding: 18px;">
                     <div class="metric-title">SHORTS ({periyot.upper()})</div>
                     <div class="metric-value" style="font-size: 28px;">{p_views:,}</div>
                     <div class="metric-sub">{p_likes} Beğeni | {p_time:.1f} Dk</div>
@@ -511,7 +578,10 @@ if "loaded" in st.session_state and st.session_state.loaded:
                 ''', unsafe_allow_html=True)
 
         st.markdown("<br>", unsafe_allow_html=True)
+        st.markdown('<div class="reveal-box">', unsafe_allow_html=True)
         st.markdown("#### 🖥️ Büyük Video (Long-form) İçerik Performansı")
+        st.markdown('</div>', unsafe_allow_html=True)
+
         l_c1, l_c2, l_c3 = st.columns(3)
         for periyot, col in zip(["Günlük", "Haftalık", "Aylık"], [l_c1, l_c2, l_c3]):
             p_data = long_df[long_df["Periyot"] == periyot]
@@ -520,7 +590,7 @@ if "loaded" in st.session_state and st.session_state.loaded:
             p_time = p_data["Süre (Dk)"].sum()
             with col:
                 st.markdown(f'''
-                <div class="metric-card-ondo" style="min-height: 120px; padding: 18px;">
+                <div class="metric-card-ondo reveal-box" style="min-height: 120px; padding: 18px;">
                     <div class="metric-title">BÜYÜK VİDEO ({periyot.upper()})</div>
                     <div class="metric-value" style="font-size: 28px;">{p_views:,}</div>
                     <div class="metric-sub">{p_likes} Beğeni | {p_time:.1f} Dk</div>
@@ -533,7 +603,7 @@ if "loaded" in st.session_state and st.session_state.loaded:
 
         col_g1, col_g2 = st.columns(2)
         with col_g1:
-            st.markdown('<div class="ondo-glass-card">', unsafe_allow_html=True)
+            st.markdown('<div class="ondo-glass-card reveal-box">', unsafe_allow_html=True)
             st.write("### 📊 İçerik Türüne Göre İzlenme Dağılımı")
             fig_bar = px.bar(
                 df_grouped, 
@@ -549,7 +619,7 @@ if "loaded" in st.session_state and st.session_state.loaded:
             st.markdown('</div>', unsafe_allow_html=True)
 
         with col_g2:
-            st.markdown('<div class="ondo-glass-card">', unsafe_allow_html=True)
+            st.markdown('<div class="ondo-glass-card reveal-box">', unsafe_allow_html=True)
             st.write("### 📈 Beğeni ve Etkileşim Trendi")
             fig_line = px.line(
                 df_grouped.sort_values("Yayın Tarihi"), 
@@ -565,8 +635,8 @@ if "loaded" in st.session_state and st.session_state.loaded:
             st.markdown('</div>', unsafe_allow_html=True)
 
     elif current_tab == "Gelen Yorumlar":
-        st.markdown('<div class="ondo-glass-card">', unsafe_allow_html=True)
-        st.write("### 💬 YouTube Kanalı Canlı Yorum Yönetim Merkezi")
+        st.markdown('<div class="ondo-glass-card reveal-box">', unsafe_allow_html=True)
+        st.write("### 💬 YouTube Kanalı Geçmişe Dayalı Canlı Yorum Yönetim Merkezi")
         
         if not df_comments.empty:
             filter_choice = st.radio("Yorum Durumu Filtresi", ["Tümü", "Cevap Bekliyor", "Cevaplanan"], horizontal=True)
@@ -584,14 +654,14 @@ if "loaded" in st.session_state and st.session_state.loaded:
         st.markdown('</div>', unsafe_allow_html=True)
 
     elif current_tab == "Detaylı Analiz":
-        st.markdown('<div class="ondo-glass-card">', unsafe_allow_html=True)
+        st.markdown('<div class="ondo-glass-card reveal-box">', unsafe_allow_html=True)
         st.write("### 🔍 Tüm İçeriklerin Tür ve Periyot Arşivi")
         df_show = df[["Video Başlığı", "Yayın Tarihi", "Tür", "Periyot", "İzlenme", "Beğeni", "Yorum", "Süre (Dk)"]]
         st.dataframe(df_show, use_container_width=True)
         st.markdown('</div>', unsafe_allow_html=True)
 
     elif current_tab == "AI Strateji Raporu":
-        st.markdown('<div class="ondo-glass-card">', unsafe_allow_html=True)
+        st.markdown('<div class="ondo-glass-card reveal-box">', unsafe_allow_html=True)
         st.write("### 🤖 Profesyonel Kripto & Kanal Büyüme Raporu (Ağustos 2026)")
         with st.spinner("Kanal verileri ve Ağustos 2026 kripto trendleri Llama 3.3 motoru ile sentezleniyor..."):
             client = Groq(api_key=st.session_state.groq_key)
