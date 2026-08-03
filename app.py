@@ -47,7 +47,7 @@ def parse_iso8601_duration_seconds(duration_str):
     seconds = int(match.group(3)) if match.group(3) else 0
     return hours * 3600 + minutes * 60 + seconds
 
-# 2. Gelişmiş Tasarım Mimarisi (CSS)
+# 2. Gelişmiş Cam Efektli Tasarım Mimarisi (CSS)
 st.markdown(f"""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&display=swap');
@@ -162,6 +162,26 @@ st.markdown(f"""
         color: #d4af37; 
         margin-top: 6px;
         font-weight: 600;
+    }}
+
+    /* --- DETAYLI ANALİZ TABLOSU İÇİN CAM EFEKTLİ HOVER KAPSAYICI --- */
+    .glass-table-container {{
+        background: rgba(17, 24, 39, 0.75);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 24px;
+        padding: 24px;
+        box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.7);
+        transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        position: relative;
+        overflow: hidden;
+        margin-top: 20px;
+    }}
+    .glass-table-container:hover {{
+        transform: translateY(-6px) scale(1.01);
+        border-color: rgba(212, 175, 55, 0.7);
+        box-shadow: 0 30px 70px -15px rgba(212, 175, 55, 0.35), 0 0 35px rgba(212, 175, 55, 0.25);
     }}
 
     section[data-testid="stSidebar"] {{
@@ -302,9 +322,15 @@ if analyze_btn:
                     comments = int(stats.get('commentCount', 0))
                     
                     duration_iso = content.get('duration', 'PT0M')
-                    duration_sec = parse_iso8601_duration_seconds(duration_iso)
+                    match = re.match(r'PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?', duration_iso)
+                    duration_sec = 0
+                    if match:
+                        h = int(match.group(1)) if match.group(1) else 0
+                        m = int(match.group(2)) if match.group(2) else 0
+                        s = int(match.group(3)) if match.group(3) else 0
+                        duration_sec = h * 3600 + m * 60 + s
+                    
                     duration_min = round(duration_sec / 60, 2)
-
                     content_type = "Shorts" if duration_sec <= 60 else "Büyük Video"
 
                     delta = now - published_dt
@@ -473,7 +499,6 @@ if "loaded" in st.session_state and st.session_state.loaded:
 
         st.markdown("<br>", unsafe_allow_html=True)
         
-        # Grafikler için verileri tarihe ve türe göre grupluyoruz (Grouping)
         df_grouped = df.groupby(["Yayın Tarihi", "Tür"], as_index=False)[["İzlenme", "Beğeni"]].sum()
 
         col_g1, col_g2 = st.columns(2)
@@ -508,7 +533,11 @@ if "loaded" in st.session_state and st.session_state.loaded:
     elif current_tab == "Detaylı Analiz":
         st.write("### 🔍 Tüm İçeriklerin Tür ve Periyot Arşivi")
         df_show = df[["Video Başlığı", "Yayın Tarihi", "Tür", "Periyot", "İzlenme", "Beğeni", "Yorum", "Süre (Dk)"]]
+        
+        # TABLOYU CAM EFEKTLİ ÖZEL KUTU İÇERİSİNE ALIYORUZ
+        st.markdown('<div class="glass-table-container">', unsafe_allow_html=True)
         st.dataframe(df_show, use_container_width=True)
+        st.markdown('</div>', unsafe_allow_html=True)
 
     elif current_tab == "AI Strateji Raporu":
         st.write("### 🤖 Profesyonel Kripto & Kanal Büyüme Raporu (Ağustos 2026)")
@@ -516,7 +545,7 @@ if "loaded" in st.session_state and st.session_state.loaded:
             client = Groq(api_key=st.session_state.groq_key)
             
             prompt = f"""
-            Sen kurumsal düzeyde Web3, kripto varlık ve YouTube kanal büyüme stratejisi geliştiren üst düzey bir analistsin.
+            Sen kurumsal düzeyde Web3, kripto varlık ve kanal büyüme stratejisi geliştiren üst düzey bir analistsin.
             Mevcut Tarih: Ağustos 2026.
             Kanal Adı: {ch_title}
             Toplam İzlenme: {total_views} | Abone Sayısı: {subscribers} | Toplam Video: {total_videos}
