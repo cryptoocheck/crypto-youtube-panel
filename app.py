@@ -36,7 +36,7 @@ possible_files = ["bg2.jpg.jpg", "bg2.jpg", "bg.jpg"]
 banner_file = next((f for f in possible_files if os.path.exists(f)), None)
 img_b64 = get_img_as_base64(banner_file) if banner_file else None
 
-# 2. Daha da Aşağıya İndirilmiş Kusursuz Banner Mimarisi (CSS)
+# 2. Gereksiz Boş Kutuları Kaldırılmış Tasarım Mimarisi (CSS)
 st.markdown(f"""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&display=swap');
@@ -64,7 +64,7 @@ st.markdown(f"""
         max-width: 100% !important;
     }}
 
-    /* --- 1.5 KAT DAHA AŞAĞI İNDİRİLMİŞ ÇERÇEVELİ BANNER --- */
+    /* --- BANNER --- */
     .absolute-center-banner {{
         display: flex;
         justify-content: center;
@@ -101,26 +101,6 @@ st.markdown(f"""
         border-radius: 16px;
         display: block;
         margin: 0 auto;
-    }}
-
-    /* Grafik ve İçerik Kutuları */
-    .ondo-glass-card {{
-        background: rgba(17, 24, 39, 0.7);
-        backdrop-filter: blur(16px);
-        -webkit-backdrop-filter: blur(16px);
-        border: 1px solid rgba(255, 255, 255, 0.07);
-        border-radius: 24px;
-        padding: 30px;
-        margin-bottom: 24px;
-        box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.7);
-        transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-        position: relative;
-        overflow: hidden;
-    }}
-    .ondo-glass-card:hover {{
-        transform: translateY(-6px) scale(1.01);
-        border-color: rgba(212, 175, 55, 0.7);
-        box-shadow: 0 30px 70px -15px rgba(212, 175, 55, 0.35), 0 0 35px rgba(212, 175, 55, 0.25);
     }}
 
     /* Üst Metrik Kartları */
@@ -423,7 +403,6 @@ if "loaded" in st.session_state and st.session_state.loaded:
         col_left, col_right = st.columns([2, 1])
         
         with col_left:
-            st.markdown('<div class="ondo-glass-card">', unsafe_allow_html=True)
             st.write("### İzlenme ve Etkileşim Dağılımı")
             fig = px.scatter(
                 df, 
@@ -442,10 +421,8 @@ if "loaded" in st.session_state and st.session_state.loaded:
                 font=dict(family="Plus Jakarta Sans, sans-serif", color="#d1d5db")
             )
             st.plotly_chart(fig, use_container_width=True)
-            st.markdown('</div>', unsafe_allow_html=True)
 
         with col_right:
-            st.markdown('<div class="ondo-glass-card">', unsafe_allow_html=True)
             st.write("### İzleyici Etkileşim Oranı")
             avg_likes = df['Beğeni'].mean()
             avg_comments = df['Yorum'].mean()
@@ -463,19 +440,15 @@ if "loaded" in st.session_state and st.session_state.loaded:
                 font=dict(family="Plus Jakarta Sans, sans-serif", color="#d1d5db")
             )
             st.plotly_chart(fig_pie, use_container_width=True)
-            st.markdown('</div>', unsafe_allow_html=True)
 
     elif current_tab == "Detaylı Analiz":
-        st.markdown('<div class="ondo-glass-card">', unsafe_allow_html=True)
         st.write("### Video Performans Kayıtları")
         st.dataframe(
             df,
             use_container_width=True
         )
-        st.markdown('</div>', unsafe_allow_html=True)
 
     elif current_tab == "AI Strateji Raporu":
-        st.markdown('<div class="ondo-glass-card">', unsafe_allow_html=True)
         st.write("### 🤖 Stratejik Yönetici Özeti")
         with st.spinner("Web3 finans modelleri Llama 3.3 Motoru ile analiz ediliyor..."):
             client = Groq(api_key=st.session_state.groq_key)
@@ -499,7 +472,6 @@ if "loaded" in st.session_state and st.session_state.loaded:
             )
 
             st.markdown(chat_completion.choices[0].message.content)
-        st.markdown('</div>', unsafe_allow_html=True)
 
 else:
     st.info("👈 Sol üstteki küçük oka tıklayarak kontrol panelini açabilir ve 'Canlı Verileri Getir' butonuna basabilirsiniz.")
