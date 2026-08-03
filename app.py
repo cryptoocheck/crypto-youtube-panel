@@ -24,7 +24,7 @@ if "channel_id" not in st.session_state:
 if "active_tab" not in st.session_state:
     st.session_state.active_tab = "Performans Matrisi"
 
-# 2. Kesin Çözüm: bg2.jpg ve Tüm Arayüz Mimarisi (CSS)
+# 2. Kesin Çözüm: bg2.jpg.jpg ve Tüm Arayüz Mimarisi (CSS)
 st.markdown(f"""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&display=swap');
@@ -52,7 +52,7 @@ st.markdown(f"""
         max-width: 100% !important;
     }}
 
-    /* --- bg2.jpg Banner Çerçevesi ve Hover Parıltısı --- */
+    /* --- Banner Çerçevesi ve Hover Parıltısı --- */
     .banner-container-box {{
         background: rgba(17, 24, 39, 0.6);
         backdrop-filter: blur(16px);
@@ -209,10 +209,12 @@ st.markdown(f"""
 </style>
 """, unsafe_allow_html=True)
 
-# --- BANNER (bg2.jpg Kesin Çözüm) ---
-if os.path.exists("bg2.jpg"):
+# --- BANNER (bg2.jpg.jpg Doğru Yol Eşleşmesi) ---
+banner_file = "bg2.jpg.jpg" if os.path.exists("bg2.jpg.jpg") else "bg2.jpg" if os.path.exists("bg2.jpg") else "bg.jpg"
+
+if os.path.exists(banner_file):
     st.markdown('<div class="banner-container-box">', unsafe_allow_html=True)
-    st.image("bg2.jpg", use_container_width=True)
+    st.image(banner_file, use_container_width=True)
     st.markdown('</div>', unsafe_allow_html=True)
 else:
     st.markdown("<h1 style='text-align: center; font-weight: 800; font-size: 48px; letter-spacing: -1px;'>Crypto Check</h1>", unsafe_allow_html=True)
@@ -230,7 +232,7 @@ if analyze_btn:
         st.error("Lütfen sol paneldeki tüm erişim anahtarlarını eksiksiz girin.")
     else:
         try:
-            with st.spinner("Onchain ve YouTube verileri senkronize ediliyor..."):
+            with st.spinner("Onchain and YouTube verileri senkronize ediliyor..."):
                 youtube = build('youtube', 'v3', developerKey=st.session_state.youtube_key)
                 
                 ch_req = youtube.channels().list(
