@@ -300,7 +300,6 @@ if analyze_btn:
                     
                     engagement_rate = ((likes + comments) / views * 100) if views > 0 else 0
                     
-                    # Süre analizi (Yerel Regex Dönüşümü)
                     duration_iso = content.get('duration', 'PT0M')
                     duration_min = parse_iso8601_duration(duration_iso)
 
@@ -347,13 +346,15 @@ if "loaded" in st.session_state and st.session_state.loaded:
     ch_title = st.session_state.ch_title
     df = st.session_state.df
 
-    # Güvenlik Kontrolü
+    # Güvenlik Kontrolü: Eksik sütunları otomatik tamamla
     if "Tahmini CTR (%)" not in df.columns:
         df["Tahmini CTR (%)"] = 6.5
     if "Süre (Dk)" not in df.columns:
         df["Süre (Dk)"] = 5.0
     if "Abone Dönüşüm (%)" not in df.columns:
         df["Abone Dönüşüm (%)"] = 1.2
+    if "Çözünürlük" not in df.columns:
+        df["Çözünürlük"] = "HD"
 
     # Üst Metrik Kartları
     c1, c2, c3, c4 = st.columns(4)
