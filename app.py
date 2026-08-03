@@ -47,7 +47,7 @@ def parse_iso8601_duration_seconds(duration_str):
     seconds = int(match.group(3)) if match.group(3) else 0
     return hours * 3600 + minutes * 60 + seconds
 
-# 2. Tam Merkezlenmiş Cam Tasarım Mimarisi (CSS)
+# 2. Kaydırma Efektli (Fade-in & Slide-up) Gelişmiş Cam Tasarım Mimarisi (CSS)
 st.markdown(f"""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&display=swap');
@@ -75,6 +75,22 @@ st.markdown(f"""
         max-width: 100% !important;
     }}
 
+    /* --- AŞAĞIDAN SÜZÜLEREK GELME ANİMASYONU (FADE-IN & SLIDE-UP) --- */
+    @keyframes fadeInUp {{
+        0% {{
+            opacity: 0;
+            transform: translateY(40px) scale(0.98);
+        }}
+        100% {{
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }}
+    }}
+
+    .animated-box {{
+        animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }}
+
     /* --- BANNER --- */
     .absolute-center-banner {{
         display: flex;
@@ -83,6 +99,7 @@ st.markdown(f"""
         width: 100%;
         margin-top: 120px;
         margin-bottom: 25px;
+        animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }}
     .banner-ondo-box {{
         background: rgba(17, 24, 39, 0.75);
@@ -114,7 +131,7 @@ st.markdown(f"""
         margin: 0 auto;
     }}
 
-    /* --- KUTULARIN İÇİNİ TAM MERKEZE HİZALAYAN FLEX MİMARİSİ --- */
+    /* --- MERKEZLENMİŞ VE ANİMASYONLU KUTULAR --- */
     .metric-card-ondo, .ondo-glass-card {{
         background: rgba(17, 24, 39, 0.75);
         backdrop-filter: blur(16px);
@@ -131,6 +148,7 @@ st.markdown(f"""
         text-align: center;
         min-height: 140px;
         transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }}
     .metric-card-ondo:hover, .ondo-glass-card:hover {{
         transform: translateY(-6px) scale(1.01);
@@ -179,6 +197,7 @@ st.markdown(f"""
         padding: 15px !important;
         box-shadow: 0 15px 35px -10px rgba(0, 0, 0, 0.5) !important;
         transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1) !important;
+        animation: fadeInUp 0.9s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }}
     .stDataFrame:hover {{
         transform: translateY(-4px) scale(1.005);
@@ -467,7 +486,9 @@ if "loaded" in st.session_state and st.session_state.loaded:
     current_tab = st.session_state.active_tab
 
     if current_tab == "Performans Matrisi":
+        st.markdown('<div class="animated-box">', unsafe_allow_html=True)
         st.write("### ⚡ Shorts ve Büyük Video Karşılaştırmalı Periyot Analizi")
+        st.markdown('</div>', unsafe_allow_html=True)
         
         shorts_df = df[df["Tür"] == "Shorts"]
         long_df = df[df["Tür"] == "Büyük Video"]
