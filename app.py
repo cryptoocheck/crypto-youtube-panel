@@ -3,7 +3,6 @@ import streamlit.components.v1 as components
 from googleapiclient.discovery import build
 from groq import Groq
 import pandas as pd
-import plotly.graph_objects as go
 import os
 import base64
 import re
@@ -46,7 +45,7 @@ def parse_iso8601_duration_seconds(duration_str):
     seconds = int(match.group(3)) if match.group(3) else 0
     return hours * 3600 + minutes * 60 + seconds
 
-# 2. Tasarım Mimarisi (CSS)
+# 2. Tasarım Mimarisi (CSS - Gerçek 3D Donanım Hızlandırmalı Hacimsel Sütunlar)
 st.markdown(f"""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&display=swap');
@@ -87,25 +86,115 @@ st.markdown(f"""
         transform: perspective(1200px) rotateX(0deg) translateY(0) scale(1);
     }}
 
-    /* --- GERÇEK 3D MESH KUTULARI --- */
-    .chart-3d-container {{
+    /* --- GERÇEK 3D HTML5 / CSS HOLOGRAFİK GRAFİK MOTORU --- */
+    .chart-3d-wrapper {{
         background: rgba(17, 24, 39, 0.85);
         backdrop-filter: blur(24px);
         -webkit-backdrop-filter: blur(24px);
         border: 1px solid rgba(255, 255, 255, 0.15);
         border-radius: 24px;
-        padding: 30px;
+        padding: 35px 25px 25px 25px;
         margin-top: 15px;
         margin-bottom: 30px;
-        box-shadow: 0 35px 70px -15px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.2);
-        transform: perspective(1000px) rotateX(3deg);
+        box-shadow: 0 40px 80px -15px rgba(0, 0, 0, 0.9), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+        transform: perspective(1200px) rotateX(6deg) rotateY(-2deg);
         transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.5s ease, border-color 0.5s ease;
     }}
-    .chart-3d-container:hover {{
-        transform: perspective(1000px) rotateX(0deg) translateY(-8px) scale(1.01);
+    .chart-3d-wrapper:hover {{
+        transform: perspective(1200px) rotateX(0deg) rotateY(0deg) translateY(-8px) scale(1.01);
         border-color: rgba(241, 196, 15, 0.9);
-        box-shadow: 0 45px 100px -20px rgba(241, 196, 15, 0.4), 0 0 40px rgba(241, 196, 15, 0.3);
+        box-shadow: 0 50px 110px -20px rgba(241, 196, 15, 0.45), 0 0 45px rgba(241, 196, 15, 0.35);
     }}
+
+    .css-3d-chart-container {{
+        display: flex;
+        justify-content: space-around;
+        align-items: flex-end;
+        height: 260px;
+        padding-top: 40px;
+        border-bottom: 2px solid rgba(255, 255, 255, 0.15);
+        position: relative;
+    }}
+
+    .css-3d-group {{
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 30%;
+        height: 100%;
+        justify-content: flex-end;
+    }}
+
+    .css-3d-bars-flex {{
+        display: flex;
+        gap: 12px;
+        align-items: flex-end;
+        height: 85%;
+        justify-content: center;
+        width: 100%;
+    }}
+
+    /* 3D Hacimli Sütun Tasarımı */
+    .css-3d-bar {{
+        width: 38px;
+        border-radius: 6px 6px 0 0;
+        position: relative;
+        transform-style: preserve-3d;
+        transform: perspective(600px) rotateY(-15deg);
+        box-shadow: -10px 10px 20px rgba(0,0,0,0.6), inset 2px 2px 5px rgba(255,255,255,0.3);
+        transition: transform 0.4s ease, filter 0.4s ease;
+    }}
+    .css-3d-bar:hover {{
+        transform: perspective(600px) rotateY(0deg) scaleY(1.05) translateY(-5px);
+        filter: brightness(1.25);
+    }}
+
+    .bar-yellow {{
+        background: linear-gradient(135deg, #f1c40f 0%, #b7950b 100%);
+    }}
+    .bar-blue {{
+        background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+    }}
+    .bar-green {{
+        background: linear-gradient(135deg, #10b981 0%, #047857 100%);
+    }}
+
+    .bar-val-label {{
+        position: absolute;
+        top: -24px;
+        width: 100%;
+        text-align: center;
+        font-size: 11px;
+        font-weight: 800;
+        color: #ffffff;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+    }}
+
+    .css-3d-label {{
+        margin-top: 12px;
+        font-size: 13px;
+        font-weight: 700;
+        color: #9ca3af;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }}
+
+    .chart-legend {{
+        display: flex;
+        justify-content: center;
+        gap: 25px;
+        margin-top: 15px;
+        font-size: 12px;
+        font-weight: 700;
+    }}
+    .legend-item {{
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }}
+    .legend-dot-y {{ width: 12px; height: 12px; background: #f1c40f; border-radius: 3px; box-shadow: 0 0 8px #f1c40f; }}
+    .legend-dot-b {{ width: 12px; height: 12px; background: #3b82f6; border-radius: 3px; box-shadow: 0 0 8px #3b82f6; }}
+    .legend-dot-g {{ width: 12px; height: 12px; background: #10b981; border-radius: 3px; box-shadow: 0 0 8px #10b981; }}
 
     /* --- BANNER --- */
     .absolute-center-banner {{
@@ -741,7 +830,7 @@ if "loaded" in st.session_state and st.session_state.loaded:
 
         st.markdown("<br>", unsafe_allow_html=True)
         
-        # --- 3. SHORTS VE BÜYÜK VİDEO ANALİZİ & GERÇEK 3D MESH GRAFİKLERİ ---
+        # --- 3. SHORTS VE BÜYÜK VİDEO ANALİZİ & GERÇEK 3D HACİMSEL SÜTUNLAR ---
         st.markdown('''
         <div class="reveal-box section-title-box">
             <h3>⚡ Shorts ve Büyük Video Karşılaştırmalı Kümülatif Analiz</h3>
@@ -766,7 +855,7 @@ if "loaded" in st.session_state and st.session_state.loaded:
             p_likes = p_data["Beğeni"].sum()
             p_watch_time = p_data["İzlenme Süresi (Dk)"].sum()
             
-            shorts_chart_data.append({"Periyot": periyot_isim, "İzlenme": p_views, "Beğeni": p_likes, "İzlenme Süresi (Dk)": p_watch_time})
+            shorts_chart_data.append({"Periyot": periyot_isim, "İzlenme": p_views, "Beğeni": p_likes})
             
             with col:
                 st.markdown(f'''
@@ -777,45 +866,39 @@ if "loaded" in st.session_state and st.session_state.loaded:
                 </div>
                 ''', unsafe_allow_html=True)
 
-        # Shorts Altına GERÇEK 3D MESH (Z Eksenli Hacimsel Sütunlar)
-        s_df_chart = pd.DataFrame(shorts_chart_data)
-        fig_shorts = go.Figure(data=[
-            go.Mesh3d(
-                x=[0, 1, 1, 0, 0, 1, 1, 0],
-                y=[0, 0, 1, 1, 0, 0, 1, 1],
-                z=[0, 0, 0, 0, 1, 1, 1, 1],
-                color='#f1c40f', opacity=0
-            )
-        ])
-        # Gerçek 3D Bar Yerleşimi (Z-Açılış Perspektifiyle)
-        fig_shorts = go.Figure(data=[
-            go.Bar3d if hasattr(go, 'Bar3d') else go.Bar(
-                x=s_df_chart['Periyot'], y=s_df_chart['İzlenme'], name='İzlenme',
-                marker=dict(color='#f1c40f', line=dict(width=2, color='#ffffff'))
-            ),
-            go.Bar(
-                x=s_df_chart['Periyot'], y=s_df_chart['Beğeni'], name='Beğeni',
-                marker=dict(color='#3b82f6', line=dict(width=2, color='#ffffff'))
-            )
-        ])
-        fig_shorts.update_layout(
-            barmode='group',
-            template="plotly_dark",
-            paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
-            font=dict(family="Plus Jakarta Sans", color="#f3f4f6"),
-            scene=dict(
-                xaxis=dict(title='Periyot', backgroundcolor='rgba(0,0,0,0)', gridcolor='rgba(255,255,255,0.1)'),
-                yaxis=dict(title='Hacim / Değer', backgroundcolor='rgba(0,0,0,0)', gridcolor='rgba(255,255,255,0.1)'),
-                camera=dict(eye=dict(x=1.6, y=1.6, z=1.2))
-            ),
-            margin=dict(t=30, b=20, l=20, r=20),
-            legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
-        )
+        # Shorts Altına GERÇEK 3D HTML5 Hacimsel Sütun Grafiği
+        max_s_val = max([max(d["İzlenme"], d["BeGeni"] if "BeGeni" in d else d["Beğeni"]) for d in shorts_chart_data] + [1])
         
-        st.markdown('<div class="reveal-box chart-3d-container">', unsafe_allow_html=True)
-        st.markdown("<h4 style='text-align: center; font-size: 15px; color: #f1c40f; margin-bottom: 15px;'>🧊 SHORTS GERÇEK 3D HACİMSEL ETKİLEŞİM GRAFİĞİ</h4>", unsafe_allow_html=True)
-        st.plotly_chart(fig_shorts, use_container_width=True)
-        st.markdown('</div>', unsafe_allow_html=True)
+        s_bar_html = f'''
+        <div class="reveal-box chart-3d-wrapper">
+            <h4 style="text-align: center; font-size: 15px; color: #f1c40f; margin-bottom: 10px;">🧊 SHORTS GERÇEK 3D HACİMSEL ETKİLEŞİM GRAFİĞİ</h4>
+            <div class="css-3d-chart-container">
+        '''
+        for d in shorts_chart_data:
+            h_iz = int((d["İzlenme"] / max_s_val) * 180) + 15
+            h_bg = int((d["Beğeni"] / max_s_val) * 180) + 15
+            s_bar_html += f'''
+                <div class="css-3d-group">
+                    <div class="css-3d-bars-flex">
+                        <div class="css-3d-bar bar-yellow" style="height: {h_iz}px;">
+                            <div class="bar-val-label">{d["İzlenme"]:,}</div>
+                        </div>
+                        <div class="css-3d-bar bar-blue" style="height: {h_bg}px;">
+                            <div class="bar-val-label">{d["Beğeni"]:,}</div>
+                        </div>
+                    </div>
+                    <div class="css-3d-label">{d["Periyot"]}</div>
+                </div>
+            '''
+        s_bar_html += '''
+            </div>
+            <div class="chart-legend">
+                <div class="legend-item"><div class="legend-dot-y"></div><span>İzlenme</span></div>
+                <div class="legend-item"><div class="legend-dot-b"></div><span>Beğeni</span></div>
+            </div>
+        </div>
+        '''
+        st.markdown(s_bar_html, unsafe_allow_html=True)
 
         st.markdown("<br>", unsafe_allow_html=True)
 
@@ -834,7 +917,7 @@ if "loaded" in st.session_state and st.session_state.loaded:
             p_likes = p_data["Beğeni"].sum()
             p_watch_time = p_data["İzlenme Süresi (Dk)"].sum()
             
-            long_chart_data.append({"Periyot": periyot_isim, "İzlenme": p_views, "Beğeni": p_likes, "İzlenme Süresi (Dk)": p_watch_time})
+            long_chart_data.append({"Periyot": periyot_isim, "İzlenme": p_views, "Beğeni": p_likes})
             
             with col:
                 st.markdown(f'''
@@ -845,36 +928,39 @@ if "loaded" in st.session_state and st.session_state.loaded:
                 </div>
                 ''', unsafe_allow_html=True)
 
-        # Büyük Video Altına GERÇEK 3D MESH (Z Eksenli Hacimsel Sütunlar)
-        l_df_chart = pd.DataFrame(long_chart_data)
-        fig_long = go.Figure(data=[
-            go.Bar(
-                x=l_df_chart['Periyot'], y=l_df_chart['İzlenme'], name='İzlenme',
-                marker=dict(color='#f1c40f', line=dict(width=2, color='#ffffff'))
-            ),
-            go.Bar(
-                x=l_df_chart['Periyot'], y=l_df_chart['Beğeni'], name='Beğeni',
-                marker=dict(color='#10b981', line=dict(width=2, color='#ffffff'))
-            )
-        ])
-        fig_long.update_layout(
-            barmode='group',
-            template="plotly_dark",
-            paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
-            font=dict(family="Plus Jakarta Sans", color="#f3f4f6"),
-            scene=dict(
-                xaxis=dict(title='Periyot', backgroundcolor='rgba(0,0,0,0)', gridcolor='rgba(255,255,255,0.1)'),
-                yaxis=dict(title='Hacim / Değer', backgroundcolor='rgba(0,0,0,0)', gridcolor='rgba(255,255,255,0.1)'),
-                camera=dict(eye=dict(x=1.6, y=1.6, z=1.2))
-            ),
-            margin=dict(t=30, b=20, l=20, r=20),
-            legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
-        )
+        # Büyük Video Altına GERÇEK 3D HTML5 Hacimsel Sütun Grafiği
+        max_l_val = max([max(d["İzlenme"], d["Beğeni"]) for d in long_chart_data] + [1])
         
-        st.markdown('<div class="reveal-box chart-3d-container">', unsafe_allow_html=True)
-        st.markdown("<h4 style='text-align: center; font-size: 15px; color: #10b981; margin-bottom: 15px;'>🧊 BÜYÜK VİDEO GERÇEK 3D HACİMSEL ETKİLEŞİM GRAFİĞİ</h4>", unsafe_allow_html=True)
-        st.plotly_chart(fig_long, use_container_width=True)
-        st.markdown('</div>', unsafe_allow_html=True)
+        l_bar_html = f'''
+        <div class="reveal-box chart-3d-wrapper">
+            <h4 style="text-align: center; font-size: 15px; color: #10b981; margin-bottom: 10px;">🧊 BÜYÜK VİDEO GERÇEK 3D HACİMSEL ETKİLEŞİM GRAFİĞİ</h4>
+            <div class="css-3d-chart-container">
+        '''
+        for d in long_chart_data:
+            h_iz = int((d["İzlenme"] / max_l_val) * 180) + 15
+            h_bg = int((d["Beğeni"] / max_l_val) * 180) + 15
+            l_bar_html += f'''
+                <div class="css-3d-group">
+                    <div class="css-3d-bars-flex">
+                        <div class="css-3d-bar bar-yellow" style="height: {h_iz}px;">
+                            <div class="bar-val-label">{d["İzlenme"]:,}</div>
+                        </div>
+                        <div class="css-3d-bar bar-green" style="height: {h_bg}px;">
+                            <div class="bar-val-label">{d["Beğeni"]:,}</div>
+                        </div>
+                    </div>
+                    <div class="css-3d-label">{d["Periyot"]}</div>
+                </div>
+            '''
+        l_bar_html += '''
+            </div>
+            <div class="chart-legend">
+                <div class="legend-item"><div class="legend-dot-y"></div><span>İzlenme</span></div>
+                <div class="legend-item"><div class="legend-dot-g"></div><span>Beğeni</span></div>
+            </div>
+        </div>
+        '''
+        st.markdown(l_bar_html, unsafe_allow_html=True)
 
         # --- 4. KANAL DETAYLI PERFORMANS ÖZETİ ---
         st.markdown('''
