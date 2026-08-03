@@ -33,7 +33,7 @@ def get_img_as_base64(file_path):
 img_path = "bg2.jpg" if os.path.exists("bg2.jpg") else "bg.jpg" if os.path.exists("bg.jpg") else "bg.jpg.jpg" if os.path.exists("bg.jpg.jpg") else "photo_6014965432080600852_y (1).jpg" if os.path.exists("photo_6014965432080600852_y (1).jpg") else ""
 img_b64 = get_img_as_base64(img_path)
 
-# 2. İşaretlediğin Alanlara Tam Oturan Profesyonel Sekme Mimarisi (CSS)
+# 2. Ondo.Finance Tarzı ve 3 Eşit Parçaya Yayılan Butonçuk Sekme Mimarisi (CSS)
 st.markdown(f"""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
@@ -153,20 +153,23 @@ st.markdown(f"""
         transform: translateY(-2px);
     }}
 
-    /* --- İŞARETLEDİĞİN 3 ALANA TAM OTURAN BUTONÇUK SEKME MİMARİSİ --- */
+    /* Streamlit'in Varsayılan Sekmelerini Tamamen Tam Genişliğe ve İşaretlenen Alanlara Sabitleme */
+    .stTabs {{
+        width: 100% !important;
+    }}
     div[data-baseweb="tab-list"] {{
         display: grid !important;
         grid-template-columns: repeat(3, 1fr) !important;
         width: 100% !important;
-        max-width: 950px !important;
-        margin: 10px auto 30px auto !important;
+        max-width: 100% !important;
+        margin: 15px 0 30px 0 !important;
         background-color: rgba(17, 24, 39, 0.85) !important;
         padding: 8px !important;
         border-radius: 18px !important;
         border: 1px solid rgba(255, 255, 255, 0.08) !important;
         backdrop-filter: blur(12px) !important;
         box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6) !important;
-        gap: 8px !important;
+        gap: 10px !important;
     }}
 
     div[data-baseweb="tab"] {{
@@ -176,8 +179,8 @@ st.markdown(f"""
         border-radius: 14px !important;
         color: #9ca3af !important;
         font-weight: 700 !important;
-        font-size: 14px !important;
-        padding: 12px 16px !important;
+        font-size: 15px !important;
+        padding: 14px 20px !important;
         background: transparent !important;
         border: none !important;
         transition: all 0.3s ease !important;
@@ -320,7 +323,7 @@ if analyze_btn:
             </script>
             """, height=0)
 
-            # --- İŞARETLEDİĞİN 3 ALANA TAM YAYILAN SEKME MİMARİSİ ---
+            # --- 3 EŞİT PARÇAYA (SOL, ORTA, SAĞ) TAM YAYILAN SEKMELER ---
             t1, t2, t3 = st.tabs(["📊 Performans Matrisi", "🔍 Detaylı Analiz", "🤖 AI Strateji Raporu"])
 
             with t1:
