@@ -24,7 +24,7 @@ if "channel_id" not in st.session_state:
 if "active_tab" not in st.session_state:
     st.session_state.active_tab = "Performans Matrisi"
 
-# 2. Kesin Çözüm: bg2.jpg.jpg ve Tüm Arayüz Mimarisi (CSS)
+# 2. bg2.jpg.jpg Bannerına Cam ve Büyüme (Hover) Efekti Ekleyen Tasarım Mimarisi (CSS)
 st.markdown(f"""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&display=swap');
@@ -52,23 +52,25 @@ st.markdown(f"""
         max-width: 100% !important;
     }}
 
-    /* --- Banner Çerçevesi ve Hover Parıltısı --- */
+    /* --- BANNER İÇİN CAM VE BÜYÜME (HOVER) EFEKTİ --- */
     .banner-container-box {{
-        background: rgba(17, 24, 39, 0.6);
+        background: rgba(17, 24, 39, 0.7);
         backdrop-filter: blur(16px);
         -webkit-backdrop-filter: blur(16px);
-        border: 1px solid rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.08);
         border-radius: 24px;
         padding: 16px;
-        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), 0 0 35px rgba(212, 175, 55, 0.15);
+        box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.7);
         transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
         margin: 15px auto 25px auto;
         max-width: 1200px;
+        position: relative;
+        overflow: hidden;
     }}
     .banner-container-box:hover {{
-        transform: translateY(-4px) scale(1.01);
+        transform: translateY(-6px) scale(1.01);
         border-color: rgba(212, 175, 55, 0.7);
-        box-shadow: 0 30px 70px rgba(0, 0, 0, 0.9), 0 0 45px rgba(212, 175, 55, 0.35);
+        box-shadow: 0 30px 70px -15px rgba(212, 175, 55, 0.35), 0 0 35px rgba(212, 175, 55, 0.25);
     }}
 
     /* Grafik ve İçerik Kutuları */
@@ -209,7 +211,7 @@ st.markdown(f"""
 </style>
 """, unsafe_allow_html=True)
 
-# --- BANNER (bg2.jpg.jpg Doğru Yol Eşleşmesi) ---
+# --- BANNER (bg2.jpg.jpg - Cam ve Hover Efektli Kutu İçinde) ---
 banner_file = "bg2.jpg.jpg" if os.path.exists("bg2.jpg.jpg") else "bg2.jpg" if os.path.exists("bg2.jpg") else "bg.jpg"
 
 if os.path.exists(banner_file):
@@ -232,7 +234,7 @@ if analyze_btn:
         st.error("Lütfen sol paneldeki tüm erişim anahtarlarını eksiksiz girin.")
     else:
         try:
-            with st.spinner("Onchain and YouTube verileri senkronize ediliyor..."):
+            with st.spinner("Onchain ve YouTube verileri senkronize ediliyor..."):
                 youtube = build('youtube', 'v3', developerKey=st.session_state.youtube_key)
                 
                 ch_req = youtube.channels().list(
