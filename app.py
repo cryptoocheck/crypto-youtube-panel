@@ -47,7 +47,7 @@ def parse_iso8601_duration_seconds(duration_str):
     seconds = int(match.group(3)) if match.group(3) else 0
     return hours * 3600 + minutes * 60 + seconds
 
-# 2. Gelişmiş Cam Efektli Tasarım Mimarisi (CSS)
+# 2. Gelişmiş Web3 Tasarım Mimarisi & Tablo Stilleri (CSS)
 st.markdown(f"""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&display=swap');
@@ -114,26 +114,20 @@ st.markdown(f"""
         margin: 0 auto;
     }}
 
-    /* Üst Metrik Kartları */
-    .metric-card-ondo {{
+    /* Üst Metrik Kartları ve İçerik Kutuları İçin Cam Efekti & Hover */
+    .metric-card-ondo, .ondo-glass-card {{
         background: rgba(17, 24, 39, 0.75);
         backdrop-filter: blur(16px);
         -webkit-backdrop-filter: blur(16px);
-        border: 1px solid rgba(255, 255, 255, 0.07);
+        border: 1px solid rgba(255, 255, 255, 0.08);
         border-radius: 20px;
         padding: 28px 20px;
         margin-bottom: 20px;
         box-shadow: 0 15px 35px -10px rgba(0, 0, 0, 0.5);
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        text-align: center;
-        min-height: 140px;
         transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
     }}
-    .metric-card-ondo:hover {{
-        transform: translateY(-6px) scale(1.03);
+    .metric-card-ondo:hover, .ondo-glass-card:hover {{
+        transform: translateY(-6px) scale(1.01);
         border-color: rgba(212, 175, 55, 0.7);
         box-shadow: 0 25px 60px -12px rgba(212, 175, 55, 0.4), 0 0 25px rgba(212, 175, 55, 0.25);
     }}
@@ -164,24 +158,20 @@ st.markdown(f"""
         font-weight: 600;
     }}
 
-    /* --- DETAYLI ANALİZ TABLOSU İÇİN CAM EFEKTLİ HOVER KAPSAYICI --- */
-    .glass-table-container {{
-        background: rgba(17, 24, 39, 0.75);
-        backdrop-filter: blur(16px);
-        -webkit-backdrop-filter: blur(16px);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        border-radius: 24px;
-        padding: 24px;
-        box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.7);
-        transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-        position: relative;
-        overflow: hidden;
-        margin-top: 20px;
+    /* --- PROFESYONEL CAM TABLO STİLİ --- */
+    .stDataFrame {{
+        background: rgba(17, 24, 39, 0.75) !important;
+        backdrop-filter: blur(16px) !important;
+        border: 1px solid rgba(255, 255, 255, 0.08) !important;
+        border-radius: 20px !important;
+        padding: 15px !important;
+        box-shadow: 0 15px 35px -10px rgba(0, 0, 0, 0.5) !important;
+        transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1) !important;
     }}
-    .glass-table-container:hover {{
-        transform: translateY(-6px) scale(1.01);
-        border-color: rgba(212, 175, 55, 0.7);
-        box-shadow: 0 30px 70px -15px rgba(212, 175, 55, 0.35), 0 0 35px rgba(212, 175, 55, 0.25);
+    .stDataFrame:hover {{
+        transform: translateY(-4px) scale(1.005);
+        border-color: rgba(212, 175, 55, 0.7) !important;
+        box-shadow: 0 25px 60px -12px rgba(212, 175, 55, 0.3), 0 0 25px rgba(212, 175, 55, 0.2) !important;
     }}
 
     section[data-testid="stSidebar"] {{
@@ -322,15 +312,9 @@ if analyze_btn:
                     comments = int(stats.get('commentCount', 0))
                     
                     duration_iso = content.get('duration', 'PT0M')
-                    match = re.match(r'PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?', duration_iso)
-                    duration_sec = 0
-                    if match:
-                        h = int(match.group(1)) if match.group(1) else 0
-                        m = int(match.group(2)) if match.group(2) else 0
-                        s = int(match.group(3)) if match.group(3) else 0
-                        duration_sec = h * 3600 + m * 60 + s
-                    
+                    duration_sec = parse_iso8601_duration_seconds(duration_iso)
                     duration_min = round(duration_sec / 60, 2)
+
                     content_type = "Shorts" if duration_sec <= 60 else "Büyük Video"
 
                     delta = now - published_dt
@@ -484,7 +468,13 @@ if "loaded" in st.session_state and st.session_state.loaded:
             p_likes = p_data["Beğeni"].sum()
             p_time = p_data["Süre (Dk)"].sum()
             with col:
-                st.metric(label=f"Shorts ({periyot})", value=f"{p_views:,} İzlenme", delta=f"{p_likes} Beğeni | {p_time:.1f} Dk")
+                st.markdown(f'''
+                <div class="metric-card-ondo" style="min-height: 110px; padding: 18px;">
+                    <div class="metric-title">SHORTS ({periyot.upper()})</div>
+                    <div class="metric-value" style="font-size: 26px;">{p_views:,}</div>
+                    <div class="metric-sub">{p_likes} Beğeni | {p_time:.1f} Dk</div>
+                </div>
+                ''', unsafe_allow_html=True)
 
         st.markdown("<br>", unsafe_allow_html=True)
         st.markdown("#### 🖥️ Büyük Video (Long-form) İçerik Performansı")
@@ -495,7 +485,13 @@ if "loaded" in st.session_state and st.session_state.loaded:
             p_likes = p_data["Beğeni"].sum()
             p_time = p_data["Süre (Dk)"].sum()
             with col:
-                st.metric(label=f"Büyük Video ({periyot})", value=f"{p_views:,} İzlenme", delta=f"{p_likes} Beğeni | {p_time:.1f} Dk")
+                st.markdown(f'''
+                <div class="metric-card-ondo" style="min-height: 110px; padding: 18px;">
+                    <div class="metric-title">BÜYÜK VİDEO ({periyot.upper()})</div>
+                    <div class="metric-value" style="font-size: 26px;">{p_views:,}</div>
+                    <div class="metric-sub">{p_likes} Beğeni | {p_time:.1f} Dk</div>
+                </div>
+                ''', unsafe_allow_html=True)
 
         st.markdown("<br>", unsafe_allow_html=True)
         
@@ -503,6 +499,7 @@ if "loaded" in st.session_state and st.session_state.loaded:
 
         col_g1, col_g2 = st.columns(2)
         with col_g1:
+            st.markdown('<div class="ondo-glass-card">', unsafe_allow_html=True)
             st.write("### 📊 İçerik Türüne Göre İzlenme Dağılımı")
             fig_bar = px.bar(
                 df_grouped, 
@@ -515,8 +512,10 @@ if "loaded" in st.session_state and st.session_state.loaded:
             )
             fig_bar.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)')
             st.plotly_chart(fig_bar, use_container_width=True)
+            st.markdown('</div>', unsafe_allow_html=True)
 
         with col_g2:
+            st.markdown('<div class="ondo-glass-card">', unsafe_allow_html=True)
             st.write("### 📈 Beğeni ve Etkileşim Trendi")
             fig_line = px.line(
                 df_grouped.sort_values("Yayın Tarihi"), 
@@ -529,23 +528,23 @@ if "loaded" in st.session_state and st.session_state.loaded:
             )
             fig_line.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)')
             st.plotly_chart(fig_line, use_container_width=True)
+            st.markdown('</div>', unsafe_allow_html=True)
 
     elif current_tab == "Detaylı Analiz":
+        st.markdown('<div class="ondo-glass-card">', unsafe_allow_html=True)
         st.write("### 🔍 Tüm İçeriklerin Tür ve Periyot Arşivi")
         df_show = df[["Video Başlığı", "Yayın Tarihi", "Tür", "Periyot", "İzlenme", "Beğeni", "Yorum", "Süre (Dk)"]]
-        
-        # TABLOYU CAM EFEKTLİ ÖZEL KUTU İÇERİSİNE ALIYORUZ
-        st.markdown('<div class="glass-table-container">', unsafe_allow_html=True)
         st.dataframe(df_show, use_container_width=True)
         st.markdown('</div>', unsafe_allow_html=True)
 
     elif current_tab == "AI Strateji Raporu":
+        st.markdown('<div class="ondo-glass-card">', unsafe_allow_html=True)
         st.write("### 🤖 Profesyonel Kripto & Kanal Büyüme Raporu (Ağustos 2026)")
         with st.spinner("Kanal verileri ve Ağustos 2026 kripto trendleri Llama 3.3 motoru ile sentezleniyor..."):
             client = Groq(api_key=st.session_state.groq_key)
             
             prompt = f"""
-            Sen kurumsal düzeyde Web3, kripto varlık ve kanal büyüme stratejisi geliştiren üst düzey bir analistsin.
+            Sen kurumsal düzeyde Web3, kripto varlık ve YouTube kanal büyüme stratejisi geliştiren üst düzey bir analistsin.
             Mevcut Tarih: Ağustos 2026.
             Kanal Adı: {ch_title}
             Toplam İzlenme: {total_views} | Abone Sayısı: {subscribers} | Toplam Video: {total_videos}
@@ -564,6 +563,7 @@ if "loaded" in st.session_state and st.session_state.loaded:
             )
 
             st.markdown(chat_completion.choices[0].message.content)
+        st.markdown('</div>', unsafe_allow_html=True)
 
 else:
     st.info("👈 Sol üstteki küçük oka tıklayarak kontrol panelini açabilir ve 'Canlı Verileri Getir' butonuna basabilirsiniz.")
