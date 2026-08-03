@@ -8,6 +8,7 @@ import plotly.graph_objects as go
 import os
 import base64
 import re
+from datetime import datetime, timedelta
 
 # 1. Streamlit Sayfa Yapılandırması
 st.set_page_config(
@@ -37,17 +38,16 @@ possible_files = ["bg2.jpg.jpg", "bg2.jpg", "bg.jpg"]
 banner_file = next((f for f in possible_files if os.path.exists(f)), None)
 img_b64 = get_img_as_base64(banner_file) if banner_file else None
 
-def parse_iso8601_duration(duration_str):
+def parse_iso8601_duration_seconds(duration_str):
     match = re.match(r'PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?', duration_str)
     if not match:
-        return 0.0
+        return 0
     hours = int(match.group(1)) if match.group(1) else 0
     minutes = int(match.group(2)) if match.group(2) else 0
     seconds = int(match.group(3)) if match.group(3) else 0
-    total_seconds = hours * 3600 + minutes * 60 + seconds
-    return round(total_seconds / 60, 1)
+    return hours * 3600 + minutes * 60 + seconds
 
-# 2. Gelişmiş Web3 Tasarım Mimarisi (CSS)
+# 2. Gelişmiş Tasarım Mimarisi (CSS)
 st.markdown(f"""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&display=swap');
@@ -257,11 +257,11 @@ if analyze_btn:
         st.error("Lütfen sol paneldeki tüm erişim anahtarlarını eksiksiz girin.")
     else:
         try:
-            with st.spinner("YouTube API üzerinden TÜM meta veriler ve istatistikler çekiliyor..."):
+            with st.spinner("YouTube API üzerinden Shorts ve Büyük Video verileri analiz ediliyor..."):
                 youtube = build('youtube', 'v3', developerKey=st.session_state.youtube_key)
                 
                 ch_req = youtube.channels().list(
-                    part='statistics,snippet,contentDetails,brandingSettings',
+                    part='statistics,snippet,contentDetails',
                     id=st.session_state.channel_id
                 ).execute()
 
@@ -286,45 +286,52 @@ if analyze_btn:
                 ).execute()
 
                 v_list = []
+                now = datetime.utcnow()
+
                 for item in videos_req['items']:
                     snippet = item['snippet']
                     stats = item['statistics']
                     content = item['contentDetails']
-                    status = item['status']
 
                     title = snippet['title']
-                    published_at = snippet['publishedAt'][:10]
+                    published_str = snippet['publishedAt']
+                    published_dt = datetime.strptime(published_str[:19], "%Y-%m-%dT%H:%M:%S")
+                    
                     views = int(stats.get('viewCount', 0))
                     likes = int(stats.get('likeCount', 0))
                     comments = int(stats.get('commentCount', 0))
                     
-                    engagement_rate = ((likes + comments) / views * 100) if views > 0 else 0
-                    
                     duration_iso = content.get('duration', 'PT0M')
-                    duration_min = parse_iso8601_duration(duration_iso)
+                    duration_sec = parse_iso8601_duration_seconds(duration_iso)
+                    duration_min = round(duration_sec / 60, 2)
 
-                    definition = content.get('definition', 'sd').upper()
-                    tags_count = len(snippet.get('tags', []))
+                    # İçerik Türü Tespiti (60 sn altı Shorts, üstü Büyük Video)
+                    content_type = "Shorts" if duration_sec <= 60 else "Büyük Video"
 
-                    est_sub_conv = round((subscribers / max(total_views, 1)) * 100 + (engagement_rate * 0.2), 2)
-                    est_ctr = round(min(float(4.5 + (engagement_rate * 0.4)), 15.0), 2)
+                    # Zaman aralığı tespiti (Günlük, Haftalık, Aylık)
+                    delta = now - published_dt
+                    if delta.days <= 1:
+                        time_frame = "Günlük"
+                    elif delta.days <= 7:
+                        time_frame = "Haftalık"
+                    elif delta.days <= 30:
+                        time_frame = "Aylık"
+                    else:
+                        time_frame = "Arşiv"
 
                     v_list.append({
                         "Video Başlığı": title,
-                        "Yayın Tarihi": published_at,
+                        "Yayın Tarihi": published_str[:10],
+                        "Tür": content_type,
+                        "Periyot": time_frame,
                         "İzlenme": views,
                         "Beğeni": likes,
                         "Yorum": comments,
-                        "Etkileşim (%)": round(engagement_rate, 2),
-                        "Süre (Dk)": duration_min,
-                        "Çözünürlük": definition,
-                        "Etiket Sayısı": tags_count,
-                        "Abone Dönüşüm (%)": est_sub_conv,
-                        "Tahmini CTR (%)": est_ctr
+                        "Süre (Dk)": duration_min
                     })
 
                 df = pd.DataFrame(v_list)
-                avg_eng = float(df["Etkileşim (%)"].mean())
+                avg_eng = float(((df['Beğeni'] + df['Yorum']).sum() / max(df['İzlenme'].sum(), 1)) * 100)
                 
                 st.session_state.df = df
                 st.session_state.total_views = total_views
@@ -345,16 +352,6 @@ if "loaded" in st.session_state and st.session_state.loaded:
     avg_eng = st.session_state.avg_eng
     ch_title = st.session_state.ch_title
     df = st.session_state.df
-
-    # Güvenlik Kontrolü: Eksik sütunları otomatik tamamla
-    if "Tahmini CTR (%)" not in df.columns:
-        df["Tahmini CTR (%)"] = 6.5
-    if "Süre (Dk)" not in df.columns:
-        df["Süre (Dk)"] = 5.0
-    if "Abone Dönüşüm (%)" not in df.columns:
-        df["Abone Dönüşüm (%)"] = 1.2
-    if "Çözünürlük" not in df.columns:
-        df["Çözünürlük"] = "HD"
 
     # Üst Metrik Kartları
     c1, c2, c3, c4 = st.columns(4)
@@ -442,69 +439,72 @@ if "loaded" in st.session_state and st.session_state.loaded:
     current_tab = st.session_state.active_tab
 
     if current_tab == "Performans Matrisi":
-        st.write("### 📈 Derinlemesine Kanal & Algoritma Matrisi")
+        st.write("### ⚡ Shorts ve Büyük Video Karşılaştırmalı Periyot Analizi")
         
-        col_m1, col_m2, col_m3 = st.columns(3)
-        with col_m1:
-            st.metric(label="Ortalama Tahmini CTR", value=f"%{df['Tahmini CTR (%)'].mean():.2f}", delta="Hedef: >%6.0")
-        with col_m2:
-            st.metric(label="Ortalama Video Süresi", value=f"{df['Süre (Dk)'].mean():.1f} Dk", delta="Kanal Formatı")
-        with col_m3:
-            st.metric(label="Ortalama Abone Dönüşüm Oranı", value=f"%{df['Abone Dönüşüm (%)'].mean():.2f}", delta="Sadakat Skoru")
+        # Filtreleme için veri setini ayır
+        shorts_df = df[df["Tür"] == "Shorts"]
+        long_df = df[df["Tür"] == "Büyük Video"]
+
+        st.markdown("#### 📱 Shorts (Dikey) İçerik Performansı")
+        s_c1, s_c2, s_c3 = st.columns(3)
+        for periyot, col in zip(["Günlük", "Haftalık", "Aylık"], [s_c1, s_c2, s_c3]):
+            p_data = shorts_df[shorts_df["Periyot"] == periyot]
+            p_views = p_data["İzlenme"].sum()
+            p_likes = p_data["Beğeni"].sum()
+            p_time = p_data["Süre (Dk)"].sum()
+            with col:
+                st.metric(label=f"Shorts ({periyot})", value=f"{p_views:,} İzlenme", delta=f"{p_likes} Beğeni | {p_time:.1f} Dk")
 
         st.markdown("<br>", unsafe_allow_html=True)
-        col_left, col_right = st.columns([2, 1])
-        
-        with col_left:
-            st.write("### İzlenme ve Video Süresi Korelasyonu")
-            fig = px.scatter(
-                df, 
-                x="İzlenme", 
-                y="Süre (Dk)", 
-                size="Beğeni", 
-                hover_name="Video Başlığı",
-                color="Etkileşim (%)",
-                color_continuous_scale=px.colors.sequential.YlOrBr,
-                template="plotly_dark",
-                labels={"İzlenme": "Toplam İzlenme", "Süre (Dk)": "Video Süresi (Dakika)"}
-            )
-            fig.update_layout(
-                paper_bgcolor='rgba(0,0,0,0)',
-                plot_bgcolor='rgba(0,0,0,0)',
-                font=dict(family="Plus Jakarta Sans, sans-serif", color="#d1d5db")
-            )
-            st.plotly_chart(fig, use_container_width=True)
+        st.markdown("#### 🖥️ Büyük Video (Long-form) İçerik Performansı")
+        l_c1, l_c2, l_c3 = st.columns(3)
+        for periyot, col in zip(["Günlük", "Haftalık", "Aylık"], [l_c1, l_c2, l_c3]):
+            p_data = long_df[long_df["Periyot"] == periyot]
+            p_views = p_data["İzlenme"].sum()
+            p_likes = p_data["Beğeni"].sum()
+            p_time = p_data["Süre (Dk)"].sum()
+            with col:
+                st.metric(label=f"Büyük Video ({periyot})", value=f"{p_views:,} İzlenme", delta=f"{p_likes} Beğeni | {p_time:.1f} Dk")
 
-        with col_right:
-            st.write("### Video Çözünürlük Dağılımı")
-            res_counts = df['Çözünürlük'].value_counts().reset_index()
-            res_counts.columns = ['Çözünürlük', 'Adet']
-            
-            fig_pie = px.pie(
-                res_counts, 
-                names='Çözünürlük', 
-                values='Adet',
-                hole=0.65,
-                color_discrete_sequence=['#d4af37', '#1f2937', '#374151']
+        st.markdown("<br>", unsafe_allow_html=True)
+        
+        # Grafikler
+        col_g1, col_g2 = st.columns(2)
+        with col_g1:
+            st.write("### 📊 İçerik Türüne Göre İzlenme Dağılımı")
+            fig_bar = px.bar(
+                df, 
+                x="Yayın Tarihi", 
+                y="İzlenme", 
+                color="Tür",
+                barmode="group",
+                template="plotly_dark",
+                color_discrete_map={"Shorts": "#d4af37", "Büyük Video": "#1f2937"}
             )
-            fig_pie.update_layout(
-                paper_bgcolor='rgba(0,0,0,0)',
-                plot_bgcolor='rgba(0,0,0,0)',
-                showlegend=True,
-                font=dict(family="Plus Jakarta Sans, sans-serif", color="#d1d5db")
+            fig_bar.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)')
+            st.plotly_chart(fig_bar, use_container_width=True)
+
+        with col_g2:
+            st.write("### 📈 Beğeni ve Etkileşim Trendi")
+            fig_line = px.line(
+                df.sort_values("Yayın Tarihi"), 
+                x="Yayın Tarihi", 
+                y="Beğeni", 
+                color="Tür",
+                markers=True,
+                template="plotly_dark",
+                color_discrete_map={"Shorts": "#d4af37", "Büyük Video": "#3b82f6"}
             )
-            st.plotly_chart(fig_pie, use_container_width=True)
+            fig_line.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)')
+            st.plotly_chart(fig_line, use_container_width=True)
 
     elif current_tab == "Detaylı Analiz":
-        st.write("### 🔍 Tüm Meta Verileriyle Kapsamlı Video Arşivi")
-        st.dataframe(
-            df,
-            use_container_width=True
-        )
+        st.write("### 🔍 Tüm İçeriklerin Tür ve Periyot Arşivi")
+        st.dataframe(df, use_container_width=True)
 
     elif current_tab == "AI Strateji Raporu":
         st.write("### 🤖 Profesyonel Kripto & Kanal Büyüme Raporu (Ağustos 2026)")
-        with st.spinner("Kanalın tüm meta verileri ve Ağustos 2026 kripto trendleri Llama 3.3 motoru ile sentezleniyor..."):
+        with st.spinner("Kanal verileri ve Ağustos 2026 kripto trendleri Llama 3.3 motoru ile sentezleniyor..."):
             client = Groq(api_key=st.session_state.groq_key)
             
             prompt = f"""
@@ -512,15 +512,13 @@ if "loaded" in st.session_state and st.session_state.loaded:
             Mevcut Tarih: Ağustos 2026.
             Kanal Adı: {ch_title}
             Toplam İzlenme: {total_views} | Abone Sayısı: {subscribers} | Toplam Video: {total_videos}
-            Son Videoların Ortalama İzlenmesi: {df['İzlenme'].mean():.0f}
-            Ortalama Etkileşim Oranı: %{df['Etkileşim (%)'].mean():.2f}
-            Ortalama Video Süresi: {df['Süre (Dk)'].mean():.1f} Dakika
+            Shorts ve Büyük Video Performansları sisteme entegre edilmiştir.
 
             Lütfen kesinlikle Türkçe olarak, profesyonel yatırım fonu raporu formatında şu başlıkları detaylıca sun:
-            1. **Kanalın Kitle ve Etkileşim Sağlığı:** Mevcut meta verilerin (süreler, çözünürlükler, etkileşimler) profesyonel analizi.
-            2. **Ağustos 2026 Yüksek İzlenme Getirecek 3 Trend & Coin:** (Örn: CLARITY Act regülasyonları, AI altcoinleri/TAO, RWA tokenizasyonu, Solana/Sui ekosistemi veya BTC Q4 beklentileri üzerinden nokta atışı coin ve konu önerileri).
-            3. **Yüksek CTR ve İzlenme Süresi İçin Algoritma Taktikleri:** İzleyiciyi ilk 15 saniyede tutacak kanca (hook) stratejisi ve başlık önerileri.
-            4. **Otomasyon & İçerik Üretim Hattı:** Bu analizleri sürekli kılmak için bir YouTube içerik üreticisinin izlemesi gereken operasyonel yol haritası.
+            1. **Kanalın Kitle ve Etkileşim Sağlığı:** Shorts ve klasik video dağılımının analizi.
+            2. **Ağustos 2026 Yüksek İzlenme Getirecek 3 Trend & Coin:** (Örn: CLARITY Act regülasyonları, AI altcoinleri/TAO, RWA tokenizasyonu, Solana/Sui ekosistemi veya BTC Q4 beklentileri).
+            3. **Yüksek CTR ve İzlenme Süresi İçin Algoritma Taktikleri.**
+            4. **Otomasyon & İçerik Üretim Hattı.**
             """
             
             chat_completion = client.chat.completions.create(
