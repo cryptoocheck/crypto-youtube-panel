@@ -6,7 +6,6 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 import os
-import base64
 
 # 1. Streamlit Sayfa Yapılandırması
 st.set_page_config(
@@ -25,18 +24,7 @@ if "channel_id" not in st.session_state:
 if "active_tab" not in st.session_state:
     st.session_state.active_tab = "Performans Matrisi"
 
-def get_img_as_base64(file_path):
-    if os.path.exists(file_path):
-        with open(file_path, "rb") as f:
-            data = f.read()
-        return base64.b64encode(data).decode()
-    return None
-
-# Kesin olarak bg2.jpg dosyasını kullanıyoruz
-img_path = "bg2.jpg" if os.path.exists("bg2.jpg") else "bg.jpg"
-img_b64 = get_img_as_base64(img_path)
-
-# 2. bg2.jpg Görseline Tam Uyumlu Web3 Tasarım Mimarisi (CSS)
+# 2. Kesin Çözüm: bg2.jpg ve Tüm Arayüz Mimarisi (CSS)
 st.markdown(f"""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&display=swap');
@@ -64,39 +52,23 @@ st.markdown(f"""
         max-width: 100% !important;
     }}
 
-    /* --- bg2.jpg İÇİN KUSURSUZ ÇERÇEVE VE HOVER MİMARİSİ --- */
-    .absolute-center-banner {{
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        width: 100%;
-        margin-top: 15px;
-        margin-bottom: 25px;
-    }}
-    .banner-glow-wrapper {{
-        background: rgba(17, 24, 39, 0.5);
+    /* --- bg2.jpg Banner Çerçevesi ve Hover Parıltısı --- */
+    .banner-container-box {{
+        background: rgba(17, 24, 39, 0.6);
         backdrop-filter: blur(16px);
         -webkit-backdrop-filter: blur(16px);
         border: 1px solid rgba(255, 255, 255, 0.1);
         border-radius: 24px;
-        padding: 12px;
+        padding: 16px;
         box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), 0 0 35px rgba(212, 175, 55, 0.15);
         transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-        width: 75%;
+        margin: 15px auto 25px auto;
         max-width: 1200px;
     }}
-    .banner-glow-wrapper:hover {{
+    .banner-container-box:hover {{
         transform: translateY(-4px) scale(1.01);
         border-color: rgba(212, 175, 55, 0.7);
         box-shadow: 0 30px 70px rgba(0, 0, 0, 0.9), 0 0 45px rgba(212, 175, 55, 0.35);
-    }}
-    .absolute-center-banner img {{
-        width: 100% !important;
-        height: auto !important;
-        max-height: 450px !important;
-        object-fit: cover !important;
-        border-radius: 16px;
-        display: block;
     }}
 
     /* Grafik ve İçerik Kutuları */
@@ -237,15 +209,11 @@ st.markdown(f"""
 </style>
 """, unsafe_allow_html=True)
 
-# --- BANNER (bg2.jpg) ---
-if img_b64:
-    st.markdown(f'''
-    <div class="absolute-center-banner">
-        <div class="banner-glow-wrapper">
-            <img src="data:image/jpeg;base64,{img_b64}" alt="Crypto Check Banner">
-        </div>
-    </div>
-    ''', unsafe_allow_html=True)
+# --- BANNER (bg2.jpg Kesin Çözüm) ---
+if os.path.exists("bg2.jpg"):
+    st.markdown('<div class="banner-container-box">', unsafe_allow_html=True)
+    st.image("bg2.jpg", use_container_width=True)
+    st.markdown('</div>', unsafe_allow_html=True)
 else:
     st.markdown("<h1 style='text-align: center; font-weight: 800; font-size: 48px; letter-spacing: -1px;'>Crypto Check</h1>", unsafe_allow_html=True)
 
