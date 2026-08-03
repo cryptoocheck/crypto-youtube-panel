@@ -16,6 +16,14 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
+# 2. Oturum Hafızası (Session State) Başlatma
+if "youtube_key" not in st.session_state:
+    st.session_state.youtube_key = ""
+if "groq_key" not in st.session_state:
+    st.session_state.groq_key = ""
+if "channel_id" not in st.session_state:
+    st.session_state.channel_id = ""
+
 def get_img_as_base64(file_path):
     if os.path.exists(file_path):
         with open(file_path, "rb") as f:
@@ -26,7 +34,7 @@ def get_img_as_base64(file_path):
 img_path = "bg2.jpg" if os.path.exists("bg2.jpg") else "bg.jpg" if os.path.exists("bg.jpg") else "bg.jpg.jpg" if os.path.exists("bg.jpg.jpg") else "photo_6014965432080600852_y (1).jpg" if os.path.exists("photo_6014965432080600852_y (1).jpg") else ""
 img_b64 = get_img_as_base64(img_path)
 
-# 2. Apple Tipografi ve 3D Kart Mimarisi (CSS)
+# 3. Apple Tipografi ve 3D Kart Mimarisi (CSS)
 st.markdown(f"""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@300;400;500;600;700&display=swap');
@@ -167,25 +175,25 @@ if img_b64:
 else:
     st.markdown("<h1 style='text-align: center; font-weight: 700; font-size: 48px;'>Crypto Check</h1>", unsafe_allow_html=True)
 
-# Sidebar (Kontrol Paneli)
+# Sidebar (Kontrol Paneli - Otomatik Hafızaya Alan Inputlar)
 st.sidebar.markdown("### ⚙️ Kontrol Paneli")
-youtube_key = st.sidebar.text_input("YouTube Data API Anahtarı", type="password")
-groq_key = st.sidebar.text_input("Groq AI Anahtarı", type="password")
-channel_id = st.sidebar.text_input("Kanal ID")
+st.session_state.youtube_key = st.sidebar.text_input("YouTube Data API Anahtarı", value=st.session_state.youtube_key, type="password")
+st.session_state.groq_key = st.sidebar.text_input("Groq AI Anahtarı", value=st.session_state.groq_key, type="password")
+st.session_state.channel_id = st.sidebar.text_input("Kanal ID", value=st.session_state.channel_id)
 
 analyze_btn = st.sidebar.button("Canlı Verileri Getir")
 
 if analyze_btn:
-    if not youtube_key or not groq_key or not channel_id:
+    if not st.session_state.youtube_key or not st.session_state.groq_key or not st.session_state.channel_id:
         st.error("Lütfen sol paneldeki tüm erişim anahtarlarını eksiksiz girin.")
     else:
         try:
             with st.spinner("YouTube sunucularından canlı veriler yükleniyor..."):
-                youtube = build('youtube', 'v3', developerKey=youtube_key)
+                youtube = build('youtube', 'v3', developerKey=st.session_state.youtube_key)
                 
                 ch_req = youtube.channels().list(
                     part='statistics,snippet,contentDetails',
-                    id=channel_id
+                    id=st.session_state.channel_id
                 ).execute()
 
                 channel = ch_req['items'][0]
@@ -228,7 +236,7 @@ if analyze_btn:
                 df = pd.DataFrame(v_list)
                 avg_eng = float(df["Etkileşim (%)"].mean())
             
-            # Üst Metrik Kartları ve 2 Saniyelik Sayaç Motoru (Bileşen Entegrasyonu)
+            # Üst Metrik Kartları ve 2 Saniyelik Sayaç Motoru
             c1, c2, c3, c4 = st.columns(4)
             with c1:
                 st.markdown(f'<div class="metric-card-apple"><div class="metric-title">TOPLAM İZLENME</div><div class="metric-value"><span id="counter-1">0</span></div><div class="metric-sub">Canlı Veri</div></div>', unsafe_allow_html=True)
@@ -239,7 +247,6 @@ if analyze_btn:
             with c4:
                 st.markdown(f'<div class="metric-card-apple"><div class="metric-title">İÇERİK SAYISI</div><div class="metric-value"><span id="counter-4">0</span></div><div class="metric-sub">Yayınlanan Video</div></div>', unsafe_allow_html=True)
 
-            # Sayaç animasyonunu çalıştıran güvenli JavaScript bileşeni
             components.html(f"""
             <script>
             function runCounter(id, target, isFloat) {{
@@ -343,7 +350,7 @@ if analyze_btn:
                 st.markdown('<div class="apple-card-3d">', unsafe_allow_html=True)
                 st.write("### 🤖 Stratejik Yönetici Özeti")
                 with st.spinner("Kanal modelleri Llama 3.3 Motoru ile analiz ediliyor..."):
-                    client = Groq(api_key=groq_key)
+                    client = Groq(api_key=st.session_state.groq_key)
                     
                     prompt = f"""
                     Sen Apple seviyesinde ürün ve içerik stratejisi geliştiren lider bir YouTube Kripto Kanalı Danışmanısın.
