@@ -32,10 +32,11 @@ def get_img_as_base64(file_path):
         return base64.b64encode(data).decode()
     return None
 
-img_path = "bg2.jpg" if os.path.exists("bg2.jpg") else "bg.jpg" if os.path.exists("bg.jpg") else "bg.jpg.jpg" if os.path.exists("bg.jpg.jpg") else "photo_6014965432080600852_y (1).jpg" if os.path.exists("photo_6014965432080600852_y (1).jpg") else ""
+# Kesin olarak bg2.jpg dosyasını kullanıyoruz
+img_path = "bg2.jpg" if os.path.exists("bg2.jpg") else "bg.jpg"
 img_b64 = get_img_as_base64(img_path)
 
-# 2. Banner Boyut ve Hizalama Hatası Giderilmiş Tasarım Mimarisi (CSS)
+# 2. bg2.jpg Görseline Tam Uyumlu Web3 Tasarım Mimarisi (CSS)
 st.markdown(f"""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&display=swap');
@@ -63,7 +64,7 @@ st.markdown(f"""
         max-width: 100% !important;
     }}
 
-    /* --- BANNER (Görsel Taşması ve Orantısızlık Kesin Çözüm) --- */
+    /* --- bg2.jpg İÇİN KUSURSUZ ÇERÇEVE VE HOVER MİMARİSİ --- */
     .absolute-center-banner {{
         display: flex;
         justify-content: center;
@@ -73,20 +74,16 @@ st.markdown(f"""
         margin-bottom: 25px;
     }}
     .banner-glow-wrapper {{
-        background: rgba(17, 24, 39, 0.6);
+        background: rgba(17, 24, 39, 0.5);
         backdrop-filter: blur(16px);
         -webkit-backdrop-filter: blur(16px);
         border: 1px solid rgba(255, 255, 255, 0.1);
         border-radius: 24px;
-        padding: 16px;
+        padding: 12px;
         box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), 0 0 35px rgba(212, 175, 55, 0.15);
         transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
         width: 75%;
         max-width: 1200px;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        overflow: hidden;
     }}
     .banner-glow-wrapper:hover {{
         transform: translateY(-4px) scale(1.01);
@@ -95,13 +92,14 @@ st.markdown(f"""
     }}
     .absolute-center-banner img {{
         width: 100% !important;
-        max-height: 380px !important;
-        object-fit: contain !important;
-        border-radius: 14px;
+        height: auto !important;
+        max-height: 450px !important;
+        object-fit: cover !important;
+        border-radius: 16px;
         display: block;
     }}
 
-    /* Evrensel Grafik ve İçerik Kutuları */
+    /* Grafik ve İçerik Kutuları */
     .ondo-glass-card {{
         background: rgba(17, 24, 39, 0.7);
         backdrop-filter: blur(16px);
@@ -239,12 +237,12 @@ st.markdown(f"""
 </style>
 """, unsafe_allow_html=True)
 
-# --- BANNER ---
+# --- BANNER (bg2.jpg) ---
 if img_b64:
     st.markdown(f'''
     <div class="absolute-center-banner">
         <div class="banner-glow-wrapper">
-            <img src="data:image/jpeg;base64,{img_b64}" alt="Crypto Check Logo">
+            <img src="data:image/jpeg;base64,{img_b64}" alt="Crypto Check Banner">
         </div>
     </div>
     ''', unsafe_allow_html=True)
