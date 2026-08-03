@@ -47,7 +47,7 @@ def parse_iso8601_duration_seconds(duration_str):
     seconds = int(match.group(3)) if match.group(3) else 0
     return hours * 3600 + minutes * 60 + seconds
 
-# 2. Yüksek Performanslı ve Kaydırma Efektli Tasarım Mimarisi (CSS)
+# 2. Çok Yavaş, Ağır ve İpeksi Süzülme Animasyon Mimarisi (CSS)
 st.markdown(f"""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&display=swap');
@@ -75,11 +75,11 @@ st.markdown(f"""
         max-width: 100% !important;
     }}
 
-    /* --- SCROLL-REVEAL SLIDE-UP ANIMASYONU --- */
+    /* --- ÇOK YAVAŞ VE İPEKSİ SÜZÜLME EFEKTİ --- */
     .reveal-box {{
         opacity: 0;
-        transform: translateY(45px);
-        transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+        transform: translateY(70px);
+        transition: opacity 1.4s cubic-bezier(0.25, 1, 0.5, 1), transform 1.4s cubic-bezier(0.25, 1, 0.5, 1);
         will-change: opacity, transform;
     }}
 
@@ -111,7 +111,6 @@ st.markdown(f"""
         position: relative;
         overflow: hidden;
         box-sizing: border-box;
-        will-change: transform;
     }}
     .banner-ondo-box:hover {{
         transform: translateY(-6px) scale(1.01);
@@ -128,7 +127,7 @@ st.markdown(f"""
         margin: 0 auto;
     }}
 
-    /* --- OPTİMİZE EDİLMİŞ KUTULAR --- */
+    /* --- KUTULAR --- */
     .metric-card-ondo, .ondo-glass-card {{
         background: rgba(17, 24, 39, 0.75);
         backdrop-filter: blur(10px);
@@ -145,7 +144,6 @@ st.markdown(f"""
         text-align: center;
         min-height: 140px;
         transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s ease, box-shadow 0.3s ease;
-        will-change: transform;
     }}
     .metric-card-ondo:hover, .ondo-glass-card:hover {{
         transform: translateY(-6px) scale(1.01);
@@ -249,13 +247,13 @@ st.markdown(f"""
 </style>
 """, unsafe_allow_html=True)
 
-# --- KAYDIRMA ANİMASYONU İÇİN INTERSECTION OBSERVER ENJEKSİYONU ---
+# --- YUMUŞAK SCROLL-REVEAL JS ENJEKSİYONU ---
 components.html("""
 <script>
 const observerOptions = {
     root: null,
-    rootMargin: '0px',
-    threshold: 0.1
+    rootMargin: '0px 0px -50px 0px',
+    threshold: 0.05
 };
 
 const observer = new IntersectionObserver((entries, observer) => {
@@ -271,8 +269,7 @@ function scanElements() {
     boxes.forEach(box => observer.observe(box));
 }
 
-// Periyodik tarama ile Streamlit bileşen değişimlerini yakala
-setInterval(scanElements, 400);
+setInterval(scanElements, 300);
 </script>
 """, height=0)
 
@@ -490,7 +487,7 @@ if "loaded" in st.session_state and st.session_state.loaded:
 
     if current_tab == "Performans Matrisi":
         st.markdown('<div class="reveal-box">', unsafe_allow_html=True)
-        st.write("### ⚡ Shorts ve Büyük Video Karşılaştırmalı Periyot Analizi")
+        st.write("### ⚡ Shorts dan Büyük Video Karşılaştırmalı Periyot Analizi")
         st.markdown('</div>', unsafe_allow_html=True)
         
         shorts_df = df[df["Tür"] == "Shorts"]
@@ -590,7 +587,7 @@ if "loaded" in st.session_state and st.session_state.loaded:
             Mevcut Tarih: Ağustos 2026.
             Kanal Adı: {ch_title}
             Toplam İzlenme: {total_views} | Abone Sayısı: {subscribers} | Toplam Video: {total_videos}
-            Shorts ve Büyük Video Performansları sisteme entegre edilmiştir.
+            Shorts dan Büyük Video Performansları sisteme entegre edilmiştir.
 
             Lütfen kesinlikle Türkçe olarak, profesyonel yatırım fonu raporu formatında şu başlıkları detaylıca sun:
             1. **Kanalın Kitle ve Etkileşim Sağlığı:** Shorts ve klasik video dağılımının analizi.
