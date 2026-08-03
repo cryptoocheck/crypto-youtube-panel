@@ -351,7 +351,7 @@ if "loaded" in st.session_state and st.session_state.loaded:
     ch_title = st.session_state.ch_title
     df = st.session_state.df
 
-    # Güvenlik Kontrolü: Eski session state verilerinde sütun eksikliğini önle
+    # Güvenlik Kontrolü
     if "Tür" not in df.columns:
         df["Tür"] = "Büyük Video"
     if "Periyot" not in df.columns:
@@ -473,11 +473,14 @@ if "loaded" in st.session_state and st.session_state.loaded:
 
         st.markdown("<br>", unsafe_allow_html=True)
         
+        # Grafikler için verileri tarihe ve türe göre grupluyoruz (Grouping)
+        df_grouped = df.groupby(["Yayın Tarihi", "Tür"], as_index=False)[["İzlenme", "Beğeni"]].sum()
+
         col_g1, col_g2 = st.columns(2)
         with col_g1:
             st.write("### 📊 İçerik Türüne Göre İzlenme Dağılımı")
             fig_bar = px.bar(
-                df, 
+                df_grouped, 
                 x="Yayın Tarihi", 
                 y="İzlenme", 
                 color="Tür",
@@ -491,7 +494,7 @@ if "loaded" in st.session_state and st.session_state.loaded:
         with col_g2:
             st.write("### 📈 Beğeni ve Etkileşim Trendi")
             fig_line = px.line(
-                df.sort_values("Yayın Tarihi"), 
+                df_grouped.sort_values("Yayın Tarihi"), 
                 x="Yayın Tarihi", 
                 y="Beğeni", 
                 color="Tür",
@@ -504,7 +507,8 @@ if "loaded" in st.session_state and st.session_state.loaded:
 
     elif current_tab == "Detaylı Analiz":
         st.write("### 🔍 Tüm İçeriklerin Tür ve Periyot Arşivi")
-        st.dataframe(df, use_container_width=True)
+        df_show = df[["Video Başlığı", "Yayın Tarihi", "Tür", "Periyot", "İzlenme", "Beğeni", "Yorum", "Süre (Dk)"]]
+        st.dataframe(df_show, use_container_width=True)
 
     elif current_tab == "AI Strateji Raporu":
         st.write("### 🤖 Profesyonel Kripto & Kanal Büyüme Raporu (Ağustos 2026)")
