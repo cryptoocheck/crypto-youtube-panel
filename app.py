@@ -36,7 +36,7 @@ possible_files = ["bg2.jpg.jpg", "bg2.jpg", "bg.jpg"]
 banner_file = next((f for f in possible_files if os.path.exists(f)), None)
 img_b64 = get_img_as_base64(banner_file) if banner_file else None
 
-# 2. Boyutu Küçültülmüş ve Üst Boşluğu Dengelenmiş Banner Mimarisi (CSS)
+# 2. Üst Kısmın Kesilmesini Engelleyen ve Tam Ortalanan Banner Mimarisi (CSS)
 st.markdown(f"""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&display=swap');
@@ -64,7 +64,7 @@ st.markdown(f"""
         max-width: 100% !important;
     }}
 
-    /* --- KÜÇÜLTÜLMÜŞ BOYUT VE 360 DERECE EŞİT ÇERÇEVELİ BANNER --- */
+    /* --- ÜST KISMI TAM GÖRÜNEN VE ÇERÇEVELİ BANNER --- */
     .absolute-center-banner {{
         display: flex;
         justify-content: center;
@@ -96,8 +96,9 @@ st.markdown(f"""
     .banner-ondo-box img {{
         width: 100% !important;
         height: auto !important;
-        max-height: 280px !important;
-        object-fit: cover !important;
+        max-height: 320px !important;
+        object-fit: contain !important;
+        object-position: center center !important;
         border-radius: 16px;
         display: block;
         margin: 0 auto;
