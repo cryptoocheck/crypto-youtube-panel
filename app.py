@@ -47,7 +47,7 @@ def parse_iso8601_duration_seconds(duration_str):
     seconds = int(match.group(3)) if match.group(3) else 0
     return hours * 3600 + minutes * 60 + seconds
 
-# 2. Soldan Sağa Çok Yavaş ve İpeksi Süzülme Animasyon Mimarisi (CSS)
+# 2. Belirgin, Çok Yavaş ve Akıcı Soldan Sağa Süzülme Animasyon Mimarisi (CSS)
 st.markdown(f"""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&display=swap');
@@ -75,11 +75,11 @@ st.markdown(f"""
         max-width: 100% !important;
     }}
 
-    /* --- SOLDAN SAĞA YAVAŞ VE İPEKSİ SÜZÜLME EFEKTİ --- */
+    /* --- BELİRGİN, AĞIR VE AKICI SOLDAN SAĞA SÜZÜLME --- */
     .reveal-box {{
         opacity: 0;
-        transform: translateX(-80px);
-        transition: opacity 1.5s cubic-bezier(0.25, 1, 0.5, 1), transform 1.5s cubic-bezier(0.25, 1, 0.5, 1);
+        transform: translateX(-120px);
+        transition: opacity 2.2s cubic-bezier(0.16, 1, 0.3, 1), transform 2.2s cubic-bezier(0.16, 1, 0.3, 1);
         will-change: opacity, transform;
     }}
 
@@ -247,29 +247,30 @@ st.markdown(f"""
 </style>
 """, unsafe_allow_html=True)
 
-# --- SOLDAN SAĞA SCROLL-REVEAL JS ENJEKSİYONU ---
+# --- GARANTİLİ SCROLL-REVEAL JS ENJEKSİYONU ---
 components.html("""
 <script>
-const observerOptions = {
-    root: null,
-    rootMargin: '0px 0px -50px 0px',
-    threshold: 0.05
-};
+function initReveal() {
+    const observerOptions = {
+        root: null,
+        rootMargin: '0px 0px 0px 0px',
+        threshold: 0.01
+    };
 
-const observer = new IntersectionObserver((entries, observer) => {
-    entries.forEach(entry => {
-        if (entry.isIntersecting) {
-            entry.target.classList.add('active');
-        }
-    });
-}, observerOptions);
+    const observer = new IntersectionObserver((entries, observer) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('active');
+            }
+        });
+    }, observerOptions);
 
-function scanElements() {
     const boxes = window.parent.document.querySelectorAll('.reveal-box');
     boxes.forEach(box => observer.observe(box));
 }
 
-setInterval(scanElements, 300);
+setTimeout(initReveal, 500);
+setInterval(initReveal, 1000);
 </script>
 """, height=0)
 
