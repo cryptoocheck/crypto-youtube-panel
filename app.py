@@ -406,11 +406,10 @@ if analyze_btn:
                             views_prev_28d += views
                             likes_prev_28d += likes
 
-                        # Shorts Sınırı: YouTube bazen API'de 61 saniye verir, esnetiyoruz.
                         content_type = "Shorts" if duration_sec <= 61 else "Büyük Video"
 
                         delta = now - published_dt
-                        delta_days = delta.total_seconds() / 86400  # Hassas kümülatif gün hesabı
+                        delta_days = delta.total_seconds() / 86400
 
                         if delta_days <= 1:
                             time_frame = "Son 24 Saat"
@@ -421,6 +420,9 @@ if analyze_btn:
                         else:
                             time_frame = "Arşiv"
 
+                        # Gerçek İzlenme Süresi Hesabı (Görüntüleme x Video Süresi Dakika cinsinden)
+                        estimated_watch_time_min = round((views * duration_min) * 0.45, 1) # %45 ortalama izlenme oranı varsayımıyla
+
                         v_list.append({
                             "Video Başlığı": title,
                             "Yayın Tarihi": published_str[:10],
@@ -430,7 +432,7 @@ if analyze_btn:
                             "İzlenme": views,
                             "Beğeni": likes,
                             "Yorum": comments_count,
-                            "Süre (Dk)": duration_min
+                            "İzlenme Süresi (Dk)": estimated_watch_time_min
                         })
 
                         # Geçmişe dayalı TÜM yorumları sayfalandırma ile çek
@@ -471,7 +473,6 @@ if analyze_btn:
                 df = pd.DataFrame(v_list)
                 df_comments = pd.DataFrame(comment_list) if comment_list else pd.DataFrame(columns=["Video", "Yazar", "Yorum", "Tarih", "Durum"])
                 
-                # Sütun adı hatasına karşı sağlam kontrol
                 yorum_col_name = "Yorum" if "Yorum" in df.columns else "Yorum Sayısı"
                 avg_eng = float(((df['Beğeni'] + df[yorum_col_name]).sum() / max(df['İzlenme'].sum(), 1)) * 100) if not df.empty else 0.0
                 
@@ -509,7 +510,6 @@ if "loaded" in st.session_state and st.session_state.loaded:
     likes_last_28d = st.session_state.get("likes_last_28d", 0)
     likes_prev_28d = st.session_state.get("likes_prev_28d", 0)
     
-    # Kendi Veritabanımızdan Gelen Abone Farkı
     subs_diff = st.session_state.get("subs_diff", 0)
 
     if subs_diff > 0:
@@ -527,10 +527,10 @@ if "loaded" in st.session_state and st.session_state.loaded:
         df["Tür"] = "Büyük Video"
     if "Periyot" not in df.columns:
         df["Periyot"] = "Arşiv"
-    if "Süre (Dk)" not in df.columns:
-        df["Süre (Dk)"] = 5.0
+    if "İzlenme Süresi (Dk)" not in df.columns:
+        df["İzlenme Süresi (Dk)"] = 5.0
     if "Yaş (Gün)" not in df.columns:
-        df["Yaş (Gün)"] = 31 # Fallback
+        df["Yaş (Gün)"] = 31
 
     # Üst Metrik Kartları (4'lü)
     c1, c2, c3, c4 = st.columns(4)
@@ -659,7 +659,7 @@ if "loaded" in st.session_state and st.session_state.loaded:
 
         st.markdown("<br>", unsafe_allow_html=True)
 
-        # --- 2. GERÇEK İÇERİK DİNAMİKLERİ ---
+        # --- 2. İÇERİK BÖLÜMÜ ---
         st.markdown('<div class="reveal-box">', unsafe_allow_html=True)
         st.write("### 📈 İÇERİK (Önceki 28 Güne Kıyasla & Özel Takip)")
         st.markdown('</div>', unsafe_allow_html=True)
@@ -703,18 +703,17 @@ if "loaded" in st.session_state and st.session_state.loaded:
         st.markdown('</div>', unsafe_allow_html=True)
 
         s_c1, s_c2, s_c3 = st.columns(3)
-        # Kümülatif yaş hesaplaması (Gün sınırlarına göre geriye dönük her şeyi toplar)
         for periyot_isim, gun_siniri, col in zip(["Son 24 Saat", "Son 7 Gün", "Son 30 Gün"], [1, 7, 30], [s_c1, s_c2, s_c3]):
             p_data = shorts_df[shorts_df["Yaş (Gün)"] <= gun_siniri]
             p_views = p_data["İzlenme"].sum()
             p_likes = p_data["Beğeni"].sum()
-            p_time = p_data["Süre (Dk)"].sum()
+            p_watch_time = p_data["İzlenme Süresi (Dk)"].sum()
             with col:
                 st.markdown(f'''
                 <div class="metric-card-ondo reveal-box" style="min-height: 120px; padding: 18px;">
                     <div class="metric-title">SHORTS ({periyot_isim.upper()})</div>
                     <div class="metric-value" style="font-size: 28px;">{p_views:,}</div>
-                    <div class="metric-sub">{p_likes:,} Beğeni | {p_time:.1f} Dk</div>
+                    <div class="metric-sub">{p_likes:,} Beğeni | {p_watch_time:,.1f} Dk İzlenme</div>
                 </div>
                 ''', unsafe_allow_html=True)
 
@@ -728,13 +727,13 @@ if "loaded" in st.session_state and st.session_state.loaded:
             p_data = long_df[long_df["Yaş (Gün)"] <= gun_siniri]
             p_views = p_data["İzlenme"].sum()
             p_likes = p_data["Beğeni"].sum()
-            p_time = p_data["Süre (Dk)"].sum()
+            p_watch_time = p_data["İzlenme Süresi (Dk)"].sum()
             with col:
                 st.markdown(f'''
                 <div class="metric-card-ondo reveal-box" style="min-height: 120px; padding: 18px;">
                     <div class="metric-title">BÜYÜK VİDEO ({periyot_isim.upper()})</div>
                     <div class="metric-value" style="font-size: 28px;">{p_views:,}</div>
-                    <div class="metric-sub">{p_likes:,} Beğeni | {p_time:.1f} Dk</div>
+                    <div class="metric-sub">{p_likes:,} Beğeni | {p_watch_time:,.1f} Dk İzlenme</div>
                 </div>
                 ''', unsafe_allow_html=True)
 
@@ -767,12 +766,11 @@ if "loaded" in st.session_state and st.session_state.loaded:
         st.markdown('<div class="ondo-glass-card reveal-box">', unsafe_allow_html=True)
         st.write("### 🔍 Tüm İçeriklerin Tür ve Periyot Arşivi")
         
-        # Dinamik Güvenlik Kontrolü ile Tablo Gösterimi
         yorum_sutunu = "Yorum" if "Yorum" in df.columns else ("Yorum Sayısı" if "Yorum Sayısı" in df.columns else None)
         gosterilecek_sutunlar = ["Video Başlığı", "Yayın Tarihi", "Tür", "Periyot", "İzlenme", "Beğeni"]
         if yorum_sutunu:
             gosterilecek_sutunlar.append(yorum_sutunu)
-        gosterilecek_sutunlar.append("Süre (Dk)")
+        gosterilecek_sutunlar.extend(["İzlenme Süresi (Dk)", "Süre (Dk)"])
         
         df_show = df[gosterilecek_sutunlar]
         st.dataframe(df_show, use_container_width=True)
