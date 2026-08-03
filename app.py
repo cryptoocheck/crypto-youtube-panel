@@ -3,8 +3,6 @@ import streamlit.components.v1 as components
 from googleapiclient.discovery import build
 from groq import Groq
 import pandas as pd
-import plotly.express as px
-import plotly.graph_objects as go
 import os
 import base64
 import re
@@ -337,6 +335,14 @@ if analyze_btn:
                 v_list = []
                 comment_list = []
                 now = datetime.utcnow()
+                cutoff_28d = now - timedelta(days=28)
+                cutoff_56d = now - timedelta(days=56)
+
+                views_last_28d = 0
+                views_prev_28d = 0
+                likes_last_28d = 0
+                likes_prev_28d = 0
+                total_duration_sec = 0
 
                 for i in range(0, len(v_ids), 50):
                     chunk_ids = v_ids[i:i+50]
@@ -362,6 +368,15 @@ if analyze_btn:
                         duration_iso = content.get('duration', 'PT0M')
                         duration_sec = parse_iso8601_duration_seconds(duration_iso)
                         duration_min = round(duration_sec / 60, 2)
+
+                        total_duration_sec += duration_sec
+
+                        if published_dt >= cutoff_28d:
+                            views_last_28d += views
+                            likes_last_28d += likes
+                        elif cutoff_56d <= published_dt < cutoff_28d:
+                            views_prev_28d += views
+                            likes_prev_28d += likes
 
                         content_type = "Shorts" if duration_sec <= 60 else "Büyük Video"
 
@@ -433,6 +448,11 @@ if analyze_btn:
                 st.session_state.total_videos = total_videos
                 st.session_state.avg_eng = avg_eng
                 st.session_state.ch_title = ch_title
+                st.session_state.total_duration_sec = total_duration_sec
+                st.session_state.views_last_28d = views_last_28d
+                st.session_state.views_prev_28d = views_prev_28d
+                st.session_state.likes_last_28d = likes_last_28d
+                st.session_state.likes_prev_28d = likes_prev_28d
                 st.session_state.loaded = True
 
         except Exception as e:
@@ -447,6 +467,13 @@ if "loaded" in st.session_state and st.session_state.loaded:
     ch_title = st.session_state.ch_title
     df = st.session_state.df
     df_comments = st.session_state.get("df_comments", pd.DataFrame())
+    total_duration_sec = st.session_state.get("total_duration_sec", 0)
+    total_watch_hours = round(total_duration_sec / 3600, 1)
+
+    views_last_28d = st.session_state.get("views_last_28d", 0)
+    views_prev_28d = st.session_state.get("views_prev_28d", 0)
+    likes_last_28d = st.session_state.get("likes_last_28d", 0)
+    likes_prev_28d = st.session_state.get("likes_prev_28d", 0)
 
     # Güvenlik Kontrolü
     if "Tür" not in df.columns:
@@ -456,16 +483,16 @@ if "loaded" in st.session_state and st.session_state.loaded:
     if "Süre (Dk)" not in df.columns:
         df["Süre (Dk)"] = 5.0
 
-    # Üst Metrik Kartları
+    # Üst Metrik Kartları (4'lü)
     c1, c2, c3, c4 = st.columns(4)
     with c1:
-        st.markdown(f'<div class="metric-card-ondo"><div class="metric-title">TOPLAM İZLENME</div><div class="metric-value"><span id="counter-1">0</span></div><div class="metric-sub">Canlı Veri</div></div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="metric-card-ondo reveal-box"><div class="metric-title">TOPLAM İZLENME</div><div class="metric-value"><span id="counter-1">0</span></div><div class="metric-sub">Canlı Veri</div></div>', unsafe_allow_html=True)
     with c2:
-        st.markdown(f'<div class="metric-card-ondo"><div class="metric-title">ABONE SAYISI</div><div class="metric-value"><span id="counter-2">0</span></div><div class="metric-sub">Aktif İzleyici</div></div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="metric-card-ondo reveal-box"><div class="metric-title">ABONE SAYISI</div><div class="metric-value"><span id="counter-2">0</span></div><div class="metric-sub">Aktif İzleyici</div></div>', unsafe_allow_html=True)
     with c3:
-        st.markdown(f'<div class="metric-card-ondo"><div class="metric-title">ORTALAMA ETKİLEŞİM</div><div class="metric-value"><span id="counter-3">0.00</span></div><div class="metric-sub">Kanal Performansı</div></div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="metric-card-ondo reveal-box"><div class="metric-title">ORTALAMA ETKİLEŞİM</div><div class="metric-value"><span id="counter-3">0.00</span></div><div class="metric-sub">Kanal Performansı</div></div>', unsafe_allow_html=True)
     with c4:
-        st.markdown(f'<div class="metric-card-ondo"><div class="metric-title">İÇERİK SAYISI</div><div class="metric-value"><span id="counter-4">0</span></div><div class="metric-sub">Yayınlanan Video</div></div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="metric-card-ondo reveal-box"><div class="metric-title">İÇERİK SAYISI</div><div class="metric-value"><span id="counter-4">0</span></div><div class="metric-sub">Yayınlanan Video</div></div>', unsafe_allow_html=True)
 
     components.html(f"""
     <script>
@@ -550,6 +577,71 @@ if "loaded" in st.session_state and st.session_state.loaded:
     current_tab = st.session_state.active_tab
 
     if current_tab == "Performans Matrisi":
+        # --- 1. GENEL BAKIŞ BÖLÜMÜ ---
+        st.markdown('<div class="reveal-box">', unsafe_allow_html=True)
+        st.write("### 🌐 GENEL BAKIŞ")
+        st.markdown('</div>', unsafe_allow_html=True)
+
+        gb1, gb2, gb3 = st.columns(3)
+        with gb1:
+            st.markdown(f'''
+            <div class="metric-card-ondo reveal-box" style="min-height: 110px; padding: 18px;">
+                <div class="metric-title">GÖRÜNTÜLEME</div>
+                <div class="metric-value" style="font-size: 26px;">{total_views:,}</div>
+                <div class="metric-sub">Tüm Zamanlar</div>
+            </div>
+            ''', unsafe_allow_html=True)
+        with gb2:
+            st.markdown(f'''
+            <div class="metric-card-ondo reveal-box" style="min-height: 110px; padding: 18px;">
+                <div class="metric-title">İZLENME SÜRESİ (SAAT)</div>
+                <div class="metric-value" style="font-size: 26px;">{total_watch_hours:,}</div>
+                <div class="metric-sub">Toplam Süre</div>
+            </div>
+            ''', unsafe_allow_html=True)
+        with gb3:
+            st.markdown(f'''
+            <div class="metric-card-ondo reveal-box" style="min-height: 110px; padding: 18px;">
+                <div class="metric-title">ABONE SAYISI (SON 28 GÜN)</div>
+                <div class="metric-value" style="font-size: 26px;">{subscribers:,}</div>
+                <div class="metric-sub">Aktif Abone</div>
+            </div>
+            ''', unsafe_allow_html=True)
+
+        st.markdown("<br>", unsafe_allow_html=True)
+
+        # --- 2. İÇERİK BÖLÜMÜ ---
+        st.markdown('<div class="reveal-box">', unsafe_allow_html=True)
+        st.write("### 📈 İÇERİK (Önceki 28 Güne Kıyasla)")
+        st.markdown('</div>', unsafe_allow_html=True)
+
+        inc1, inc2, inc3 = st.columns(3)
+        with inc1:
+            st.markdown(f'''
+            <div class="metric-card-ondo reveal-box" style="min-height: 110px; padding: 18px;">
+                <div class="metric-title">AKTİF İZLENME</div>
+                <div class="metric-value" style="font-size: 26px;">{views_last_28d:,}</div>
+                <div class="metric-sub">Önceki Dönem: {views_prev_28d:,}</div>
+            </div>
+            ''', unsafe_allow_html=True)
+        with inc2:
+            st.markdown(f'''
+            <div class="metric-card-ondo reveal-box" style="min-height: 110px; padding: 18px;">
+                <div class="metric-title">BEĞENİ SAYISI</div>
+                <div class="metric-value" style="font-size: 26px;">{likes_last_28d:,}</div>
+                <div class="metric-sub">Önceki Dönem: {likes_prev_28d:,}</div>
+            </div>
+            ''', unsafe_allow_html=True)
+        with inc3:
+            st.markdown(f'''
+            <div class="metric-card-ondo reveal-box" style="min-height: 110px; padding: 18px;">
+                <div class="metric-title">ABONE SAYISI</div>
+                <div class="metric-value" style="font-size: 26px;">{subscribers:,}</div>
+                <div class="metric-sub">Kıyaslamalı Değişim</div>
+            </div>
+            ''', unsafe_allow_html=True)
+
+        st.markdown("<br>", unsafe_allow_html=True)
         st.markdown('<div class="reveal-box">', unsafe_allow_html=True)
         st.write("### ⚡ Shorts ve Büyük Video Karşılaştırmalı Periyot Analizi")
         st.markdown('</div>', unsafe_allow_html=True)
@@ -596,43 +688,6 @@ if "loaded" in st.session_state and st.session_state.loaded:
                 </div>
                 ''', unsafe_allow_html=True)
 
-        st.markdown("<br>", unsafe_allow_html=True)
-        
-        df_grouped = df.groupby(["Yayın Tarihi", "Tür"], as_index=False)[["İzlenme", "Beğeni"]].sum()
-
-        col_g1, col_g2 = st.columns(2)
-        with col_g1:
-            st.markdown('<div class="ondo-glass-card reveal-box">', unsafe_allow_html=True)
-            st.write("### 📊 İçerik Türüne Göre İzlenme Dağılımı")
-            fig_bar = px.bar(
-                df_grouped, 
-                x="Yayın Tarihi", 
-                y="İzlenme", 
-                color="Tür",
-                barmode="group",
-                template="plotly_dark",
-                color_discrete_map={"Shorts": "#d4af37", "Büyük Video": "#1f2937"}
-            )
-            fig_bar.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)')
-            st.plotly_chart(fig_bar, use_container_width=True)
-            st.markdown('</div>', unsafe_allow_html=True)
-
-        with col_g2:
-            st.markdown('<div class="ondo-glass-card reveal-box">', unsafe_allow_html=True)
-            st.write("### 📈 Beğeni ve Etkileşim Trendi")
-            fig_line = px.line(
-                df_grouped.sort_values("Yayın Tarihi"), 
-                x="Yayın Tarihi", 
-                y="Beğeni", 
-                color="Tür",
-                markers=True,
-                template="plotly_dark",
-                color_discrete_map={"Shorts": "#d4af37", "Büyük Video": "#3b82f6"}
-            )
-            fig_line.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)')
-            st.plotly_chart(fig_line, use_container_width=True)
-            st.markdown('</div>', unsafe_allow_html=True)
-
     elif current_tab == "Gelen Yorumlar":
         st.markdown('<div class="ondo-glass-card reveal-box">', unsafe_allow_html=True)
         st.write("### 💬 YouTube Kanalı Geçmişe Dayalı Canlı Yorum Yönetim Merkezi")
@@ -641,7 +696,6 @@ if "loaded" in st.session_state and st.session_state.loaded:
             df_answered = df_comments[df_comments["Durum"] == "Cevaplanan"]
             df_pending = df_comments[df_comments["Durum"] == "Cevap Bekliyor"]
 
-            # İki Ayrı Kısım / Tablo Mimarisi
             st.markdown("<br>", unsafe_allow_html=True)
             st.markdown("#### ⏳ Cevaplanmayı Bekleyen Yorumlar")
             if not df_pending.empty:
@@ -677,7 +731,7 @@ if "loaded" in st.session_state and st.session_state.loaded:
             Mevcut Tarih: Ağustos 2026.
             Kanal Adı: {ch_title}
             Toplam İzlenme: {total_views} | Abone Sayısı: {subscribers} | Toplam Video: {total_videos}
-            Shorts dan Büyük Video Performansları sisteme entegre edilmiştir.
+            Shorts ve Büyük Video Performansları sisteme entegre edilmiştir.
 
             Lütfen kesinlikle Türkçe olarak, profesyonel yatırım fonu raporu formatında şu başlıkları detaylıca sun:
             1. **Kanalın Kitle ve Etkileşim Sağlığı:** Shorts ve klasik video dağılımının analizi.
