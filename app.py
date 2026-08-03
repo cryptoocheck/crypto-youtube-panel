@@ -36,7 +36,7 @@ possible_files = ["bg2.jpg.jpg", "bg2.jpg", "bg.jpg"]
 banner_file = next((f for f in possible_files if os.path.exists(f)), None)
 img_b64 = get_img_as_base64(banner_file) if banner_file else None
 
-# 2. Üst Kısmı Dahil 360 Derece Eşit Çerçeveli Banner Mimarisi (CSS)
+# 2. Üst ve Yan Çerçeveleri Tam Eşitlenmiş Kusursuz Web3 Banner Mimarisi (CSS)
 st.markdown(f"""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&display=swap');
@@ -64,28 +64,29 @@ st.markdown(f"""
         max-width: 100% !important;
     }}
 
-    /* --- ÜST ÇİZGİNİN KAPANMASINI ÖNLEYEN EŞİT İÇ BOŞLUKLU ÇERÇEVE --- */
+    /* --- ÜST KISMI DAHİL 360 DERECE KUSURSUZ ÇERÇEVELİ BANNER --- */
     .absolute-center-banner {{
         display: flex;
         justify-content: center;
         align-items: center;
         width: 100%;
-        margin-top: 20px;
+        margin-top: 25px;
         margin-bottom: 25px;
     }}
     .banner-ondo-box {{
-        background: rgba(17, 24, 39, 0.7);
+        background: rgba(17, 24, 39, 0.75);
         backdrop-filter: blur(16px);
         -webkit-backdrop-filter: blur(16px);
-        border: 1px solid rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.12);
         border-radius: 24px;
-        padding: 20px;
+        padding: 24px;
         box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.7);
         transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
         width: 75%;
         max-width: 1200px;
         position: relative;
         overflow: hidden;
+        box-sizing: border-box;
     }}
     .banner-ondo-box:hover {{
         transform: translateY(-6px) scale(1.01);
@@ -96,7 +97,7 @@ st.markdown(f"""
         width: 100% !important;
         height: auto !important;
         max-height: 380px !important;
-        object-fit: contain !important;
+        object-fit: cover !important;
         border-radius: 16px;
         display: block;
         margin: 0 auto;
