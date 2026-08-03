@@ -7,7 +7,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 import os
 import base64
-import isodate
+import re
 
 # 1. Streamlit Sayfa Yapılandırması
 st.set_page_config(
@@ -36,6 +36,16 @@ def get_img_as_base64(file_path):
 possible_files = ["bg2.jpg.jpg", "bg2.jpg", "bg.jpg"]
 banner_file = next((f for f in possible_files if os.path.exists(f)), None)
 img_b64 = get_img_as_base64(banner_file) if banner_file else None
+
+def parse_iso8601_duration(duration_str):
+    match = re.match(r'PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?', duration_str)
+    if not match:
+        return 0.0
+    hours = int(match.group(1)) if match.group(1) else 0
+    minutes = int(match.group(2)) if match.group(2) else 0
+    seconds = int(match.group(3)) if match.group(3) else 0
+    total_seconds = hours * 3600 + minutes * 60 + seconds
+    return round(total_seconds / 60, 1)
 
 # 2. Gelişmiş Web3 Tasarım Mimarisi (CSS)
 st.markdown(f"""
@@ -290,20 +300,13 @@ if analyze_btn:
                     
                     engagement_rate = ((likes + comments) / views * 100) if views > 0 else 0
                     
-                    # Süre analizi (ISO 8601)
+                    # Süre analizi (Yerel Regex Dönüşümü)
                     duration_iso = content.get('duration', 'PT0M')
-                    try:
-                        duration_sec = isodate.parse_duration(duration_iso).total_seconds()
-                    except:
-                        duration_sec = 0
-                    duration_min = round(duration_sec / 60, 1)
+                    duration_min = parse_iso8601_duration(duration_iso)
 
-                    # Çözünürlük ve Lisans
                     definition = content.get('definition', 'sd').upper()
-                    privacy = status.get('privacyStatus', 'public')
                     tags_count = len(snippet.get('tags', []))
 
-                    # Gelişmiş Metrikler
                     est_sub_conv = round((subscribers / max(total_views, 1)) * 100 + (engagement_rate * 0.2), 2)
                     est_ctr = round(min(float(4.5 + (engagement_rate * 0.4)), 15.0), 2)
 
