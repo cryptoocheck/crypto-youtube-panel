@@ -24,7 +24,7 @@ if "channel_id" not in st.session_state:
 if "active_tab" not in st.session_state:
     st.session_state.active_tab = "Performans Matrisi"
 
-# 2. bg2.jpg.jpg Bannerına Cam ve Büyüme (Hover) Efekti Ekleyen Tasarım Mimarisi (CSS)
+# 2. Evrensel Cam ve Büyüme Efekti Mimarisi (CSS)
 st.markdown(f"""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&display=swap');
@@ -71,6 +71,12 @@ st.markdown(f"""
         transform: translateY(-6px) scale(1.01);
         border-color: rgba(212, 175, 55, 0.7);
         box-shadow: 0 30px 70px -15px rgba(212, 175, 55, 0.35), 0 0 35px rgba(212, 175, 55, 0.25);
+    }}
+    .banner-container-box img {{
+        border-radius: 14px !important;
+        width: 100% !important;
+        height: auto !important;
+        display: block !important;
     }}
 
     /* Grafik ve İçerik Kutuları */
@@ -211,10 +217,11 @@ st.markdown(f"""
 </style>
 """, unsafe_allow_html=True)
 
-# --- BANNER (bg2.jpg.jpg - Cam ve Hover Efektli Kutu İçinde) ---
-banner_file = "bg2.jpg.jpg" if os.path.exists("bg2.jpg.jpg") else "bg2.jpg" if os.path.exists("bg2.jpg") else "bg.jpg"
+# --- BANNER (Tüm Alternatif Dosya İsimlerini Otomatik Bulan ve Cam İçine Alan Mimarisi) ---
+possible_files = ["bg2.jpg.jpg", "bg2.jpg", "bg.jpg"]
+banner_file = next((f for f in possible_files if os.path.exists(f)), None)
 
-if os.path.exists(banner_file):
+if banner_file:
     st.markdown('<div class="banner-container-box">', unsafe_allow_html=True)
     st.image(banner_file, use_container_width=True)
     st.markdown('</div>', unsafe_allow_html=True)
