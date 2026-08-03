@@ -32,12 +32,11 @@ def get_img_as_base64(file_path):
         return base64.b64encode(data).decode()
     return None
 
-# Görseli base64 formatına çevirip HTML içine doğrudan gömüyoruz (Kesin Çözüm)
 possible_files = ["bg2.jpg.jpg", "bg2.jpg", "bg.jpg"]
 banner_file = next((f for f in possible_files if os.path.exists(f)), None)
 img_b64 = get_img_as_base64(banner_file) if banner_file else None
 
-# 2. Tam Uyumlu Cam ve Büyüme (Hover) Efekti Mimarisi (CSS)
+# 2. Şık Web3 Çerçeveli ve Cam Efektli Banner Mimarisi (CSS)
 st.markdown(f"""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&display=swap');
@@ -65,7 +64,7 @@ st.markdown(f"""
         max-width: 100% !important;
     }}
 
-    /* --- HTML TABANLI KUSURSUZ BANNER CAM VE BÜYÜME EFEKTİ --- */
+    /* --- NET ÇERÇEVELİ, CAM EFEKTLİ VE BÜYÜME (HOVER) ÖZELLİKLİ BANNER --- */
     .absolute-center-banner {{
         display: flex;
         justify-content: center;
@@ -74,32 +73,33 @@ st.markdown(f"""
         margin-top: 15px;
         margin-bottom: 25px;
     }}
-    .banner-glass-card {{
-        background: rgba(17, 24, 39, 0.7);
+    .banner-framed-card {{
+        background: rgba(17, 24, 39, 0.75);
         backdrop-filter: blur(16px);
         -webkit-backdrop-filter: blur(16px);
-        border: 1px solid rgba(255, 255, 255, 0.07);
+        border: 2px solid rgba(212, 175, 55, 0.4);
         border-radius: 24px;
         padding: 16px;
-        box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.7);
+        box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.8), 0 0 20px rgba(212, 175, 55, 0.1);
         transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
         width: 75%;
         max-width: 1200px;
         position: relative;
         overflow: hidden;
     }}
-    .banner-glass-card:hover {{
+    .banner-framed-card:hover {{
         transform: translateY(-6px) scale(1.01);
-        border-color: rgba(212, 175, 55, 0.7);
-        box-shadow: 0 30px 70px -15px rgba(212, 175, 55, 0.35), 0 0 35px rgba(212, 175, 55, 0.25);
+        border-color: rgba(212, 175, 55, 0.9);
+        box-shadow: 0 30px 70px -15px rgba(212, 175, 55, 0.4), 0 0 35px rgba(212, 175, 55, 0.3);
     }}
-    .banner-glass-card img {{
+    .banner-framed-card img {{
         width: 100% !important;
         height: auto !important;
         max-height: 420px !important;
         object-fit: cover !important;
-        border-radius: 16px;
+        border-radius: 14px;
         display: block;
+        border: 1px solid rgba(255, 255, 255, 0.1);
     }}
 
     /* Grafik ve İçerik Kutuları */
@@ -240,11 +240,11 @@ st.markdown(f"""
 </style>
 """, unsafe_allow_html=True)
 
-# --- BANNER (HTML tabanlı, cam efektli ve hover büyüme animasyonlu) ---
+# --- ÇERÇEVELİ VE CAM EFEKTLİ BANNER ---
 if img_b64:
     st.markdown(f'''
     <div class="absolute-center-banner">
-        <div class="banner-glass-card">
+        <div class="banner-framed-card">
             <img src="data:image/jpeg;base64,{img_b64}" alt="Crypto Check Banner">
         </div>
     </div>
