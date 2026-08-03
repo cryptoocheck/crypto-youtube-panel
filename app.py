@@ -33,7 +33,7 @@ def get_img_as_base64(file_path):
 img_path = "bg2.jpg" if os.path.exists("bg2.jpg") else "bg.jpg" if os.path.exists("bg.jpg") else "bg.jpg.jpg" if os.path.exists("bg.jpg.jpg") else "photo_6014965432080600852_y (1).jpg" if os.path.exists("photo_6014965432080600852_y (1).jpg") else ""
 img_b64 = get_img_as_base64(img_path)
 
-# 2. Kesin Merkezlenmiş Butonçuk Sekme Mimarisi (CSS)
+# 2. İşaretlediğin Alanlara Tam Oturan Profesyonel Sekme Mimarisi (CSS)
 st.markdown(f"""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
@@ -153,30 +153,35 @@ st.markdown(f"""
         transform: translateY(-2px);
     }}
 
-    /* KESİN ÇÖZÜM: Sekme Butonlarını Tam Ortaya Sabitleyen Flex Mimarisi */
+    /* --- İŞARETLEDİĞİN 3 ALANA TAM OTURAN BUTONÇUK SEKME MİMARİSİ --- */
     div[data-baseweb="tab-list"] {{
-        display: flex !important;
-        justify-content: center !important;
-        align-items: center !important;
-        margin: 0 auto 30px auto !important;
+        display: grid !important;
+        grid-template-columns: repeat(3, 1fr) !important;
+        width: 100% !important;
+        max-width: 950px !important;
+        margin: 10px auto 30px auto !important;
         background-color: rgba(17, 24, 39, 0.85) !important;
-        padding: 8px 16px !important;
-        border-radius: 9999px !important;
+        padding: 8px !important;
+        border-radius: 18px !important;
         border: 1px solid rgba(255, 255, 255, 0.08) !important;
         backdrop-filter: blur(12px) !important;
-        width: fit-content !important;
         box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6) !important;
+        gap: 8px !important;
     }}
 
     div[data-baseweb="tab"] {{
-        border-radius: 9999px !important;
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        border-radius: 14px !important;
         color: #9ca3af !important;
         font-weight: 700 !important;
         font-size: 14px !important;
-        padding: 10px 28px !important;
+        padding: 12px 16px !important;
         background: transparent !important;
         border: none !important;
         transition: all 0.3s ease !important;
+        text-align: center !important;
     }}
 
     div[data-baseweb="tab"]:hover {{
@@ -315,7 +320,7 @@ if analyze_btn:
             </script>
             """, height=0)
 
-            # --- KESİN ORTALANMIŞ SEKMELER ---
+            # --- İŞARETLEDİĞİN 3 ALANA TAM YAYILAN SEKME MİMARİSİ ---
             t1, t2, t3 = st.tabs(["📊 Performans Matrisi", "🔍 Detaylı Analiz", "🤖 AI Strateji Raporu"])
 
             with t1:
