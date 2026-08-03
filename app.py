@@ -47,7 +47,7 @@ def parse_iso8601_duration_seconds(duration_str):
     seconds = int(match.group(3)) if match.group(3) else 0
     return hours * 3600 + minutes * 60 + seconds
 
-# 2. Tasarım Mimarisi (CSS - 3D Grafik Kartları & Şeffaf Cam Başlıklar)
+# 2. Tasarım Mimarisi (CSS)
 st.markdown(f"""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&display=swap');
@@ -75,11 +75,11 @@ st.markdown(f"""
         max-width: 100% !important;
     }}
 
-    /* --- ÇOK YAVAŞ, AĞIR VE AKICI İKİ YÖNLÜ GEÇİŞ (3D EFFECT) --- */
+    /* --- İPEKSİ SÜZÜLME VE 3D GEÇİŞ --- */
     .reveal-box {{
         opacity: 0;
-        transform: translateY(60px) scale(0.96);
-        transition: opacity 1.6s cubic-bezier(0.16, 1, 0.3, 1), transform 1.6s cubic-bezier(0.16, 1, 0.3, 1);
+        transform: translateY(50px) scale(0.97);
+        transition: opacity 1.5s cubic-bezier(0.16, 1, 0.3, 1), transform 1.5s cubic-bezier(0.16, 1, 0.3, 1);
         will-change: opacity, transform;
     }}
 
@@ -161,7 +161,7 @@ st.markdown(f"""
         text-shadow: 0 0 10px rgba(241, 196, 15, 0.6);
     }}
 
-    /* --- 3 BOYUTLU GRAFİK VE KUTU ALANLARI --- */
+    /* --- 3D KUTULAR --- */
     .metric-card-ondo, .ondo-glass-card {{
         background: rgba(17, 24, 39, 0.75);
         backdrop-filter: blur(16px);
@@ -180,7 +180,7 @@ st.markdown(f"""
         transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.4s ease, box-shadow 0.4s ease;
     }}
     .metric-card-ondo:hover, .ondo-glass-card:hover {{
-        transform: translateY(-8px) scale(1.01) perspective(1000px) rotateX(1deg);
+        transform: translateY(-8px) scale(1.01);
         border-color: rgba(241, 196, 15, 0.7);
         box-shadow: 0 30px 70px -12px rgba(241, 196, 15, 0.4), 0 0 30px rgba(241, 196, 15, 0.25);
     }}
@@ -225,7 +225,6 @@ st.markdown(f"""
         border-radius: 20px !important;
         padding: 15px !important;
         box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.6) !important;
-        transition: transform 0.3s ease, border-color 0.3s ease !important;
     }}
 
     section[data-testid="stSidebar"] {{
@@ -727,7 +726,7 @@ if "loaded" in st.session_state and st.session_state.loaded:
 
         st.markdown("<br>", unsafe_allow_html=True)
         
-        # --- 3. SHORTS VE BÜYÜK VİDEO ANALİZİ & 3D GRAFİKLER ---
+        # --- 3. SHORTS VE BÜYÜK VİDEO ANALİZİ & GERÇEK 3D AKICI GRAFİKLER ---
         st.markdown('''
         <div class="reveal-box section-title-box">
             <h3>⚡ Shorts ve Büyük Video Karşılaştırmalı Kümülatif Analiz</h3>
@@ -763,20 +762,25 @@ if "loaded" in st.session_state and st.session_state.loaded:
                 </div>
                 ''', unsafe_allow_html=True)
 
-        # Shorts Altına 3 Boyutlu Akıcı Grafik
+        # Shorts Altına 3 Boyutlu (3D Görsel Efektli) Akıcı Grafik
         st.markdown('<div class="reveal-box">', unsafe_allow_html=True)
         s_df_chart = pd.DataFrame(shorts_chart_data)
-        fig_shorts = px.bar(
-            s_df_chart, x="Periyot", y=["İzlenme", "Beğeni"],
-            barmode="group", template="plotly_dark",
-            color_discrete_map={"İzlenme": "#f1c40f", "Beğeni": "#3b82f6"},
-            title="Shorts Periyot Bazlı Etkileşim Grafiği"
-        )
+        fig_shorts = go.Figure(data=[
+            go.Bar(name='İzlenme', x=s_df_chart['Periyot'], y=s_df_chart['İzlenme'], marker_color='#f1c40f', marker=dict(line=dict(width=1, color='#ffffff'))),
+            go.Bar(name='Beğeni', x=s_df_chart['Periyot'], y=s_df_chart['Beğeni'], marker_color='#3b82f6', marker=dict(line=dict(width=1, color='#ffffff')))
+        ])
         fig_shorts.update_layout(
-            paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
+            barmode='group',
+            template="plotly_dark",
+            title="Shorts 3D Periyot Bazlı Etkileşim Analizi",
+            paper_bgcolor='rgba(0,0,0,0)',
+            plot_bgcolor='rgba(0,0,0,0)',
             font=dict(family="Plus Jakarta Sans", color="#f3f4f6"),
-            margin=dict(t=40, b=20, l=20, r=20),
-            scene=dict(camera=dict(eye=dict(x=1.5, y=1.5, z=1.2)))
+            scene=dict(
+                camera=dict(eye=dict(x=1.8, y=1.8, z=1.4))
+            ),
+            margin=dict(t=50, b=20, l=20, r=20),
+            transition=dict(duration=1000, easing="cubic-in-out")
         )
         st.plotly_chart(fig_shorts, use_container_width=True)
         st.markdown('</div>', unsafe_allow_html=True)
@@ -809,19 +813,25 @@ if "loaded" in st.session_state and st.session_state.loaded:
                 </div>
                 ''', unsafe_allow_html=True)
 
-        # Büyük Video Altına 3 Boyutlu Akıcı Grafik
+        # Büyük Video Altına 3 Boyutlu (3D Görsel Efektli) Akıcı Grafik
         st.markdown('<div class="reveal-box">', unsafe_allow_html=True)
         l_df_chart = pd.DataFrame(long_chart_data)
-        fig_long = px.bar(
-            l_df_chart, x="Periyot", y=["İzlenme", "Beğeni"],
-            barmode="group", template="plotly_dark",
-            color_discrete_map={"İzlenme": "#f1c40f", "Beğeni": "#10b981"},
-            title="Büyük Video Periyot Bazlı Etkileşim Grafiği"
-        )
+        fig_long = go.Figure(data=[
+            go.Bar(name='İzlenme', x=l_df_chart['Periyot'], y=l_df_chart['İzlenme'], marker_color='#f1c40f', marker=dict(line=dict(width=1, color='#ffffff'))),
+            go.Bar(name='Beğeni', x=l_df_chart['Periyot'], y=l_df_chart['Beğeni'], marker_color='#10b981', marker=dict(line=dict(width=1, color='#ffffff')))
+        ])
         fig_long.update_layout(
-            paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
+            barmode='group',
+            template="plotly_dark",
+            title="Büyük Video 3D Periyot Bazlı Etkileşim Analizi",
+            paper_bgcolor='rgba(0,0,0,0)',
+            plot_bgcolor='rgba(0,0,0,0)',
             font=dict(family="Plus Jakarta Sans", color="#f3f4f6"),
-            margin=dict(t=40, b=20, l=20, r=20)
+            scene=dict(
+                camera=dict(eye=dict(x=1.8, y=1.8, z=1.4))
+            ),
+            margin=dict(t=50, b=20, l=20, r=20),
+            transition=dict(duration=1000, easing="cubic-in-out")
         )
         st.plotly_chart(fig_long, use_container_width=True)
         st.markdown('</div>', unsafe_allow_html=True)
