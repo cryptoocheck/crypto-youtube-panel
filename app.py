@@ -7,6 +7,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 import os
 import base64
+import isodate
 
 # 1. Streamlit Sayfa Yapılandırması
 st.set_page_config(
@@ -36,7 +37,7 @@ possible_files = ["bg2.jpg.jpg", "bg2.jpg", "bg.jpg"]
 banner_file = next((f for f in possible_files if os.path.exists(f)), None)
 img_b64 = get_img_as_base64(banner_file) if banner_file else None
 
-# 2. Gelişmiş Tasarım Mimarisi (CSS)
+# 2. Gelişmiş Web3 Tasarım Mimarisi (CSS)
 st.markdown(f"""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&display=swap');
@@ -246,11 +247,11 @@ if analyze_btn:
         st.error("Lütfen sol paneldeki tüm erişim anahtarlarını eksiksiz girin.")
     else:
         try:
-            with st.spinner("Onchain ve YouTube derin verileri senkronize ediliyor..."):
+            with st.spinner("YouTube API üzerinden TÜM meta veriler ve istatistikler çekiliyor..."):
                 youtube = build('youtube', 'v3', developerKey=st.session_state.youtube_key)
                 
                 ch_req = youtube.channels().list(
-                    part='statistics,snippet,contentDetails',
+                    part='statistics,snippet,contentDetails,brandingSettings',
                     id=st.session_state.channel_id
                 ).execute()
 
@@ -262,42 +263,62 @@ if analyze_btn:
                 uploads_playlist_id = channel['contentDetails']['relatedPlaylists']['uploads']
 
                 playlist_req = youtube.playlistItems().list(
-                    part='snippet',
+                    part='snippet,contentDetails',
                     playlistId=uploads_playlist_id,
-                    maxResults=20
+                    maxResults=50
                 ).execute()
 
-                v_ids = [item['snippet']['resourceId']['videoId'] for item in playlist_req['items']]
+                v_ids = [item['contentDetails']['videoId'] for item in playlist_req['items']]
                 
                 videos_req = youtube.videos().list(
-                    part='statistics,snippet,contentDetails',
+                    part='statistics,snippet,contentDetails,status',
                     id=','.join(v_ids)
                 ).execute()
 
                 v_list = []
                 for item in videos_req['items']:
-                    title = item['snippet']['title']
-                    views = int(item['statistics'].get('viewCount', 0))
-                    likes = int(item['statistics'].get('likeCount', 0))
-                    comments = int(item['statistics'].get('commentCount', 0))
+                    snippet = item['snippet']
+                    stats = item['statistics']
+                    content = item['contentDetails']
+                    status = item['status']
+
+                    title = snippet['title']
+                    published_at = snippet['publishedAt'][:10]
+                    views = int(stats.get('viewCount', 0))
+                    likes = int(stats.get('likeCount', 0))
+                    comments = int(stats.get('commentCount', 0))
                     
                     engagement_rate = ((likes + comments) / views * 100) if views > 0 else 0
                     
-                    est_velocity = int(views * 0.35)
+                    # Süre analizi (ISO 8601)
+                    duration_iso = content.get('duration', 'PT0M')
+                    try:
+                        duration_sec = isodate.parse_duration(duration_iso).total_seconds()
+                    except:
+                        duration_sec = 0
+                    duration_min = round(duration_sec / 60, 1)
+
+                    # Çözünürlük ve Lisans
+                    definition = content.get('definition', 'sd').upper()
+                    privacy = status.get('privacyStatus', 'public')
+                    tags_count = len(snippet.get('tags', []))
+
+                    # Gelişmiş Metrikler
                     est_sub_conv = round((subscribers / max(total_views, 1)) * 100 + (engagement_rate * 0.2), 2)
                     est_ctr = round(min(float(4.5 + (engagement_rate * 0.4)), 15.0), 2)
-                    est_avd_min = round(float(2.2 + (likes / max(views, 1) * 15)), 1)
 
                     v_list.append({
                         "Video Başlığı": title,
+                        "Yayın Tarihi": published_at,
                         "İzlenme": views,
                         "Beğeni": likes,
                         "Yorum": comments,
                         "Etkileşim (%)": round(engagement_rate, 2),
-                        "Tahmini 24s Hız": est_velocity,
+                        "Süre (Dk)": duration_min,
+                        "Çözünürlük": definition,
+                        "Etiket Sayısı": tags_count,
                         "Abone Dönüşüm (%)": est_sub_conv,
-                        "Tahmini CTR (%)": est_ctr,
-                        "Ort. İzleme (Dk)": est_avd_min
+                        "Tahmini CTR (%)": est_ctr
                     })
 
                 df = pd.DataFrame(v_list)
@@ -323,15 +344,13 @@ if "loaded" in st.session_state and st.session_state.loaded:
     ch_title = st.session_state.ch_title
     df = st.session_state.df
 
-    # Güvenlik Kontrolü: Eksik sütunlar varsa otomatik tamamla (KeyError önlemi)
+    # Güvenlik Kontrolü
     if "Tahmini CTR (%)" not in df.columns:
         df["Tahmini CTR (%)"] = 6.5
-    if "Ort. İzleme (Dk)" not in df.columns:
-        df["Ort. İzleme (Dk)"] = 3.0
+    if "Süre (Dk)" not in df.columns:
+        df["Süre (Dk)"] = 5.0
     if "Abone Dönüşüm (%)" not in df.columns:
         df["Abone Dönüşüm (%)"] = 1.2
-    if "Tahmini 24s Hız" not in df.columns:
-        df["Tahmini 24s Hız"] = df["İzlenme"] * 0.35
 
     # Üst Metrik Kartları
     c1, c2, c3, c4 = st.columns(4)
@@ -425,7 +444,7 @@ if "loaded" in st.session_state and st.session_state.loaded:
         with col_m1:
             st.metric(label="Ortalama Tahmini CTR", value=f"%{df['Tahmini CTR (%)'].mean():.2f}", delta="Hedef: >%6.0")
         with col_m2:
-            st.metric(label="Ortalama İzlenme Süresi (AVD)", value=f"{df['Ort. İzleme (Dk)'].mean():.1f} Dk", delta="Kitle Tutma")
+            st.metric(label="Ortalama Video Süresi", value=f"{df['Süre (Dk)'].mean():.1f} Dk", delta="Kanal Formatı")
         with col_m3:
             st.metric(label="Ortalama Abone Dönüşüm Oranı", value=f"%{df['Abone Dönüşüm (%)'].mean():.2f}", delta="Sadakat Skoru")
 
@@ -433,17 +452,17 @@ if "loaded" in st.session_state and st.session_state.loaded:
         col_left, col_right = st.columns([2, 1])
         
         with col_left:
-            st.write("### İzlenme ve İlk 24 Saat Hız Korelasyonu")
+            st.write("### İzlenme ve Video Süresi Korelasyonu")
             fig = px.scatter(
                 df, 
                 x="İzlenme", 
-                y="Tahmini 24s Hız", 
+                y="Süre (Dk)", 
                 size="Beğeni", 
                 hover_name="Video Başlığı",
                 color="Etkileşim (%)",
                 color_continuous_scale=px.colors.sequential.YlOrBr,
                 template="plotly_dark",
-                labels={"İzlenme": "Toplam İzlenme", "Tahmini 24s Hız": "İlk 24s İzlenme Hızı"}
+                labels={"İzlenme": "Toplam İzlenme", "Süre (Dk)": "Video Süresi (Dakika)"}
             )
             fig.update_layout(
                 paper_bgcolor='rgba(0,0,0,0)',
@@ -453,16 +472,17 @@ if "loaded" in st.session_state and st.session_state.loaded:
             st.plotly_chart(fig, use_container_width=True)
 
         with col_right:
-            st.write("### İzleyici Etkileşim Oranı")
-            avg_likes = df['Beğeni'].mean()
-            avg_comments = df['Yorum'].mean()
+            st.write("### Video Çözünürlük Dağılımı")
+            res_counts = df['Çözünürlük'].value_counts().reset_index()
+            res_counts.columns = ['Çözünürlük', 'Adet']
             
-            fig_pie = go.Figure(data=[go.Pie(
-                labels=['Beğeniler', 'Yorumlar'],
-                values=[avg_likes, avg_comments],
-                hole=.65,
-                marker_colors=['#d4af37', '#1f2937'] 
-            )])
+            fig_pie = px.pie(
+                res_counts, 
+                names='Çözünürlük', 
+                values='Adet',
+                hole=0.65,
+                color_discrete_sequence=['#d4af37', '#1f2937', '#374151']
+            )
             fig_pie.update_layout(
                 paper_bgcolor='rgba(0,0,0,0)',
                 plot_bgcolor='rgba(0,0,0,0)',
@@ -472,7 +492,7 @@ if "loaded" in st.session_state and st.session_state.loaded:
             st.plotly_chart(fig_pie, use_container_width=True)
 
     elif current_tab == "Detaylı Analiz":
-        st.write("### 🔍 Tüm Videolar İçin Derin Performans Kayıtları")
+        st.write("### 🔍 Tüm Meta Verileriyle Kapsamlı Video Arşivi")
         st.dataframe(
             df,
             use_container_width=True
@@ -480,7 +500,7 @@ if "loaded" in st.session_state and st.session_state.loaded:
 
     elif current_tab == "AI Strateji Raporu":
         st.write("### 🤖 Profesyonel Kripto & Kanal Büyüme Raporu (Ağustos 2026)")
-        with st.spinner("Kanal verileri ve Ağustos 2026 kripto trendleri Llama 3.3 motoru ile sentezleniyor..."):
+        with st.spinner("Kanalın tüm meta verileri ve Ağustos 2026 kripto trendleri Llama 3.3 motoru ile sentezleniyor..."):
             client = Groq(api_key=st.session_state.groq_key)
             
             prompt = f"""
@@ -490,10 +510,10 @@ if "loaded" in st.session_state and st.session_state.loaded:
             Toplam İzlenme: {total_views} | Abone Sayısı: {subscribers} | Toplam Video: {total_videos}
             Son Videoların Ortalama İzlenmesi: {df['İzlenme'].mean():.0f}
             Ortalama Etkileşim Oranı: %{df['Etkileşim (%)'].mean():.2f}
-            Ortalama Tahmini CTR: %{df['Tahmini CTR (%)'].mean():.2f}
+            Ortalama Video Süresi: {df['Süre (Dk)'].mean():.1f} Dakika
 
             Lütfen kesinlikle Türkçe olarak, profesyonel yatırım fonu raporu formatında şu başlıkları detaylıca sun:
-            1. **Kanalın Kitle ve Etkileşim Sağlığı:** Mevcut verilerin profesyonel analizi.
+            1. **Kanalın Kitle ve Etkileşim Sağlığı:** Mevcut meta verilerin (süreler, çözünürlükler, etkileşimler) profesyonel analizi.
             2. **Ağustos 2026 Yüksek İzlenme Getirecek 3 Trend & Coin:** (Örn: CLARITY Act regülasyonları, AI altcoinleri/TAO, RWA tokenizasyonu, Solana/Sui ekosistemi veya BTC Q4 beklentileri üzerinden nokta atışı coin ve konu önerileri).
             3. **Yüksek CTR ve İzlenme Süresi İçin Algoritma Taktikleri:** İzleyiciyi ilk 15 saniyede tutacak kanca (hook) stratejisi ve başlık önerileri.
             4. **Otomasyon & İçerik Üretim Hattı:** Bu analizleri sürekli kılmak için bir YouTube içerik üreticisinin izlemesi gereken operasyonel yol haritası.
