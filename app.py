@@ -36,7 +36,7 @@ possible_files = ["bg2.jpg.jpg", "bg2.jpg", "bg.jpg"]
 banner_file = next((f for f in possible_files if os.path.exists(f)), None)
 img_b64 = get_img_as_base64(banner_file) if banner_file else None
 
-# 2. 4 Kat Daha Aşağı İndirilmiş Kusursuz Çerçeveli Banner Mimarisi (CSS)
+# 2. İsteğe Göre Çok Daha Fazla Aşağı İndirilmiş Banner Mimarisi (CSS)
 st.markdown(f"""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&display=swap');
@@ -64,7 +64,7 @@ st.markdown(f"""
         max-width: 100% !important;
     }}
 
-    /* --- 4 KAT DAHA AŞAĞI İNDİRİLMİŞ TAM GÖRÜNÜR ÇERÇEVELİ BANNER --- */
+    /* --- İSTENİLEN ÖLÇÜDE DAHA FAZLA AŞAĞI İNDİRİLMİŞ BANNER --- */
     .absolute-center-banner {{
         display: flex;
         justify-content: center;
