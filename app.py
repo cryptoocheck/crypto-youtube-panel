@@ -10,13 +10,12 @@ import base64
 
 # 1. Streamlit Sayfa Yapılandırması
 st.set_page_config(
-    page_title="Crypto Check — Profesyonel Analiz Paneli",
-    page_icon="📈",
+    page_title="Crypto Check — Profesyonel Web3 Finans Paneli",
+    page_icon="🌐",
     layout="wide",
     initial_sidebar_state="collapsed"
 )
 
-# 2. Oturum Hafızası (Session State) Başlatma
 if "youtube_key" not in st.session_state:
     st.session_state.youtube_key = ""
 if "groq_key" not in st.session_state:
@@ -34,19 +33,23 @@ def get_img_as_base64(file_path):
 img_path = "bg2.jpg" if os.path.exists("bg2.jpg") else "bg.jpg" if os.path.exists("bg.jpg") else "bg.jpg.jpg" if os.path.exists("bg.jpg.jpg") else "photo_6014965432080600852_y (1).jpg" if os.path.exists("photo_6014965432080600852_y (1).jpg") else ""
 img_b64 = get_img_as_base64(img_path)
 
-# 3. Apple Tipografi ve 3D Kart Mimarisi (CSS)
+# 2. Ondo.Finance Tarzı Akışkan, Hareketli ve Premium Web3 Tasarım Mimarisi (CSS)
 st.markdown(f"""
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@300;400;500;600;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
     
     html, body, [class*="css"] {{
-        font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Helvetica, Arial, sans-serif;
-        color: #f5f5f7;
-        letter-spacing: -0.01em;
+        font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+        color: #f3f4f6;
     }}
 
     .stApp {{
-        background-color: #000000;
+        background-color: #030712;
+        background-image: 
+            radial-gradient(at 0% 0%, rgba(212, 175, 55, 0.08) 0px, transparent 50%),
+            radial-gradient(at 100% 0%, rgba(30, 58, 138, 0.15) 0px, transparent 50%),
+            radial-gradient(at 50% 100%, rgba(15, 23, 42, 1) 0px, transparent 50%);
+        background-attachment: fixed;
     }}
 
     #MainMenu {{visibility: hidden;}}
@@ -54,7 +57,7 @@ st.markdown(f"""
 
     .block-container {{
         padding-top: 0rem !important;
-        padding-bottom: 2rem !important;
+        padding-bottom: 3rem !important;
         max-width: 100% !important;
     }}
 
@@ -63,56 +66,85 @@ st.markdown(f"""
         justify-content: center;
         align-items: center;
         width: 100%;
-        margin-top: 10px;
-        margin-bottom: 15px;
+        margin-top: 15px;
+        margin-bottom: 25px;
     }}
     .absolute-center-banner img {{
         width: 75% !important;
         max-width: 1200px !important;
         height: auto;
-        border-radius: 16px;
+        border-radius: 20px;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), 0 0 40px rgba(212, 175, 55, 0.15);
         display: block;
+        transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    }}
+    .absolute-center-banner img:hover {{
+        transform: scale(1.01);
     }}
 
-    .apple-card-3d {{
-        background: linear-gradient(145deg, #121214, #1b1b1e);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        border-radius: 22px;
+    /* Ondo Tarzı Cam Efektli (Glassmorphism) ve Hareketli 3D Kartlar */
+    .ondo-glass-card {{
+        background: rgba(17, 24, 39, 0.7);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1px solid rgba(255, 255, 255, 0.07);
+        border-radius: 24px;
         padding: 30px;
-        margin-bottom: 25px;
-        box-shadow: 0 16px 48px 0 rgba(0, 0, 0, 0.7), inset 0 1px 0 0 rgba(255, 255, 255, 0.12);
+        margin-bottom: 24px;
+        box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.7);
         transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
         position: relative;
+        overflow: hidden;
     }}
-    .apple-card-3d:hover {{
-        transform: translateY(-5px);
-        box-shadow: 0 24px 60px 0 rgba(0, 0, 0, 0.85), inset 0 1px 0 0 rgba(255, 255, 255, 0.2);
+    .ondo-glass-card::before {{
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 2px;
+        background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.5), transparent);
+        opacity: 0;
+        transition: opacity 0.4s ease;
+    }}
+    .ondo-glass-card:hover {{
+        transform: translateY(-6px);
         border-color: rgba(212, 175, 55, 0.3);
+        box-shadow: 0 30px 60px -20px rgba(212, 175, 55, 0.15);
+    }}
+    .ondo-glass-card:hover::before {{
+        opacity: 1;
     }}
 
-    .metric-card-apple {{
-        background: linear-gradient(145deg, #161618, #1c1c1e);
-        border: 1px solid rgba(255, 255, 255, 0.08);
+    .metric-card-ondo {{
+        background: rgba(17, 24, 39, 0.75);
+        backdrop-filter: blur(16px);
+        border: 1px solid rgba(255, 255, 255, 0.07);
         border-radius: 20px;
         padding: 26px;
         margin-bottom: 20px;
-        box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.6), inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
+        box-shadow: 0 15px 35px -10px rgba(0, 0, 0, 0.5);
+        transition: all 0.3s ease;
+    }}
+    .metric-card-ondo:hover {{
+        border-color: rgba(212, 175, 55, 0.4);
+        transform: translateY(-3px);
     }}
 
     .metric-title {{
-        font-size: 12px;
-        font-weight: 600;
+        font-size: 11px;
+        font-weight: 700;
         text-transform: uppercase;
-        letter-spacing: 1.2px;
-        color: #86868b;
-        margin-bottom: 8px;
+        letter-spacing: 1.5px;
+        color: #9ca3af;
+        margin-bottom: 10px;
     }}
     
     .metric-value {{
         font-size: 38px;
-        font-weight: 700;
-        letter-spacing: -0.02em;
-        background: linear-gradient(180deg, #ffffff 0%, #a1a1a6 100%);
+        font-weight: 800;
+        letter-spacing: -0.03em;
+        background: linear-gradient(135deg, #ffffff 0%, #d1d5db 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
     }}
@@ -120,47 +152,52 @@ st.markdown(f"""
     .metric-sub {{
         font-size: 12px;
         color: #d4af37; 
-        margin-top: 6px;
-        font-weight: 500;
+        margin-top: 8px;
+        font-weight: 600;
     }}
 
     section[data-testid="stSidebar"] {{
-        background-color: #09090b !important;
-        border-right: 1px solid #27272a;
+        background-color: #0b0f19 !important;
+        border-right: 1px solid rgba(255, 255, 255, 0.05);
     }}
     
     .stButton>button {{
-        background: #d4af37; 
-        color: #000000;
+        background: linear-gradient(135deg, #d4af37 0%, #aa8c2c 100%); 
+        color: #030712;
         border: none;
-        border-radius: 980px;
-        font-weight: 600;
-        padding: 10px 24px;
+        border-radius: 9999px;
+        font-weight: 700;
+        padding: 12px 28px;
         transition: all 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
         width: 100%;
+        box-shadow: 0 4px 20px rgba(212, 175, 55, 0.3);
     }}
     .stButton>button:hover {{
-        background: #f1c40f;
-        box-shadow: 0 0 20px rgba(241, 196, 15, 0.5);
-        color: #000000;
+        background: linear-gradient(135deg, #f1c40f 0%, #d4af37 100%);
+        box-shadow: 0 0 30px rgba(241, 196, 15, 0.6);
+        transform: translateY(-2px);
+        color: #030712;
     }}
 
     .stTabs [data-baseweb="tab-list"] {{
-        gap: 8px;
-        background-color: #1c1c1e;
-        padding: 6px;
-        border-radius: 980px;
-        border: 1px solid rgba(255, 255, 255, 0.08);
+        gap: 10px;
+        background-color: rgba(17, 24, 39, 0.8);
+        padding: 8px;
+        border-radius: 9999px;
+        border: 1px solid rgba(255, 255, 255, 0.07);
+        backdrop-filter: blur(10px);
     }}
     .stTabs [data-baseweb="tab"] {{
-        border-radius: 980px;
-        color: #86868b;
-        font-weight: 500;
-        padding: 8px 20px;
+        border-radius: 9999px;
+        color: #9ca3af;
+        font-weight: 600;
+        padding: 10px 24px;
+        transition: all 0.3s ease;
     }}
     .stTabs [aria-selected="true"] {{
-        background-color: #d4af37 !important;
-        color: #000000 !important;
+        background: linear-gradient(135deg, #d4af37 0%, #aa8c2c 100%) !important;
+        color: #030712 !important;
+        box-shadow: 0 4px 15px rgba(212, 175, 55, 0.4);
     }}
 </style>
 """, unsafe_allow_html=True)
@@ -173,10 +210,10 @@ if img_b64:
     </div>
     ''', unsafe_allow_html=True)
 else:
-    st.markdown("<h1 style='text-align: center; font-weight: 700; font-size: 48px;'>Crypto Check</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 style='text-align: center; font-weight: 800; font-size: 48px; letter-spacing: -1px;'>Crypto Check</h1>", unsafe_allow_html=True)
 
-# Sidebar (Kontrol Paneli - Otomatik Hafızaya Alan Inputlar)
-st.sidebar.markdown("### ⚙️ Kontrol Paneli")
+# Sidebar (Kontrol Paneli)
+st.sidebar.markdown("### 🌐 Web3 Kontrol Paneli")
 st.session_state.youtube_key = st.sidebar.text_input("YouTube Data API Anahtarı", value=st.session_state.youtube_key, type="password")
 st.session_state.groq_key = st.sidebar.text_input("Groq AI Anahtarı", value=st.session_state.groq_key, type="password")
 st.session_state.channel_id = st.sidebar.text_input("Kanal ID", value=st.session_state.channel_id)
@@ -188,7 +225,7 @@ if analyze_btn:
         st.error("Lütfen sol paneldeki tüm erişim anahtarlarını eksiksiz girin.")
     else:
         try:
-            with st.spinner("YouTube sunucularından canlı veriler yükleniyor..."):
+            with st.spinner("Onchain ve YouTube verileri senkronize ediliyor..."):
                 youtube = build('youtube', 'v3', developerKey=st.session_state.youtube_key)
                 
                 ch_req = youtube.channels().list(
@@ -236,16 +273,16 @@ if analyze_btn:
                 df = pd.DataFrame(v_list)
                 avg_eng = float(df["Etkileşim (%)"].mean())
             
-            # Üst Metrik Kartları ve 2 Saniyelik Sayaç Motoru
+            # Üst Metrik Kartları (2 Saniyede 0'dan Artan Akıllı Sayaçlar)
             c1, c2, c3, c4 = st.columns(4)
             with c1:
-                st.markdown(f'<div class="metric-card-apple"><div class="metric-title">TOPLAM İZLENME</div><div class="metric-value"><span id="counter-1">0</span></div><div class="metric-sub">Canlı Veri</div></div>', unsafe_allow_html=True)
+                st.markdown(f'<div class="metric-card-ondo"><div class="metric-title">TOPLAM İZLENME</div><div class="metric-value"><span id="counter-1">0</span></div><div class="metric-sub">Canlı Veri</div></div>', unsafe_allow_html=True)
             with c2:
-                st.markdown(f'<div class="metric-card-apple"><div class="metric-title">ABONE SAYISI</div><div class="metric-value"><span id="counter-2">0</span></div><div class="metric-sub">Aktif İzleyici</div></div>', unsafe_allow_html=True)
+                st.markdown(f'<div class="metric-card-ondo"><div class="metric-title">ABONE SAYISI</div><div class="metric-value"><span id="counter-2">0</span></div><div class="metric-sub">Aktif İzleyici</div></div>', unsafe_allow_html=True)
             with c3:
-                st.markdown(f'<div class="metric-card-apple"><div class="metric-title">ORTALAMA ETKİLEŞİM</div><div class="metric-value"><span id="counter-3">0.00</span></div><div class="metric-sub">Kanal Performansı</div></div>', unsafe_allow_html=True)
+                st.markdown(f'<div class="metric-card-ondo"><div class="metric-title">ORTALAMA ETKİLEŞİM</div><div class="metric-value"><span id="counter-3">0.00</span></div><div class="metric-sub">Kanal Performansı</div></div>', unsafe_allow_html=True)
             with c4:
-                st.markdown(f'<div class="metric-card-apple"><div class="metric-title">İÇERİK SAYISI</div><div class="metric-value"><span id="counter-4">0</span></div><div class="metric-sub">Yayınlanan Video</div></div>', unsafe_allow_html=True)
+                st.markdown(f'<div class="metric-card-ondo"><div class="metric-title">İÇERİK SAYISI</div><div class="metric-value"><span id="counter-4">0</span></div><div class="metric-sub">Yayınlanan Video</div></div>', unsafe_allow_html=True)
 
             components.html(f"""
             <script>
@@ -295,7 +332,7 @@ if analyze_btn:
                 col_left, col_right = st.columns([2, 1])
                 
                 with col_left:
-                    st.markdown('<div class="apple-card-3d">', unsafe_allow_html=True)
+                    st.markdown('<div class="ondo-glass-card">', unsafe_allow_html=True)
                     st.write("### İzlenme ve Etkileşim Dağılımı")
                     fig = px.scatter(
                         df, 
@@ -311,13 +348,13 @@ if analyze_btn:
                     fig.update_layout(
                         paper_bgcolor='rgba(0,0,0,0)',
                         plot_bgcolor='rgba(0,0,0,0)',
-                        font=dict(family="SF Pro Display, -apple-system", color="#d1d1d6")
+                        font=dict(family="Plus Jakarta Sans, sans-serif", color="#d1d5db")
                     )
                     st.plotly_chart(fig, use_container_width=True)
                     st.markdown('</div>', unsafe_allow_html=True)
 
                 with col_right:
-                    st.markdown('<div class="apple-card-3d">', unsafe_allow_html=True)
+                    st.markdown('<div class="ondo-glass-card">', unsafe_allow_html=True)
                     st.write("### İzleyici Etkileşim Oranı")
                     avg_likes = df['Beğeni'].mean()
                     avg_comments = df['Yorum'].mean()
@@ -325,20 +362,20 @@ if analyze_btn:
                     fig_pie = go.Figure(data=[go.Pie(
                         labels=['Beğeniler', 'Yorumlar'],
                         values=[avg_likes, avg_comments],
-                        hole=.6,
-                        marker_colors=['#d4af37', '#48484a'] 
+                        hole=.65,
+                        marker_colors=['#d4af37', '#1f2937'] 
                     )])
                     fig_pie.update_layout(
                         paper_bgcolor='rgba(0,0,0,0)',
                         plot_bgcolor='rgba(0,0,0,0)',
                         showlegend=True,
-                        font=dict(family="SF Pro Display, -apple-system", color="#d1d1d6")
+                        font=dict(family="Plus Jakarta Sans, sans-serif", color="#d1d5db")
                     )
                     st.plotly_chart(fig_pie, use_container_width=True)
                     st.markdown('</div>', unsafe_allow_html=True)
 
             with t2:
-                st.markdown('<div class="apple-card-3d">', unsafe_allow_html=True)
+                st.markdown('<div class="ondo-glass-card">', unsafe_allow_html=True)
                 st.write("### Video Performans Kayıtları")
                 st.dataframe(
                     df,
@@ -347,22 +384,22 @@ if analyze_btn:
                 st.markdown('</div>', unsafe_allow_html=True)
 
             with t3:
-                st.markdown('<div class="apple-card-3d">', unsafe_allow_html=True)
+                st.markdown('<div class="ondo-glass-card">', unsafe_allow_html=True)
                 st.write("### 🤖 Stratejik Yönetici Özeti")
-                with st.spinner("Kanal modelleri Llama 3.3 Motoru ile analiz ediliyor..."):
+                with st.spinner("Web3 finans modelleri Llama 3.3 Motoru ile analiz ediliyor..."):
                     client = Groq(api_key=st.session_state.groq_key)
                     
                     prompt = f"""
-                    Sen Apple seviyesinde ürün ve içerik stratejisi geliştiren lider bir YouTube Kripto Kanalı Danışmanısın.
+                    Sen kurumsal düzeyde Web3 ve kripto varlık stratejisi geliştiren lider bir finansal analistsin.
                     Kanal Adı: {ch_title}
                     Toplam İzlenme: {total_views} | Abone Sayısı: {subscribers}
                     Son 15 Videonun Ortalama İzlenmesi: {df['İzlenme'].mean():.0f}
                     Ortalama Etkileşim Oranı: %{df['Etkileşim (%)'].mean():.2f}
 
-                    Lütfen kesinlikle Türkçe olarak, üst düzey yönetici formatında (Apple Tarzı Minimalist ve Derin):
-                    1. **Kanalın Büyüme Vektörü:** Mevcut kitle sadakatini ve etkileşim gücünü analiz et.
-                    2. **3 Fark Yaratan İçerik Fikri:** Güncel kripto ekosistemine uygun 3 spesifik, yüksek tıklama (CTR) potansiyelli video konusu ve başlık yapısı sun.
-                    3. **Kitle Tutma Mimarisi:** Tıklama sonrası izleyici kaybını engelleyecek 1 stratejik altın kural sun.
+                    Lütfen kesinlikle Türkçe olarak, üst düzey kurumsal DeFi formatında:
+                    1. **Kanalın Likidite & Kitle Vektörü:** Mevcut kitle sadakatini ve etkileşim gücünü analiz et.
+                    2. **3 Kurumsal İçerik Fikri:** Güncel kripto ekosistemine uygun 3 spesifik, yüksek CTR potansiyelli video konusu sun.
+                    3. **Kitle Tutma Mimarisi:** İzleyici kaybını engelleyecek 1 stratejik altın kural sun.
                     """
                     
                     chat_completion = client.chat.completions.create(
