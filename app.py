@@ -748,7 +748,7 @@ if "loaded" in st.session_state and st.session_state.loaded:
                 </div>
                 ''', unsafe_allow_html=True)
 
-        # --- 3. YENİ EKLENEN SATIR: ŞEFFAF İZLENME SÜRESİ VE GEÇERLİ SHORTS GÖRÜNTÜLEME (İNSAN LOGOLU) ---
+        # --- 3. YENİ EKLENEN SATIR: ŞEFFAF İZLENME SÜRESİ VE BÜYÜK BEYAZ İNSAN LOGOLU SHORTS GÖRÜNTÜLEME ---
         st.markdown("<br>", unsafe_allow_html=True)
         st.markdown('<div class="reveal-box">', unsafe_allow_html=True)
         st.write("### 🎯 KANAL DETAYLI PERFORMANS ÖZETİ")
@@ -766,8 +766,8 @@ if "loaded" in st.session_state and st.session_state.loaded:
         with new_c2:
             st.markdown(f'''
             <div class="metric-card-ondo reveal-box" style="min-height: 130px; padding: 20px;">
-                <div class="metric-title">👥 GEÇERLİ SHORTS GÖRÜNTÜLEME SAYISI</div>
-                <div class="metric-value" style="font-size: 32px;">{total_shorts_views:,}</div>
+                <div class="metric-title">GEÇERLİ SHORTS GÖRÜNTÜLEME SAYISI</div>
+                <div class="metric-value" style="font-size: 32px;"><span style="font-size: 40px; color: #ffffff; vertical-align: middle; margin-right: 8px;">👥</span> {total_shorts_views:,}</div>
                 <div class="metric-sub">Kanal Geneli Dikey İzleyici Erişimi</div>
             </div>
             ''', unsafe_allow_html=True)
