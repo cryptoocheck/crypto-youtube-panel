@@ -35,10 +35,10 @@ def get_img_as_base64(file_path):
 img_path = "bg2.jpg" if os.path.exists("bg2.jpg") else "bg.jpg" if os.path.exists("bg.jpg") else "bg.jpg.jpg" if os.path.exists("bg.jpg.jpg") else "photo_6014965432080600852_y (1).jpg" if os.path.exists("photo_6014965432080600852_y (1).jpg") else ""
 img_b64 = get_img_as_base64(img_path)
 
-# 2. Ondo.Finance Tarzı Kusursuz Tasarım ve Butonçuk Sekme Mimarisi (CSS)
+# 2. Kalın, Belirgin ve Ultra Profesyonel Butonçuk Sekme Mimarisi (CSS)
 st.markdown(f"""
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&display=swap');
     
     html, body, [class*="css"] {{
         font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -154,6 +154,40 @@ st.markdown(f"""
         background: linear-gradient(135deg, #f1c40f 0%, #d4af37 100%);
         transform: translateY(-2px);
     }}
+
+    /* --- SEKME BUTONLARI ÖZEL KALIN VE BELİRGİN TASARIM --- */
+    .tab-active button {{
+        background: linear-gradient(135deg, #d4af37 0%, #b8860b 100%) !important;
+        color: #030712 !important;
+        font-weight: 800 !important;
+        font-size: 15px !important;
+        letter-spacing: 0.5px !important;
+        border-radius: 9999px !important;
+        border: 1px solid rgba(255, 255, 255, 0.3) !important;
+        box-shadow: 0 0 25px rgba(212, 175, 55, 0.5) !important;
+        padding: 14px 24px !important;
+        transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    }}
+    
+    .tab-inactive button {{
+        background: rgba(17, 24, 39, 0.85) !important;
+        color: #e5e7eb !important;
+        font-weight: 700 !important;
+        font-size: 14px !important;
+        letter-spacing: 0.5px !important;
+        border-radius: 9999px !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        backdrop-filter: blur(12px) !important;
+        padding: 14px 24px !important;
+        transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    }}
+    
+    .tab-inactive button:hover {{
+        background: rgba(31, 41, 55, 0.95) !important;
+        border-color: rgba(212, 175, 55, 0.4) !important;
+        color: #ffffff !important;
+        transform: translateY(-2px);
+    }}
 </style>
 """, unsafe_allow_html=True)
 
@@ -228,7 +262,6 @@ if analyze_btn:
                 df = pd.DataFrame(v_list)
                 avg_eng = float(df["Etkileşim (%)"].mean())
                 
-                # Verileri oturumda sakla
                 st.session_state.df = df
                 st.session_state.total_views = total_views
                 st.session_state.subscribers = subscribers
@@ -240,7 +273,7 @@ if analyze_btn:
         except Exception as e:
             st.error(f"Sistem Çalışma Hatası: {e}")
 
-# Eğer veriler yüklendiyse ekranı çiz
+# Veriler yüklendiyse paneli çiz
 if "loaded" in st.session_state and st.session_state.loaded:
     total_views = st.session_state.total_views
     subscribers = st.session_state.subscribers
@@ -301,19 +334,35 @@ if "loaded" in st.session_state and st.session_state.loaded:
     </script>
     """, height=0)
 
-    # --- TAM İSTEDİĞİN GİBİ 3 EŞİT PARÇAYA YAYILAN PROFESYONEL BUTONÇUK SEKMELER ---
+    # --- ULTRA PROFESYONEL KALIN VE BELİRGİN BUTONÇUK SEKMELER ---
     st.markdown("<br>", unsafe_allow_html=True)
     tab_col1, tab_col2, tab_col3 = st.columns(3)
 
     with tab_col1:
-        if st.button("📊 Performans Matrisi", use_container_width=True):
+        css_class = "tab-active" if st.session_state.active_tab == "Performans Matrisi" else "tab-inactive"
+        st.markdown(f'<div class="{css_class}">', unsafe_allow_html=True)
+        if st.button("📊 PERFORMANS MATRİSİ", use_container_width=True):
             st.session_state.active_tab = "Performans Matrisi"
+            st.rerun()
+        st.markdown('</div>', unsafe_allow_html=True)
+
     with tab_col2:
-        if st.button("🔍 Detaylı Analiz", use_container_width=True):
+        css_class = "tab-active" if st.session_state.active_tab == "Detaylı Analiz" else "tab-inactive"
+        st.markdown(f'<div class="{css_class}">', unsafe_allow_html=True)
+        if st.button("🔍 DETAYLI ANALİZ", use_container_width=True):
             st.session_state.active_tab = "Detaylı Analiz"
+            st.rerun()
+        st.markdown('</div>', unsafe_allow_html=True)
+
     with tab_col3:
-        if st.button("🤖 AI Strateji Raporu", use_container_width=True):
+        css_class = "tab-active" if st.session_state.active_tab == "AI Strateji Raporu" else "tab-inactive"
+        st.markdown(f'<div class="{css_class}">', unsafe_allow_html=True)
+        if st.button("🤖 AI STRATEJİ RAPORU", use_container_width=True):
             st.session_state.active_tab = "AI Strateji Raporu"
+            st.rerun()
+        st.markdown('</div>', unsafe_allow_html=True)
+
+    st.markdown("<br>", unsafe_allow_html=True)
 
     # Aktif sekmeye göre içerik gösterimi
     current_tab = st.session_state.active_tab
