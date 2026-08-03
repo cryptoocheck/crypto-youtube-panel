@@ -35,7 +35,7 @@ def get_img_as_base64(file_path):
 img_path = "bg2.jpg" if os.path.exists("bg2.jpg") else "bg.jpg" if os.path.exists("bg.jpg") else "bg.jpg.jpg" if os.path.exists("bg.jpg.jpg") else "photo_6014965432080600852_y (1).jpg" if os.path.exists("photo_6014965432080600852_y (1).jpg") else ""
 img_b64 = get_img_as_base64(img_path)
 
-# 2. Fare Yaklaşınca Büyüyen ve Parlayan Altın Sarısı Cam Efekti Mimarisi (CSS)
+# 2. Sayfadaki TÜM Kutucuklara Hover Büyüme ve Parlayan Altın Sarısı Cam Efekti Mimarisi (CSS)
 st.markdown(f"""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&display=swap');
@@ -80,7 +80,7 @@ st.markdown(f"""
         display: block;
     }}
 
-    /* Grafik ve İçerik Kartları (Hover Efektli Cam Tasarımı) */
+    /* SAYFADAKİ TÜM KUTULAR (Grafikler, Tablolar, AI Raporu) İÇİN EVRENSEL HOVER EFEKTİ */
     .ondo-glass-card {{
         background: rgba(17, 24, 39, 0.7);
         backdrop-filter: blur(16px);
@@ -96,8 +96,8 @@ st.markdown(f"""
     }}
     .ondo-glass-card:hover {{
         transform: translateY(-6px) scale(1.01);
-        border-color: rgba(212, 175, 55, 0.6);
-        box-shadow: 0 30px 70px -15px rgba(212, 175, 55, 0.3), 0 0 30px rgba(212, 175, 55, 0.2);
+        border-color: rgba(212, 175, 55, 0.7);
+        box-shadow: 0 30px 70px -15px rgba(212, 175, 55, 0.35), 0 0 35px rgba(212, 175, 55, 0.25);
     }}
 
     /* Üst Metrik Kartları (Fare Yaklaşınca Büyüyen ve Parlayan Altın Sarısı Efekt) */
@@ -188,8 +188,8 @@ st.markdown(f"""
     
     .tab-inactive button:hover {{
         background: rgba(31, 41, 55, 0.85) !important;
-        border-color: rgba(212, 175, 55, 0.6) !important;
-        box-shadow: 0 12px 35px rgba(212, 175, 55, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
+        border-color: rgba(212, 175, 55, 0.7) !important;
+        box-shadow: 0 12px 35px rgba(212, 175, 55, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
         color: #ffffff !important;
         transform: translateY(-3px) scale(1.02);
     }}
@@ -287,7 +287,7 @@ if "loaded" in st.session_state and st.session_state.loaded:
     ch_title = st.session_state.ch_title
     df = st.session_state.df
 
-    # Üst Metrik Kartları (Hover Efektli)
+    # Üst Metrik Kartları
     c1, c2, c3, c4 = st.columns(4)
     with c1:
         st.markdown(f'<div class="metric-card-ondo"><div class="metric-title">TOPLAM İZLENME</div><div class="metric-value"><span id="counter-1">0</span></div><div class="metric-sub">Canlı Veri</div></div>', unsafe_allow_html=True)
