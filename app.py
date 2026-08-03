@@ -6,6 +6,7 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 import os
+import base64
 
 # 1. Streamlit Sayfa Yapılandırması
 st.set_page_config(
@@ -24,7 +25,19 @@ if "channel_id" not in st.session_state:
 if "active_tab" not in st.session_state:
     st.session_state.active_tab = "Performans Matrisi"
 
-# 2. Evrensel Cam ve Büyüme Efekti Mimarisi (CSS)
+def get_img_as_base64(file_path):
+    if os.path.exists(file_path):
+        with open(file_path, "rb") as f:
+            data = f.read()
+        return base64.b64encode(data).decode()
+    return None
+
+# Görseli base64 formatına çevirip HTML içine doğrudan gömüyoruz (Kesin Çözüm)
+possible_files = ["bg2.jpg.jpg", "bg2.jpg", "bg.jpg"]
+banner_file = next((f for f in possible_files if os.path.exists(f)), None)
+img_b64 = get_img_as_base64(banner_file) if banner_file else None
+
+# 2. Tam Uyumlu Cam ve Büyüme (Hover) Efekti Mimarisi (CSS)
 st.markdown(f"""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&display=swap');
@@ -52,31 +65,41 @@ st.markdown(f"""
         max-width: 100% !important;
     }}
 
-    /* --- BANNER İÇİN CAM VE BÜYÜME (HOVER) EFEKTİ --- */
-    .banner-container-box {{
+    /* --- HTML TABANLI KUSURSUZ BANNER CAM VE BÜYÜME EFEKTİ --- */
+    .absolute-center-banner {{
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+        margin-top: 15px;
+        margin-bottom: 25px;
+    }}
+    .banner-glass-card {{
         background: rgba(17, 24, 39, 0.7);
         backdrop-filter: blur(16px);
         -webkit-backdrop-filter: blur(16px);
-        border: 1px solid rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.07);
         border-radius: 24px;
         padding: 16px;
         box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.7);
         transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-        margin: 15px auto 25px auto;
+        width: 75%;
         max-width: 1200px;
         position: relative;
         overflow: hidden;
     }}
-    .banner-container-box:hover {{
+    .banner-glass-card:hover {{
         transform: translateY(-6px) scale(1.01);
         border-color: rgba(212, 175, 55, 0.7);
         box-shadow: 0 30px 70px -15px rgba(212, 175, 55, 0.35), 0 0 35px rgba(212, 175, 55, 0.25);
     }}
-    .banner-container-box img {{
-        border-radius: 14px !important;
+    .banner-glass-card img {{
         width: 100% !important;
         height: auto !important;
-        display: block !important;
+        max-height: 420px !important;
+        object-fit: cover !important;
+        border-radius: 16px;
+        display: block;
     }}
 
     /* Grafik ve İçerik Kutuları */
@@ -217,14 +240,15 @@ st.markdown(f"""
 </style>
 """, unsafe_allow_html=True)
 
-# --- BANNER (Tüm Alternatif Dosya İsimlerini Otomatik Bulan ve Cam İçine Alan Mimarisi) ---
-possible_files = ["bg2.jpg.jpg", "bg2.jpg", "bg.jpg"]
-banner_file = next((f for f in possible_files if os.path.exists(f)), None)
-
-if banner_file:
-    st.markdown('<div class="banner-container-box">', unsafe_allow_html=True)
-    st.image(banner_file, use_container_width=True)
-    st.markdown('</div>', unsafe_allow_html=True)
+# --- BANNER (HTML tabanlı, cam efektli ve hover büyüme animasyonlu) ---
+if img_b64:
+    st.markdown(f'''
+    <div class="absolute-center-banner">
+        <div class="banner-glass-card">
+            <img src="data:image/jpeg;base64,{img_b64}" alt="Crypto Check Banner">
+        </div>
+    </div>
+    ''', unsafe_allow_html=True)
 else:
     st.markdown("<h1 style='text-align: center; font-weight: 800; font-size: 48px; letter-spacing: -1px;'>Crypto Check</h1>", unsafe_allow_html=True)
 
