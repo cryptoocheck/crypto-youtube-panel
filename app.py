@@ -47,7 +47,7 @@ def parse_iso8601_duration_seconds(duration_str):
     seconds = int(match.group(3)) if match.group(3) else 0
     return hours * 3600 + minutes * 60 + seconds
 
-# 2. Akıcı Soldan Sağa Süzülme (Scroll-Reveal) Mimarisi (CSS)
+# 2. Yöne Duyarlı Gelişmiş Süzülme Animasyon Mimarisi (CSS)
 st.markdown(f"""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&display=swap');
@@ -75,17 +75,24 @@ st.markdown(f"""
         max-width: 100% !important;
     }}
 
-    /* --- GÜVENLİ VE AKICI SOLDAN SAĞA SÜZÜLME SINIFLARI --- */
+    /* --- DİNAMİK YÖNLÜ ANİMASYON SINIFLARI --- */
     .reveal-box {{
         opacity: 0;
-        transform: translateX(-100px);
+        transform: translateX(-120px);
         transition: opacity 1.8s cubic-bezier(0.16, 1, 0.3, 1), transform 1.8s cubic-bezier(0.16, 1, 0.3, 1);
         will-change: opacity, transform;
     }}
 
-    .reveal-box.visible {{
+    /* Aşağı kaydırınca soldan normal yerine gelir */
+    .reveal-box.reveal-in {{
         opacity: 1;
         transform: translateX(0);
+    }}
+
+    /* Yukarı kaydırınca kutucuklar soldan çıkıp kaybolur */
+    .reveal-box.reveal-out {{
+        opacity: 0;
+        transform: translateX(-120px);
     }}
 
     /* --- BANNER --- */
@@ -247,29 +254,35 @@ st.markdown(f"""
 </style>
 """, unsafe_allow_html=True)
 
-# --- SÜREKLİ VE KAYDIRMAYA DUYARLI SOLDAN SAĞA SÜZÜLME JS ---
+# --- YÖNE DUYARLI AKILLI JS TESPİTİ ---
 components.html("""
 <script>
-function initSmoothReveal() {
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.classList.add('visible');
-            } else {
-                // Sayfayı yukarı kaydırıp çıkardığında efekti sıfırlar, tekrar aşağı kaydırınca soldan tekrar süzülerek gelir
-                entry.target.classList.remove('visible');
+let lastScrollTop = 0;
+
+function initDirectionalScroll() {
+    const boxes = window.parent.document.querySelectorAll('.reveal-box');
+    
+    window.parent.addEventListener('scroll', function() {
+        let st = window.parent.pageYOffset || window.parent.document.documentElement.scrollTop;
+        let isDown = st > lastScrollTop;
+        lastScrollTop = st <= 0 ? 0 : st;
+
+        boxes.forEach(box => {
+            const rect = box.getBoundingClientRect();
+            if (rect.top < window.parent.innerHeight * 0.9 && rect.bottom >= 0) {
+                if (isDown) {
+                    box.classList.add('reveal-in');
+                    box.classList.remove('reveal-out');
+                } else {
+                    box.classList.add('reveal-out');
+                    box.classList.remove('reveal-in');
+                }
             }
         });
-    }, {
-        threshold: 0.1
-    });
-
-    const boxes = window.parent.document.querySelectorAll('.reveal-box');
-    boxes.forEach(box => observer.observe(box));
+    }, { passive: true });
 }
 
-setTimeout(initSmoothReveal, 600);
-setInterval(initSmoothReveal, 1200);
+setTimeout(initDirectionalScroll, 800);
 </script>
 """, height=0)
 
@@ -298,7 +311,7 @@ if analyze_btn:
         st.error("Lütfen sol paneldeki tüm erişim anahtarlarını eksiksiz girin.")
     else:
         try:
-            with st.spinner("YouTube API üzerinden Shorts ve Büyük Video verileri analiz ediliyor..."):
+            with st.spinner("YouTube API üzerinden Shorts and Büyük Video verileri analiz ediliyor..."):
                 youtube = build('youtube', 'v3', developerKey=st.session_state.youtube_key)
                 
                 ch_req = youtube.channels().list(
