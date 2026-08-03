@@ -47,7 +47,7 @@ def parse_iso8601_duration_seconds(duration_str):
     seconds = int(match.group(3)) if match.group(3) else 0
     return hours * 3600 + minutes * 60 + seconds
 
-# 2. Çok Yavaş, Ağır ve İpeksi Süzülme Animasyon Mimarisi (CSS)
+# 2. Soldan Sağa Çok Yavaş ve İpeksi Süzülme Animasyon Mimarisi (CSS)
 st.markdown(f"""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&display=swap');
@@ -75,17 +75,17 @@ st.markdown(f"""
         max-width: 100% !important;
     }}
 
-    /* --- ÇOK YAVAŞ VE İPEKSİ SÜZÜLME EFEKTİ --- */
+    /* --- SOLDAN SAĞA YAVAŞ VE İPEKSİ SÜZÜLME EFEKTİ --- */
     .reveal-box {{
         opacity: 0;
-        transform: translateY(70px);
-        transition: opacity 1.4s cubic-bezier(0.25, 1, 0.5, 1), transform 1.4s cubic-bezier(0.25, 1, 0.5, 1);
+        transform: translateX(-80px);
+        transition: opacity 1.5s cubic-bezier(0.25, 1, 0.5, 1), transform 1.5s cubic-bezier(0.25, 1, 0.5, 1);
         will-change: opacity, transform;
     }}
 
     .reveal-box.active {{
         opacity: 1;
-        transform: translateY(0);
+        transform: translateX(0);
     }}
 
     /* --- BANNER --- */
@@ -247,7 +247,7 @@ st.markdown(f"""
 </style>
 """, unsafe_allow_html=True)
 
-# --- YUMUŞAK SCROLL-REVEAL JS ENJEKSİYONU ---
+# --- SOLDAN SAĞA SCROLL-REVEAL JS ENJEKSİYONU ---
 components.html("""
 <script>
 const observerOptions = {
@@ -487,7 +487,7 @@ if "loaded" in st.session_state and st.session_state.loaded:
 
     if current_tab == "Performans Matrisi":
         st.markdown('<div class="reveal-box">', unsafe_allow_html=True)
-        st.write("### ⚡ Shorts dan Büyük Video Karşılaştırmalı Periyot Analizi")
+        st.write("### ⚡ Shorts ve Büyük Video Karşılaştırmalı Periyot Analizi")
         st.markdown('</div>', unsafe_allow_html=True)
         
         shorts_df = df[df["Tür"] == "Shorts"]
@@ -587,7 +587,7 @@ if "loaded" in st.session_state and st.session_state.loaded:
             Mevcut Tarih: Ağustos 2026.
             Kanal Adı: {ch_title}
             Toplam İzlenme: {total_views} | Abone Sayısı: {subscribers} | Toplam Video: {total_videos}
-            Shorts dan Büyük Video Performansları sisteme entegre edilmiştir.
+            Shorts ve Büyük Video Performansları sisteme entegre edilmiştir.
 
             Lütfen kesinlikle Türkçe olarak, profesyonel yatırım fonu raporu formatında şu başlıkları detaylıca sun:
             1. **Kanalın Kitle ve Etkileşim Sağlığı:** Shorts ve klasik video dağılımının analizi.
