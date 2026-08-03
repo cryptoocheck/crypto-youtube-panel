@@ -35,7 +35,7 @@ def get_img_as_base64(file_path):
 img_path = "bg2.jpg" if os.path.exists("bg2.jpg") else "bg.jpg" if os.path.exists("bg.jpg") else "bg.jpg.jpg" if os.path.exists("bg.jpg.jpg") else "photo_6014965432080600852_y (1).jpg" if os.path.exists("photo_6014965432080600852_y (1).jpg") else ""
 img_b64 = get_img_as_base64(img_path)
 
-# 2. Banner Dahil TÜM Sayfaya Parlayan Cam Efekti ve Büyüme Mimarisi (CSS)
+# 2. Sayfadaki TÜM Butonlara ve Kutucuklara Hover Büyüme ve Parlayan Altın Sarısı Efekti (CSS)
 st.markdown(f"""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&display=swap');
@@ -63,7 +63,6 @@ st.markdown(f"""
         max-width: 100% !important;
     }}
 
-    /* --- BANNER İÇİN ORİJİNAL FOTOĞRAFI BOZMAYAN CAM VE HOVER EFEKTİ --- */
     .absolute-center-banner {{
         display: flex;
         justify-content: center;
@@ -72,27 +71,12 @@ st.markdown(f"""
         margin-top: 15px;
         margin-bottom: 25px;
     }}
-    .banner-glow-wrapper {{
-        background: rgba(17, 24, 39, 0.4);
-        backdrop-filter: blur(16px);
-        -webkit-backdrop-filter: blur(16px);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 24px;
-        padding: 12px;
-        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), 0 0 30px rgba(212, 175, 55, 0.1);
-        transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-        width: 75%;
-        max-width: 1200px;
-    }}
-    .banner-glow-wrapper:hover {{
-        transform: translateY(-4px) scale(1.01);
-        border-color: rgba(212, 175, 55, 0.7);
-        box-shadow: 0 30px 70px rgba(0, 0, 0, 0.9), 0 0 45px rgba(212, 175, 55, 0.35);
-    }}
     .absolute-center-banner img {{
-        width: 100% !important;
+        width: 75% !important;
+        max-width: 1200px !important;
         height: auto;
-        border-radius: 16px;
+        border-radius: 20px;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), 0 0 40px rgba(212, 175, 55, 0.15);
         display: block;
     }}
 
@@ -171,7 +155,7 @@ st.markdown(f"""
         border-right: 1px solid rgba(255, 255, 255, 0.05);
     }}
     
-    /* Sol Panel ve Sekme Butonları */
+    /* --- SOL PANEL VE SEKME BUTONLARI İÇİN CAM EFEKTİ VE BÜYÜME HOWER MİMARİSİ --- */
     .stButton>button {{
         background: linear-gradient(135deg, rgba(212, 175, 55, 0.85) 0%, rgba(170, 140, 44, 0.85) 100%); 
         color: #030712;
@@ -234,13 +218,11 @@ st.markdown(f"""
 </style>
 """, unsafe_allow_html=True)
 
-# --- BANNER (Orijinal Fotoğrafı Bozulmadan Cam Efekti ve Hover ile Sarmalandı) ---
+# --- BANNER ---
 if img_b64:
     st.markdown(f'''
     <div class="absolute-center-banner">
-        <div class="banner-glow-wrapper">
-            <img src="data:image/jpeg;base64,{img_b64}" alt="Crypto Check Logo">
-        </div>
+        <img src="data:image/jpeg;base64,{img_b64}" alt="Crypto Check Logo">
     </div>
     ''', unsafe_allow_html=True)
 else:
