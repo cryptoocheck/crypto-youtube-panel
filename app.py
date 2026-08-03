@@ -47,7 +47,7 @@ def parse_iso8601_duration_seconds(duration_str):
     seconds = int(match.group(3)) if match.group(3) else 0
     return hours * 3600 + minutes * 60 + seconds
 
-# 2. Kusursuz Tasarım ve Kayma Efekti Mimarisi (CSS)
+# 2. Tasarım Mimarisi (CSS)
 st.markdown(f"""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&display=swap');
@@ -459,13 +459,13 @@ if "loaded" in st.session_state and st.session_state.loaded:
     # Üst Metrik Kartları
     c1, c2, c3, c4 = st.columns(4)
     with c1:
-        st.markdown(f'<div class="metric-card-ondo reveal-box"><div class="metric-title">TOPLAM İZLENME</div><div class="metric-value"><span id="counter-1">0</span></div><div class="metric-sub">Canlı Veri</div></div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="metric-card-ondo"><div class="metric-title">TOPLAM İZLENME</div><div class="metric-value"><span id="counter-1">0</span></div><div class="metric-sub">Canlı Veri</div></div>', unsafe_allow_html=True)
     with c2:
-        st.markdown(f'<div class="metric-card-ondo reveal-box"><div class="metric-title">ABONE SAYISI</div><div class="metric-value"><span id="counter-2">0</span></div><div class="metric-sub">Aktif İzleyici</div></div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="metric-card-ondo"><div class="metric-title">ABONE SAYISI</div><div class="metric-value"><span id="counter-2">0</span></div><div class="metric-sub">Aktif İzleyici</div></div>', unsafe_allow_html=True)
     with c3:
-        st.markdown(f'<div class="metric-card-ondo reveal-box"><div class="metric-title">ORTALAMA ETKİLEŞİM</div><div class="metric-value"><span id="counter-3">0.00</span></div><div class="metric-sub">Kanal Performansı</div></div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="metric-card-ondo"><div class="metric-title">ORTALAMA ETKİLEŞİM</div><div class="metric-value"><span id="counter-3">0.00</span></div><div class="metric-sub">Kanal Performansı</div></div>', unsafe_allow_html=True)
     with c4:
-        st.markdown(f'<div class="metric-card-ondo reveal-box"><div class="metric-title">İÇERİK SAYISI</div><div class="metric-value"><span id="counter-4">0</span></div><div class="metric-sub">Yayınlanan Video</div></div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="metric-card-ondo"><div class="metric-title">İÇERİK SAYISI</div><div class="metric-value"><span id="counter-4">0</span></div><div class="metric-sub">Yayınlanan Video</div></div>', unsafe_allow_html=True)
 
     components.html(f"""
     <script>
@@ -638,41 +638,23 @@ if "loaded" in st.session_state and st.session_state.loaded:
         st.write("### 💬 YouTube Kanalı Geçmişe Dayalı Canlı Yorum Yönetim Merkezi")
         
         if not df_comments.empty:
-            # Cevaplanan ve Bekleyen sayılarını hesapla
-            answered_count = len(df_comments[df_comments["Durum"] == "Cevaplanan"])
-            pending_count = len(df_comments[df_comments["Durum"] == "Cevap Bekliyor"])
+            df_answered = df_comments[df_comments["Durum"] == "Cevaplanan"]
+            df_pending = df_comments[df_comments["Durum"] == "Cevap Bekliyor"]
 
-            # Üst Kısma Özel İstatistik Kutuları
-            comm_c1, comm_c2 = st.columns(2)
-            with comm_c1:
-                st.markdown(f'''
-                <div class="metric-card-ondo" style="min-height: 100px; padding: 15px;">
-                    <div class="metric-title">CEVAPLANAN YORUMLAR</div>
-                    <div class="metric-value" style="font-size: 32px; color: #10b981;">{answered_count}</div>
-                    <div class="metric-sub">Etkileşim Kurulan</div>
-                </div>
-                ''', unsafe_allow_html=True)
-            with comm_c2:
-                st.markdown(f'''
-                <div class="metric-card-ondo" style="min-height: 100px; padding: 15px;">
-                    <div class="metric-title">CEVAP BEKLEYEN YORUMLAR</div>
-                    <div class="metric-value" style="font-size: 32px; color: #f59e0b;">{pending_count}</div>
-                    <div class="metric-sub">Yanıt Bekleyen</div>
-                </div>
-                ''', unsafe_allow_html=True)
-
+            # İki Ayrı Kısım / Tablo Mimarisi
             st.markdown("<br>", unsafe_allow_html=True)
-
-            filter_choice = st.radio("Yorum Durumu Filtresi", ["Tümü", "Cevap Bekliyor", "Cevaplanan"], horizontal=True)
-            
-            if filter_choice == "Cevap Bekliyor":
-                filtered_comments = df_comments[df_comments["Durum"] == "Cevap Bekliyor"]
-            elif filter_choice == "Cevaplanan":
-                filtered_comments = df_comments[df_comments["Durum"] == "Cevaplanan"]
+            st.markdown("#### ⏳ Cevaplanmayı Bekleyen Yorumlar")
+            if not df_pending.empty:
+                st.dataframe(df_pending, use_container_width=True)
             else:
-                filtered_comments = df_comments
+                st.success("Tebrikler! Cevap bekleyen hiç yorumunuz kalmamış.")
 
-            st.dataframe(filtered_comments, use_container_width=True)
+            st.markdown("<br><br>", unsafe_allow_html=True)
+            st.markdown("#### ✅ Cevaplanan Yorumlar")
+            if not df_answered.empty:
+                st.dataframe(df_answered, use_container_width=True)
+            else:
+                st.info("Henüz yanıtlanmış bir yorum bulunmuyor.")
         else:
             st.info("Kanal videolarınızda henüz taranabilir yorum bulunamadı veya canlı veriler yüklenmedi.")
         st.markdown('</div>', unsafe_allow_html=True)
@@ -695,7 +677,7 @@ if "loaded" in st.session_state and st.session_state.loaded:
             Mevcut Tarih: Ağustos 2026.
             Kanal Adı: {ch_title}
             Toplam İzlenme: {total_views} | Abone Sayısı: {subscribers} | Toplam Video: {total_videos}
-            Shorts ve Büyük Video Performansları sisteme entegre edilmiştir.
+            Shorts dan Büyük Video Performansları sisteme entegre edilmiştir.
 
             Lütfen kesinlikle Türkçe olarak, profesyonel yatırım fonu raporu formatında şu başlıkları detaylıca sun:
             1. **Kanalın Kitle ve Etkileşim Sağlığı:** Shorts ve klasik video dağılımının analizi.
