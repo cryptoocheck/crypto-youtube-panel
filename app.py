@@ -35,7 +35,7 @@ def get_img_as_base64(file_path):
 img_path = "bg2.jpg" if os.path.exists("bg2.jpg") else "bg.jpg" if os.path.exists("bg.jpg") else "bg.jpg.jpg" if os.path.exists("bg.jpg.jpg") else "photo_6014965432080600852_y (1).jpg" if os.path.exists("photo_6014965432080600852_y (1).jpg") else ""
 img_b64 = get_img_as_base64(img_path)
 
-# 2. Kalın, Belirgin ve Ultra Profesyonel Butonçuk Sekme Mimarisi (CSS)
+# 2. Metrik Kartlarını Tam Merkezleyen Tasarım Mimarisi (CSS)
 st.markdown(f"""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&display=swap');
@@ -99,14 +99,26 @@ st.markdown(f"""
         box-shadow: 0 30px 60px -20px rgba(212, 175, 55, 0.15);
     }}
 
+    /* --- İÇERİĞİ KUTUNUN TAM MERKEZİNE KİLİTLEYEN METRİK KARTI --- */
     .metric-card-ondo {{
         background: rgba(17, 24, 39, 0.75);
         backdrop-filter: blur(16px);
         border: 1px solid rgba(255, 255, 255, 0.07);
         border-radius: 20px;
-        padding: 26px;
+        padding: 28px 20px;
         margin-bottom: 20px;
         box-shadow: 0 15px 35px -10px rgba(0, 0, 0, 0.5);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        min-height: 140px;
+        transition: all 0.3s ease;
+    }}
+    .metric-card-ondo:hover {{
+        border-color: rgba(212, 175, 55, 0.4);
+        transform: translateY(-3px);
     }}
 
     .metric-title {{
@@ -115,7 +127,7 @@ st.markdown(f"""
         text-transform: uppercase;
         letter-spacing: 1.5px;
         color: #9ca3af;
-        margin-bottom: 10px;
+        margin-bottom: 6px;
     }}
     
     .metric-value {{
@@ -125,12 +137,13 @@ st.markdown(f"""
         background: linear-gradient(135deg, #ffffff 0%, #d1d5db 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
+        line-height: 1.2;
     }}
     
     .metric-sub {{
         font-size: 12px;
         color: #d4af37; 
-        margin-top: 8px;
+        margin-top: 6px;
         font-weight: 600;
     }}
 
@@ -139,23 +152,6 @@ st.markdown(f"""
         border-right: 1px solid rgba(255, 255, 255, 0.05);
     }}
     
-    .stButton>button {{
-        background: linear-gradient(135deg, #d4af37 0%, #aa8c2c 100%); 
-        color: #030712;
-        border: none;
-        border-radius: 9999px;
-        font-weight: 700;
-        padding: 12px 28px;
-        transition: all 0.3s ease;
-        width: 100%;
-        box-shadow: 0 4px 20px rgba(212, 175, 55, 0.3);
-    }}
-    .stButton>button:hover {{
-        background: linear-gradient(135deg, #f1c40f 0%, #d4af37 100%);
-        transform: translateY(-2px);
-    }}
-
-    /* --- SEKME BUTONLARI ÖZEL KALIN VE BELİRGİN TASARIM --- */
     .tab-active button {{
         background: linear-gradient(135deg, #d4af37 0%, #b8860b 100%) !important;
         color: #030712 !important;
@@ -282,7 +278,7 @@ if "loaded" in st.session_state and st.session_state.loaded:
     ch_title = st.session_state.ch_title
     df = st.session_state.df
 
-    # Üst Metrik Kartları
+    # Üst Metrik Kartları (Tam Ortalanmış)
     c1, c2, c3, c4 = st.columns(4)
     with c1:
         st.markdown(f'<div class="metric-card-ondo"><div class="metric-title">TOPLAM İZLENME</div><div class="metric-value"><span id="counter-1">0</span></div><div class="metric-sub">Canlı Veri</div></div>', unsafe_allow_html=True)
@@ -334,7 +330,7 @@ if "loaded" in st.session_state and st.session_state.loaded:
     </script>
     """, height=0)
 
-    # --- ULTRA PROFESYONEL KALIN VE BELİRGİN BUTONÇUK SEKMELER ---
+    # --- SEKME BUTONLARI ---
     st.markdown("<br>", unsafe_allow_html=True)
     tab_col1, tab_col2, tab_col3 = st.columns(3)
 
