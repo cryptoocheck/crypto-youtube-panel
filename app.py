@@ -299,7 +299,7 @@ if analyze_btn:
         st.error("Lütfen sol paneldeki tüm erişim anahtarlarını eksiksiz girin.")
     else:
         try:
-            with st.spinner("YouTube API üzerinden tüm geçmiş videolar ve kümülatif analiz yapılıyor..."):
+            with st.spinner("YouTube API üzerinden tüm geçmiş videolar ve şeffaf veriler hesaplanıyor..."):
                 youtube = build('youtube', 'v3', developerKey=st.session_state.youtube_key)
                 
                 ch_req = youtube.channels().list(
@@ -314,7 +314,7 @@ if analyze_btn:
                 total_videos = int(channel['statistics']['videoCount'])
                 uploads_playlist_id = channel['contentDetails']['relatedPlaylists']['uploads']
 
-                # --- KENDİ ABONE TAKİP SİSTEMİMİZ ---
+                # --- KENDİ ABONE TAKİP SİSTEMİMİZ (LOKAL DOSYA) ---
                 tracker_file = "subs_tracker.csv"
                 try:
                     if os.path.exists(tracker_file):
@@ -371,6 +371,7 @@ if analyze_btn:
                 likes_last_28d = 0
                 likes_prev_28d = 0
                 total_duration_sec = 0
+                total_shorts_views = 0
 
                 for i in range(0, len(v_ids), 50):
                     chunk_ids = v_ids[i:i+50]
@@ -408,6 +409,9 @@ if analyze_btn:
 
                         content_type = "Shorts" if duration_sec <= 61 else "Büyük Video"
 
+                        if content_type == "Shorts":
+                            total_shorts_views += views
+
                         delta = now - published_dt
                         delta_days = delta.total_seconds() / 86400
 
@@ -434,6 +438,7 @@ if analyze_btn:
                             "İzlenme Süresi (Dk)": estimated_watch_time_min
                         })
 
+                        # Yorumları çek
                         if comments_count > 0:
                             try:
                                 c_next_token = None
@@ -486,6 +491,7 @@ if analyze_btn:
                 st.session_state.views_prev_28d = views_prev_28d
                 st.session_state.likes_last_28d = likes_last_28d
                 st.session_state.likes_prev_28d = likes_prev_28d
+                st.session_state.total_shorts_views = total_shorts_views
                 st.session_state.loaded = True
 
         except Exception as e:
@@ -502,6 +508,13 @@ if "loaded" in st.session_state and st.session_state.loaded:
     df_comments = st.session_state.get("df_comments", pd.DataFrame())
     total_duration_sec = st.session_state.get("total_duration_sec", 0)
     total_watch_hours = round(total_duration_sec / 3600, 1)
+
+    # Şeffaf Toplam İzlenme Süresi (Saat olarak)
+    total_watch_time_mins = df["İzlenme Süresi (Dk)"].sum() if not df.empty else 0.0
+    total_watch_time_hours = round(total_watch_time_mins / 60, 1)
+
+    # Geçerli Shorts Görüntüleme Sayısı
+    total_shorts_views = st.session_state.get("total_shorts_views", 0)
 
     views_last_28d = st.session_state.get("views_last_28d", 0)
     views_prev_28d = st.session_state.get("views_prev_28d", 0)
@@ -529,13 +542,6 @@ if "loaded" in st.session_state and st.session_state.loaded:
         df["İzlenme Süresi (Dk)"] = 5.0
     if "Yaş (Gün)" not in df.columns:
         df["Yaş (Gün)"] = 31
-
-    # Hesaplamalar (Yeni eklenen satır için)
-    shorts_df_all = df[df["Tür"] == "Shorts"]
-    long_df_all = df[df["Tür"] == "Büyük Video"]
-
-    total_all_watch_time_min = round(df["İzlenme Süresi (Dk)"].sum(), 1) if not df.empty else 0.0
-    total_shorts_watch_time_min = round(shorts_df_all["İzlenme Süresi (Dk)"].sum(), 1) if not shorts_df_all.empty else 0.0
 
     # Üst Metrik Kartları (4'lü)
     c1, c2, c3, c4 = st.columns(4)
@@ -742,27 +748,27 @@ if "loaded" in st.session_state and st.session_state.loaded:
                 </div>
                 ''', unsafe_allow_html=True)
 
-        # --- 3. YENİ EKLENEN SATIR: KANAL GENELİ İZLENME SÜRESİ METRİKLERİ ---
+        # --- 3. YENİ EKLENEN SATIR: ŞEFFAF İZLENME SÜRESİ VE GEÇERLİ SHORTS GÖRÜNTÜLEME (İNSAN LOGOLU) ---
         st.markdown("<br>", unsafe_allow_html=True)
         st.markdown('<div class="reveal-box">', unsafe_allow_html=True)
-        st.write("### ⏱️ Kanal Geneli İzlenme Süresi Detayları")
+        st.write("### 🎯 KANAL DETAYLI PERFORMANS ÖZETİ")
         st.markdown('</div>', unsafe_allow_html=True)
 
-        r_c1, r_c2 = st.columns(2)
-        with r_c1:
+        new_c1, new_c2 = st.columns(2)
+        with new_c1:
             st.markdown(f'''
             <div class="metric-card-ondo reveal-box" style="min-height: 130px; padding: 20px;">
-                <div class="metric-title">BU ZAMANA KADAR TOPLAM İZLENME SÜRESİ</div>
-                <div class="metric-value" style="font-size: 32px;">{total_all_watch_time_min:,.1f} <span style="font-size: 18px; color: #9ca3af;">Dk</span></div>
-                <div class="metric-sub">Tüm Videoların Toplamı (~{total_watch_hours} Saat)</div>
+                <div class="metric-title">⏳ BU ZAMANA KADAR TOPLAM İZLENME SÜRESİ</div>
+                <div class="metric-value" style="font-size: 32px;">{total_watch_time_hours:,} Saat</div>
+                <div class="metric-sub">Tüm Videoların Kümülatif Karşılığı</div>
             </div>
             ''', unsafe_allow_html=True)
-        with r_c2:
+        with new_c2:
             st.markdown(f'''
             <div class="metric-card-ondo reveal-box" style="min-height: 130px; padding: 20px;">
-                <div class="metric-title">GEÇERLİ SHORTS GÖRÜNTÜLEME SÜRESİ</div>
-                <div class="metric-value" style="font-size: 32px; color: #d4af37;">{total_shorts_watch_time_min:,.1f} <span style="font-size: 18px; color: #9ca3af;">Dk</span></div>
-                <div class="metric-sub">Yalnızca Shorts İçeriklerinin Toplamı</div>
+                <div class="metric-title">👥 GEÇERLİ SHORTS GÖRÜNTÜLEME SAYISI</div>
+                <div class="metric-value" style="font-size: 32px;">{total_shorts_views:,}</div>
+                <div class="metric-sub">Kanal Geneli Dikey İzleyici Erişimi</div>
             </div>
             ''', unsafe_allow_html=True)
 
