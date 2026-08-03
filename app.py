@@ -619,25 +619,25 @@ if "loaded" in st.session_state and st.session_state.loaded:
         with inc1:
             st.markdown(f'''
             <div class="metric-card-ondo reveal-box" style="min-height: 110px; padding: 18px;">
-                <div class="metric-title">AKTİF İZLENME</div>
+                <div class="metric-title">AKTİF İZLENME (SON 28 GÜN)</div>
                 <div class="metric-value" style="font-size: 26px;">{views_last_28d:,}</div>
-                <div class="metric-sub">Önceki Dönem: {views_prev_28d:,}</div>
+                <div class="metric-sub">Önceki 28 Gün: {views_prev_28d:,}</div>
             </div>
             ''', unsafe_allow_html=True)
         with inc2:
             st.markdown(f'''
             <div class="metric-card-ondo reveal-box" style="min-height: 110px; padding: 18px;">
-                <div class="metric-title">BEĞENİ SAYISI</div>
+                <div class="metric-title">BEĞENİ SAYISI (SON 28 GÜN)</div>
                 <div class="metric-value" style="font-size: 26px;">{likes_last_28d:,}</div>
-                <div class="metric-sub">Önceki Dönem: {likes_prev_28d:,}</div>
+                <div class="metric-sub">Önceki 28 Gün: {likes_prev_28d:,}</div>
             </div>
             ''', unsafe_allow_html=True)
         with inc3:
             st.markdown(f'''
             <div class="metric-card-ondo reveal-box" style="min-height: 110px; padding: 18px;">
-                <div class="metric-title">ABONE SAYISI</div>
+                <div class="metric-title">ABONE SAYISI (TOPLAM)</div>
                 <div class="metric-value" style="font-size: 26px;">{subscribers:,}</div>
-                <div class="metric-sub">Kıyaslamalı Değişim</div>
+                <div class="metric-sub">Kanal Toplamı</div>
             </div>
             ''', unsafe_allow_html=True)
 
