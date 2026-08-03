@@ -299,7 +299,7 @@ if analyze_btn:
         st.error("Lütfen sol paneldeki tüm erişim anahtarlarını eksiksiz girin.")
     else:
         try:
-            with st.spinner("YouTube API üzerinden tüm geçmiş videolar ve yorumlar taranıyor..."):
+            with st.spinner("YouTube API üzerinden tüm veriler ve özel abone takibi yapılıyor..."):
                 youtube = build('youtube', 'v3', developerKey=st.session_state.youtube_key)
                 
                 ch_req = youtube.channels().list(
@@ -314,7 +314,37 @@ if analyze_btn:
                 total_videos = int(channel['statistics']['videoCount'])
                 uploads_playlist_id = channel['contentDetails']['relatedPlaylists']['uploads']
 
-                # Geçmişe dayalı TÜM videoları sayfalandırma ile çek
+                # --- KENDİ ABONE TAKİP SİSTEMİMİZ (LOKAL DOSYA) ---
+                tracker_file = "subs_tracker.csv"
+                try:
+                    if os.path.exists(tracker_file):
+                        tracker_df = pd.read_csv(tracker_file)
+                        if not tracker_df.empty:
+                            # Önceki kayıtlı abone sayısını al
+                            last_recorded_subs = int(tracker_df.iloc[-1]['Subscribers'])
+                        else:
+                            last_recorded_subs = subscribers
+                    else:
+                        tracker_df = pd.DataFrame(columns=["Date", "Subscribers"])
+                        last_recorded_subs = subscribers
+                        
+                    subs_diff = subscribers - last_recorded_subs
+                    
+                    # Güncel veriyi dosyaya kaydet
+                    today_str = datetime.utcnow().strftime("%Y-%m-%d")
+                    if not tracker_df.empty and tracker_df.iloc[-1]['Date'] == today_str:
+                        tracker_df.loc[tracker_df.index[-1], 'Subscribers'] = subscribers
+                    else:
+                        new_row = pd.DataFrame([{"Date": today_str, "Subscribers": subscribers}])
+                        tracker_df = pd.concat([tracker_df, new_row], ignore_index=True)
+                        
+                    tracker_df.to_csv(tracker_file, index=False)
+                    st.session_state.subs_diff = subs_diff
+
+                except Exception as e:
+                    st.session_state.subs_diff = 0
+
+                # Videoları Çekme
                 v_ids = []
                 next_page_token = None
                 while True:
@@ -342,8 +372,6 @@ if analyze_btn:
                 views_prev_28d = 0
                 likes_last_28d = 0
                 likes_prev_28d = 0
-                subs_last_28d = 0
-                subs_prev_28d = 0
                 total_duration_sec = 0
 
                 for i in range(0, len(v_ids), 50):
@@ -376,11 +404,9 @@ if analyze_btn:
                         if published_dt >= cutoff_28d:
                             views_last_28d += views
                             likes_last_28d += likes
-                            subs_last_28d += 1  # Örnek aktivite bazlı abone tahmini
                         elif cutoff_56d <= published_dt < cutoff_28d:
                             views_prev_28d += views
                             likes_prev_28d += likes
-                            subs_prev_28d += 1
 
                         content_type = "Shorts" if duration_sec <= 60 else "Büyük Video"
 
@@ -401,11 +427,11 @@ if analyze_btn:
                             "Periyot": time_frame,
                             "İzlenme": views,
                             "Beğeni": likes,
-                            "Yorum": comments_count,
+                            "Yorum Sayısı": comments_count,
                             "Süre (Dk)": duration_min
                         })
 
-                        # Geçmişe dayalı TÜM yorumları sayfalandırma ile çek
+                        # Yorumları çek
                         if comments_count > 0:
                             try:
                                 c_next_token = None
@@ -443,7 +469,7 @@ if analyze_btn:
                 df = pd.DataFrame(v_list)
                 df_comments = pd.DataFrame(comment_list) if comment_list else pd.DataFrame(columns=["Video", "Yazar", "Yorum", "Tarih", "Durum"])
                 
-                avg_eng = float(((df['Beğeni'] + df['Yorum']).sum() / max(df['İzlenme'].sum(), 1)) * 100)
+                avg_eng = float(((df['Beğeni'] + df['Yorum Sayısı']).sum() / max(df['İzlenme'].sum(), 1)) * 100)
                 
                 st.session_state.df = df
                 st.session_state.df_comments = df_comments
@@ -457,8 +483,6 @@ if analyze_btn:
                 st.session_state.views_prev_28d = views_prev_28d
                 st.session_state.likes_last_28d = likes_last_28d
                 st.session_state.likes_prev_28d = likes_prev_28d
-                st.session_state.subs_last_28d = max(int(subscribers * 0.4), subs_last_28d)
-                st.session_state.subs_prev_28d = max(int(subscribers * 0.35), subs_prev_28d)
                 st.session_state.loaded = True
 
         except Exception as e:
@@ -480,17 +504,19 @@ if "loaded" in st.session_state and st.session_state.loaded:
     views_prev_28d = st.session_state.get("views_prev_28d", 0)
     likes_last_28d = st.session_state.get("likes_last_28d", 0)
     likes_prev_28d = st.session_state.get("likes_prev_28d", 0)
-    subs_last_28d = st.session_state.get("subs_last_28d", 0)
-    subs_prev_28d = st.session_state.get("subs_prev_28d", 0)
+    
+    # Kendi Veritabanımızdan Gelen Abone Farkı
+    subs_diff = st.session_state.get("subs_diff", 0)
 
-    # Abone farkı ve ok simgesi hesaplama
-    subs_diff = subs_last_28d - subs_prev_28d
-    if subs_diff >= 0:
-        subs_arrow = "🟢 ↗"
-        subs_diff_str = f"+{subs_diff:,}"
+    if subs_diff > 0:
+        subs_arrow = '<span style="color:#10b981;">🟢 ↗</span>'
+        subs_diff_str = f'<span style="color:#10b981; font-weight:bold;">+{subs_diff:,}</span>'
+    elif subs_diff < 0:
+        subs_arrow = '<span style="color:#ef4444;">🔴 ↘</span>'
+        subs_diff_str = f'<span style="color:#ef4444; font-weight:bold;">{subs_diff:,}</span>'
     else:
-        subs_arrow = "🔴 ↘"
-        subs_diff_str = f"{subs_diff:,}"
+        subs_arrow = '➖'
+        subs_diff_str = "Değişim Yok"
 
     # Güvenlik Kontrolü
     if "Tür" not in df.columns:
@@ -503,13 +529,13 @@ if "loaded" in st.session_state and st.session_state.loaded:
     # Üst Metrik Kartları (4'lü)
     c1, c2, c3, c4 = st.columns(4)
     with c1:
-        st.markdown(f'<div class="metric-card-ondo reveal-box"><div class="metric-title">TOPLAM İZLENME</div><div class="metric-value"><span id="counter-1">0</span></div><div class="metric-sub">Canlı Veri</div></div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="metric-card-ondo reveal-box"><div class="metric-title">TOPLAM İZLENME</div><div class="metric-value"><span id="counter-1">0</span></div><div class="metric-sub">Tüm Zamanlar</div></div>', unsafe_allow_html=True)
     with c2:
-        st.markdown(f'<div class="metric-card-ondo reveal-box"><div class="metric-title">ABONE SAYISI</div><div class="metric-value"><span id="counter-2">0</span></div><div class="metric-sub">Aktif İzleyici</div></div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="metric-card-ondo reveal-box"><div class="metric-title">TOPLAM ABONE</div><div class="metric-value"><span id="counter-2">0</span></div><div class="metric-sub">Kanal Geneli</div></div>', unsafe_allow_html=True)
     with c3:
-        st.markdown(f'<div class="metric-card-ondo reveal-box"><div class="metric-title">ORTALAMA ETKİLEŞİM</div><div class="metric-value"><span id="counter-3">0.00</span></div><div class="metric-sub">Kanal Performansı</div></div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="metric-card-ondo reveal-box"><div class="metric-title">ORTALAMA ETKİLEŞİM</div><div class="metric-value"><span id="counter-3">0.00</span></div><div class="metric-sub">Genel Performans</div></div>', unsafe_allow_html=True)
     with c4:
-        st.markdown(f'<div class="metric-card-ondo reveal-box"><div class="metric-title">İÇERİK SAYISI</div><div class="metric-value"><span id="counter-4">0</span></div><div class="metric-sub">Yayınlanan Video</div></div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="metric-card-ondo reveal-box"><div class="metric-title">TOPLAM İÇERİK</div><div class="metric-value"><span id="counter-4">0</span></div><div class="metric-sub">Yayınlanan Video</div></div>', unsafe_allow_html=True)
 
     components.html(f"""
     <script>
@@ -611,25 +637,25 @@ if "loaded" in st.session_state and st.session_state.loaded:
         with gb2:
             st.markdown(f'''
             <div class="metric-card-ondo reveal-box" style="min-height: 110px; padding: 18px;">
-                <div class="metric-title">İZLENME SÜRESİ (SAAT)</div>
+                <div class="metric-title">TAHMİNİ İZLENME SÜRESİ (SAAT)</div>
                 <div class="metric-value" style="font-size: 26px;">{total_watch_hours:,}</div>
-                <div class="metric-sub">Toplam Süre</div>
+                <div class="metric-sub">Hesaplanan Toplam Süre</div>
             </div>
             ''', unsafe_allow_html=True)
         with gb3:
             st.markdown(f'''
             <div class="metric-card-ondo reveal-box" style="min-height: 110px; padding: 18px;">
-                <div class="metric-title">ABONE SAYISI (SON 28 GÜN)</div>
+                <div class="metric-title">GÜNCEL ABONE SAYISI</div>
                 <div class="metric-value" style="font-size: 26px;">{subscribers:,}</div>
-                <div class="metric-sub">Aktif Abone</div>
+                <div class="metric-sub">Kanal Toplamı</div>
             </div>
             ''', unsafe_allow_html=True)
 
         st.markdown("<br>", unsafe_allow_html=True)
 
-        # --- 2. İÇERİK BÖLÜMÜ ---
+        # --- 2. GERÇEK İÇERİK DİNAMİKLERİ ---
         st.markdown('<div class="reveal-box">', unsafe_allow_html=True)
-        st.write("### 📈 İÇERİK (Önceki 28 Güne Kıyasla)")
+        st.write("### 📈 İÇERİK (Önceki 28 Güne Kıyasla & Özel Takip)")
         st.markdown('</div>', unsafe_allow_html=True)
 
         inc1, inc2, inc3 = st.columns(3)
@@ -652,9 +678,9 @@ if "loaded" in st.session_state and st.session_state.loaded:
         with inc3:
             st.markdown(f'''
             <div class="metric-card-ondo reveal-box" style="min-height: 110px; padding: 18px;">
-                <div class="metric-title">ABONE SAYISI (SON 28 GÜN)</div>
-                <div class="metric-value" style="font-size: 26px;">{subs_last_28d:,}</div>
-                <div class="metric-sub">Önceki 28 Gün: {subs_prev_28d:,} &nbsp;|&nbsp; {subs_arrow} {subs_diff_str}</div>
+                <div class="metric-title">ABONE TAKİBİ (SİSTEM)</div>
+                <div class="metric-value" style="font-size: 26px;">{subscribers:,}</div>
+                <div class="metric-sub">Son Kayda Göre: {subs_arrow} {subs_diff_str}</div>
             </div>
             ''', unsafe_allow_html=True)
 
@@ -733,7 +759,7 @@ if "loaded" in st.session_state and st.session_state.loaded:
     elif current_tab == "Detaylı Analiz":
         st.markdown('<div class="ondo-glass-card reveal-box">', unsafe_allow_html=True)
         st.write("### 🔍 Tüm İçeriklerin Tür ve Periyot Arşivi")
-        df_show = df[["Video Başlığı", "Yayın Tarihi", "Tür", "Periyot", "İzlenme", "Beğeni", "Yorum", "Süre (Dk)"]]
+        df_show = df[["Video Başlığı", "Yayın Tarihi", "Tür", "Periyot", "İzlenme", "Beğeni", "Yorum Sayısı", "Süre (Dk)"]]
         st.dataframe(df_show, use_container_width=True)
         st.markdown('</div>', unsafe_allow_html=True)
 
