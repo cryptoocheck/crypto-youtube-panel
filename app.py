@@ -47,7 +47,7 @@ def parse_iso8601_duration_seconds(duration_str):
     seconds = int(match.group(3)) if match.group(3) else 0
     return hours * 3600 + minutes * 60 + seconds
 
-# 2. Gelişmiş Web3 Tasarım Mimarisi & Tablo Stilleri (CSS)
+# 2. Tam Merkezlenmiş Cam Tasarım Mimarisi (CSS)
 st.markdown(f"""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&display=swap');
@@ -114,7 +114,7 @@ st.markdown(f"""
         margin: 0 auto;
     }}
 
-    /* Üst Metrik Kartları ve İçerik Kutuları İçin Cam Efekti & Hover */
+    /* --- KUTULARIN İÇİNİ TAM MERKEZE HİZALAYAN FLEX MİMARİSİ --- */
     .metric-card-ondo, .ondo-glass-card {{
         background: rgba(17, 24, 39, 0.75);
         backdrop-filter: blur(16px);
@@ -124,6 +124,12 @@ st.markdown(f"""
         padding: 28px 20px;
         margin-bottom: 20px;
         box-shadow: 0 15px 35px -10px rgba(0, 0, 0, 0.5);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        min-height: 140px;
         transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
     }}
     .metric-card-ondo:hover, .ondo-glass-card:hover {{
@@ -139,6 +145,8 @@ st.markdown(f"""
         letter-spacing: 1.5px;
         color: #9ca3af;
         margin-bottom: 6px;
+        text-align: center;
+        width: 100%;
     }}
     
     .metric-value {{
@@ -149,6 +157,8 @@ st.markdown(f"""
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         line-height: 1.2;
+        text-align: center;
+        width: 100%;
     }}
     
     .metric-sub {{
@@ -156,9 +166,11 @@ st.markdown(f"""
         color: #d4af37; 
         margin-top: 6px;
         font-weight: 600;
+        text-align: center;
+        width: 100%;
     }}
 
-    /* --- PROFESYONEL CAM TABLO STİLİ --- */
+    /* Tablo Cam Efekti */
     .stDataFrame {{
         background: rgba(17, 24, 39, 0.75) !important;
         backdrop-filter: blur(16px) !important;
@@ -469,9 +481,9 @@ if "loaded" in st.session_state and st.session_state.loaded:
             p_time = p_data["Süre (Dk)"].sum()
             with col:
                 st.markdown(f'''
-                <div class="metric-card-ondo" style="min-height: 110px; padding: 18px;">
+                <div class="metric-card-ondo" style="min-height: 120px; padding: 18px;">
                     <div class="metric-title">SHORTS ({periyot.upper()})</div>
-                    <div class="metric-value" style="font-size: 26px;">{p_views:,}</div>
+                    <div class="metric-value" style="font-size: 28px;">{p_views:,}</div>
                     <div class="metric-sub">{p_likes} Beğeni | {p_time:.1f} Dk</div>
                 </div>
                 ''', unsafe_allow_html=True)
@@ -486,9 +498,9 @@ if "loaded" in st.session_state and st.session_state.loaded:
             p_time = p_data["Süre (Dk)"].sum()
             with col:
                 st.markdown(f'''
-                <div class="metric-card-ondo" style="min-height: 110px; padding: 18px;">
+                <div class="metric-card-ondo" style="min-height: 120px; padding: 18px;">
                     <div class="metric-title">BÜYÜK VİDEO ({periyot.upper()})</div>
-                    <div class="metric-value" style="font-size: 26px;">{p_views:,}</div>
+                    <div class="metric-value" style="font-size: 28px;">{p_views:,}</div>
                     <div class="metric-sub">{p_likes} Beğeni | {p_time:.1f} Dk</div>
                 </div>
                 ''', unsafe_allow_html=True)
