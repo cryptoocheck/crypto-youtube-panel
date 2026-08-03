@@ -33,7 +33,7 @@ def get_img_as_base64(file_path):
 img_path = "bg2.jpg" if os.path.exists("bg2.jpg") else "bg.jpg" if os.path.exists("bg.jpg") else "bg.jpg.jpg" if os.path.exists("bg.jpg.jpg") else "photo_6014965432080600852_y (1).jpg" if os.path.exists("photo_6014965432080600852_y (1).jpg") else ""
 img_b64 = get_img_as_base64(img_path)
 
-# 2. Ondo.Finance Tarzı Akışkan, Hareketli ve Premium Web3 Tasarım Mimarisi (CSS)
+# 2. Ondo.Finance Tarzı Profesyonel Butonçuluk ve Merkezlenmiş Sekme Mimarisi (CSS)
 st.markdown(f"""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
@@ -82,7 +82,6 @@ st.markdown(f"""
         transform: scale(1.01);
     }}
 
-    /* Ondo Tarzı Cam Efektli (Glassmorphism) ve Hareketli 3D Kartlar */
     .ondo-glass-card {{
         background: rgba(17, 24, 39, 0.7);
         backdrop-filter: blur(16px);
@@ -179,25 +178,45 @@ st.markdown(f"""
         color: #030712;
     }}
 
+    /* --- SEKME BAŞLIKLARINI ORTALAYAN VE BUTONÇUK YAPAN PROFESYONEL CSS --- */
+    .stTabs {{
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 100%;
+    }}
     .stTabs [data-baseweb="tab-list"] {{
-        gap: 10px;
-        background-color: rgba(17, 24, 39, 0.8);
-        padding: 8px;
+        display: flex;
+        justify-content: center;
+        gap: 12px;
+        background-color: rgba(17, 24, 39, 0.85);
+        padding: 8px 16px;
         border-radius: 9999px;
-        border: 1px solid rgba(255, 255, 255, 0.07);
-        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        backdrop-filter: blur(12px);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        margin: 10px auto 25px auto;
+        width: fit-content;
     }}
     .stTabs [data-baseweb="tab"] {{
         border-radius: 9999px;
         color: #9ca3af;
-        font-weight: 600;
+        font-weight: 700;
+        font-size: 14px;
         padding: 10px 24px;
-        transition: all 0.3s ease;
+        transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        background: transparent;
+        border: 1px solid transparent;
+    }}
+    .stTabs [data-baseweb="tab"]:hover {{
+        color: #ffffff;
+        background: rgba(255, 255, 255, 0.05);
     }}
     .stTabs [aria-selected="true"] {{
         background: linear-gradient(135deg, #d4af37 0%, #aa8c2c 100%) !important;
         color: #030712 !important;
-        box-shadow: 0 4px 15px rgba(212, 175, 55, 0.4);
+        box-shadow: 0 4px 20px rgba(212, 175, 55, 0.4);
+        border-color: rgba(255, 255, 255, 0.2);
     }}
 </style>
 """, unsafe_allow_html=True)
@@ -273,7 +292,7 @@ if analyze_btn:
                 df = pd.DataFrame(v_list)
                 avg_eng = float(df["Etkileşim (%)"].mean())
             
-            # Üst Metrik Kartları (2 Saniyede 0'dan Artan Akıllı Sayaçlar)
+            # Üst Metrik Kartları
             c1, c2, c3, c4 = st.columns(4)
             with c1:
                 st.markdown(f'<div class="metric-card-ondo"><div class="metric-title">TOPLAM İZLENME</div><div class="metric-value"><span id="counter-1">0</span></div><div class="metric-sub">Canlı Veri</div></div>', unsafe_allow_html=True)
@@ -325,7 +344,7 @@ if analyze_btn:
             </script>
             """, height=0)
 
-            # Sekmeli Panel Yapısı
+            # --- ORTALANMIŞ VE PROFESYONEL BUTONÇUK SEKMELER ---
             t1, t2, t3 = st.tabs(["📊 Performans Matrisi", "🔍 Detaylı Analiz", "🤖 AI Strateji Raporu"])
 
             with t1:
