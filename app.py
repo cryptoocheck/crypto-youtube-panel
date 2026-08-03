@@ -3,6 +3,7 @@ import streamlit.components.v1 as components
 from googleapiclient.discovery import build
 from groq import Groq
 import pandas as pd
+import plotly.express as px
 import os
 import base64
 import re
@@ -45,7 +46,7 @@ def parse_iso8601_duration_seconds(duration_str):
     seconds = int(match.group(3)) if match.group(3) else 0
     return hours * 3600 + minutes * 60 + seconds
 
-# 2. Tasarım Mimarisi (CSS - Gerçek 3D Perspektif ve Akıcı Animasyonlar)
+# 2. Tasarım Mimarisi (CSS)
 st.markdown(f"""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&display=swap');
@@ -73,20 +74,20 @@ st.markdown(f"""
         max-width: 100% !important;
     }}
 
-    /* --- GERÇEK 3D PERSPEKTİF VE İPEKSİ SÜZÜLME --- */
+    /* --- İPEKSİ SÜZÜLME VE 3D GEÇİŞ --- */
     .reveal-box {{
         opacity: 0;
-        transform: perspective(1000px) rotateX(15deg) translateY(80px) scale(0.92);
-        transition: opacity 1.6s cubic-bezier(0.16, 1, 0.3, 1), transform 1.6s cubic-bezier(0.16, 1, 0.3, 1);
+        transform: translateY(50px) scale(0.97);
+        transition: opacity 1.5s cubic-bezier(0.16, 1, 0.3, 1), transform 1.5s cubic-bezier(0.16, 1, 0.3, 1);
         will-change: opacity, transform;
     }}
 
     .reveal-box.active {{
         opacity: 1;
-        transform: perspective(1000px) rotateX(0deg) translateY(0) scale(1);
+        transform: translateY(0) scale(1);
     }}
 
-    /* --- 3D GRAFİK KARTLARI (HOLO-CAM EFEKTİ) ---
+    /* --- GRAFİK KARTLARI (HOLO-CAM EFEKTİ) --- */
     .chart-3d-container {{
         background: rgba(17, 24, 39, 0.8);
         backdrop-filter: blur(20px);
@@ -96,14 +97,13 @@ st.markdown(f"""
         padding: 30px;
         margin-top: 15px;
         margin-bottom: 30px;
-        box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.1);
-        transform-style: preserve-3d;
-        transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.5s ease, border-color 0.5s ease;
+        box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.6);
+        transition: transform 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease;
     }}
     .chart-3d-container:hover {{
-        transform: translateY(-8px) scale(1.01) perspective(1000px) rotateX(2deg);
-        border-color: rgba(241, 196, 15, 0.8);
-        box-shadow: 0 40px 90px -20px rgba(241, 196, 15, 0.35), 0 0 40px rgba(241, 196, 15, 0.25);
+        transform: translateY(-6px) scale(1.005);
+        border-color: rgba(241, 196, 15, 0.7);
+        box-shadow: 0 30px 60px -12px rgba(241, 196, 15, 0.35);
     }}
 
     /* --- BANNER --- */
@@ -158,7 +158,7 @@ st.markdown(f"""
         width: 100%;
         max-width: 1000px;
         box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
-        transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+        transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
     }}
     .section-title-box:hover {{
         transform: translateY(-4px) scale(1.01);
@@ -179,7 +179,7 @@ st.markdown(f"""
         text-shadow: 0 0 10px rgba(241, 196, 15, 0.6);
     }}
 
-    /* --- 3D KUTULAR --- */
+    /* --- KUTULAR --- */
     .metric-card-ondo, .ondo-glass-card {{
         background: rgba(17, 24, 39, 0.75);
         backdrop-filter: blur(16px);
@@ -195,12 +195,12 @@ st.markdown(f"""
         justify-content: center;
         text-align: center;
         min-height: 140px;
-        transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.4s ease, box-shadow 0.4s ease;
+        transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
     }}
     .metric-card-ondo:hover, .ondo-glass-card:hover {{
-        transform: translateY(-8px) scale(1.01);
+        transform: translateY(-6px) scale(1.01);
         border-color: rgba(241, 196, 15, 0.7);
-        box-shadow: 0 30px 70px -12px rgba(241, 196, 15, 0.4), 0 0 30px rgba(241, 196, 15, 0.25);
+        box-shadow: 0 25px 60px -12px rgba(241, 196, 15, 0.4);
     }}
 
     .metric-title {{
@@ -235,14 +235,12 @@ st.markdown(f"""
         width: 100%;
     }}
 
-    /* Tablo Cam Efekti */
     .stDataFrame {{
         background: rgba(17, 24, 39, 0.75) !important;
         backdrop-filter: blur(16px) !important;
         border: 1px solid rgba(255, 255, 255, 0.08) !important;
         border-radius: 20px !important;
         padding: 15px !important;
-        box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.6) !important;
     }}
 
     section[data-testid="stSidebar"] {{
@@ -250,7 +248,6 @@ st.markdown(f"""
         border-right: 1px solid rgba(255, 255, 255, 0.05);
     }}
     
-    /* Sol Panel ve Sekme Butonları */
     .stButton>button {{
         background: linear-gradient(135deg, rgba(212, 175, 55, 0.85) 0%, rgba(170, 140, 44, 0.85) 100%); 
         color: #030712;
@@ -258,15 +255,14 @@ st.markdown(f"""
         border-radius: 9999px;
         font-weight: 700;
         padding: 12px 28px;
-        transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        transition: all 0.3s ease;
         width: 100%;
         box-shadow: 0 4px 20px rgba(212, 175, 55, 0.3);
     }}
     .stButton>button:hover {{
         background: linear-gradient(135deg, #f1c40f 0%, #d4af37 100%);
-        box-shadow: 0 10px 30px rgba(241, 196, 15, 0.6), 0 0 20px rgba(241, 196, 15, 0.4);
+        box-shadow: 0 10px 30px rgba(241, 196, 15, 0.6);
         transform: translateY(-3px) scale(1.02);
-        color: #030712;
     }}
 
     .tab-active button {{
@@ -589,7 +585,7 @@ if "loaded" in st.session_state and st.session_state.loaded:
     with c3:
         st.markdown(f'<div class="metric-card-ondo reveal-box"><div class="metric-title">ORTALAMA ETKİLEŞİM</div><div class="metric-value"><span id="counter-3">0.00</span></div><div class="metric-sub">Genel Performans</div></div>', unsafe_allow_html=True)
     with c4:
-        st.markdown(f'<div class="metric-card-ondo reveal-box"><div class="metric-title">TOPLAM İÇERİK</div><div class="metric-value"><span id="counter-4">0</span></div><div class="metric-sub">Yayınlanan Video</div></div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="metric-card-ondo reveal-box"><div class="metric-title">İÇERİK SAYISI</div><div class="metric-value"><span id="counter-4">0</span></div><div class="metric-sub">Yayınlanan Video</div></div>', unsafe_allow_html=True)
 
     components.html(f"""
     <script>
@@ -780,7 +776,7 @@ if "loaded" in st.session_state and st.session_state.loaded:
                 </div>
                 ''', unsafe_allow_html=True)
 
-        # Shorts Altına Gerçek 3D Perspektifli Holo Grafik (Container İçinde)
+        # Shorts Altına 3D Holo Grafik
         s_df_chart = pd.DataFrame(shorts_chart_data)
         fig_shorts = px.bar(
             s_df_chart, x="Periyot", y=["İzlenme", "Beğeni"],
@@ -827,7 +823,7 @@ if "loaded" in st.session_state and st.session_state.loaded:
                 </div>
                 ''', unsafe_allow_html=True)
 
-        # Büyük Video Altına Gerçek 3D Perspektifli Holo Grafik (Container İçinde)
+        # Büyük Video Altına 3D Holo Grafik
         l_df_chart = pd.DataFrame(long_chart_data)
         fig_long = px.bar(
             l_df_chart, x="Periyot", y=["İzlenme", "Beğeni"],
