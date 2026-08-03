@@ -47,7 +47,7 @@ def parse_iso8601_duration_seconds(duration_str):
     seconds = int(match.group(3)) if match.group(3) else 0
     return hours * 3600 + minutes * 60 + seconds
 
-# 2. Çift Yönlü İpeksi Süzülme ve Gizlenme Mimarisi (CSS)
+# 2. Tasarım Mimarisi (CSS)
 st.markdown(f"""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&display=swap');
@@ -73,19 +73,6 @@ st.markdown(f"""
         padding-top: 0rem !important;
         padding-bottom: 3rem !important;
         max-width: 100% !important;
-    }}
-
-    /* --- ÇOK YAVAŞ, AĞIR VE AKICI İKİ YÖNLÜ GEÇİŞ --- */
-    .reveal-box {{
-        opacity: 0;
-        transform: translateX(-150px);
-        transition: opacity 1.8s cubic-bezier(0.25, 1, 0.5, 1), transform 1.8s cubic-bezier(0.25, 1, 0.5, 1);
-        will-change: opacity, transform;
-    }}
-
-    .reveal-box.active {{
-        opacity: 1;
-        transform: translateX(0);
     }}
 
     /* --- BANNER --- */
@@ -127,7 +114,7 @@ st.markdown(f"""
         margin: 0 auto;
     }}
 
-    /* --- KUTULAR VE MERKEZLEME --- */
+    /* --- KUTULAR --- */
     .metric-card-ondo, .ondo-glass-card {{
         background: rgba(17, 24, 39, 0.75);
         backdrop-filter: blur(16px);
@@ -247,37 +234,6 @@ st.markdown(f"""
 </style>
 """, unsafe_allow_html=True)
 
-# --- İKİ YÖNLÜ ANİMASYON ENJEKSİYONU (AŞAĞI: SOLDAN GEL, YUKARI: SOLA KAYARAK GİZLEN) ---
-components.html("""
-<script>
-function initDualWayReveal() {
-    const observerOptions = {
-        root: null,
-        rootMargin: '0px 0px -50px 0px',
-        threshold: 0.1
-    };
-
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                // Ekrana girdiğinde (Aşağı inerken) soldan akıcı şekilde belirsin
-                entry.target.classList.add('active');
-            } else {
-                // Ekrandan çıktığında (Yukarı çıkarken) sola kayarak kaybolsun
-                entry.target.classList.remove('active');
-            }
-        });
-    }, observerOptions);
-
-    const boxes = window.parent.document.querySelectorAll('.reveal-box');
-    boxes.forEach(box => observer.observe(box));
-}
-
-setTimeout(initDualWayReveal, 500);
-setInterval(initDualWayReveal, 1000);
-</script>
-""", height=0)
-
 # --- BANNER ---
 if img_b64:
     st.markdown(f'''
@@ -303,7 +259,7 @@ if analyze_btn:
         st.error("Lütfen sol paneldeki tüm erişim anahtarlarını eksiksiz girin.")
     else:
         try:
-            with st.spinner("YouTube API üzerinden Shorts ve Büyük Video verileri analiz ediliyor..."):
+            with st.spinner("YouTube API üzerinden kanal verileri ve yorumlar taranıyor..."):
                 youtube = build('youtube', 'v3', developerKey=st.session_state.youtube_key)
                 
                 ch_req = youtube.channels().list(
@@ -332,6 +288,7 @@ if analyze_btn:
                 ).execute()
 
                 v_list = []
+                comment_list = []
                 now = datetime.utcnow()
 
                 for item in videos_req['items']:
@@ -339,13 +296,14 @@ if analyze_btn:
                     stats = item['statistics']
                     content = item['contentDetails']
 
+                    v_id = item['id']
                     title = snippet['title']
                     published_str = snippet['publishedAt']
                     published_dt = datetime.strptime(published_str[:19], "%Y-%m-%dT%H:%M:%S")
                     
                     views = int(stats.get('viewCount', 0))
                     likes = int(stats.get('likeCount', 0))
-                    comments = int(stats.get('commentCount', 0))
+                    comments_count = int(stats.get('commentCount', 0))
                     
                     duration_iso = content.get('duration', 'PT0M')
                     duration_sec = parse_iso8601_duration_seconds(duration_iso)
@@ -370,14 +328,45 @@ if analyze_btn:
                         "Periyot": time_frame,
                         "İzlenme": views,
                         "Beğeni": likes,
-                        "Yorum": comments,
+                        "Yorum": comments_count,
                         "Süre (Dk)": duration_min
                     })
 
+                    # Yorumları Çek (Eğer yorum varsa)
+                    if comments_count > 0:
+                        try:
+                            c_req = youtube.commentThreads().list(
+                                part='snippet',
+                                videoId=v_id,
+                                maxResults=20
+                            ).execute()
+
+                            for thread in c_req.get('items', []):
+                                c_snippet = thread['snippet']['topLevelComment']['snippet']
+                                author = c_snippet['authorDisplayName']
+                                text = c_snippet['textDisplay']
+                                c_date = c_snippet['publishedAt'][:10]
+                                total_replies = thread['snippet']['totalReplyCount']
+                                
+                                status = "Cevaplanan" if total_replies > 0 else "Cevap Bekliyor"
+
+                                comment_list.append({
+                                    "Video": title,
+                                    "Yazar": author,
+                                    "Yorum": text,
+                                    "Tarih": c_date,
+                                    "Durum": status
+                               ссов
+                        except Exception:
+                            pass
+
                 df = pd.DataFrame(v_list)
+                df_comments = pd.DataFrame(comment_list) if comment_list else pd.DataFrame(columns=["Video", "Yazar", "Yorum", "Tarih", "Durum"])
+                
                 avg_eng = float(((df['Beğeni'] + df['Yorum']).sum() / max(df['İzlenme'].sum(), 1)) * 100)
                 
                 st.session_state.df = df
+                st.session_state.df_comments = df_comments
                 st.session_state.total_views = total_views
                 st.session_state.subscribers = subscribers
                 st.session_state.total_videos = total_videos
@@ -396,6 +385,7 @@ if "loaded" in st.session_state and st.session_state.loaded:
     avg_eng = st.session_state.avg_eng
     ch_title = st.session_state.ch_title
     df = st.session_state.df
+    df_comments = st.session_state.get("df_comments", pd.DataFrame())
 
     # Güvenlik Kontrolü
     if "Tür" not in df.columns:
@@ -408,13 +398,13 @@ if "loaded" in st.session_state and st.session_state.loaded:
     # Üst Metrik Kartları
     c1, c2, c3, c4 = st.columns(4)
     with c1:
-        st.markdown(f'<div class="metric-card-ondo reveal-box"><div class="metric-title">TOPLAM İZLENME</div><div class="metric-value"><span id="counter-1">0</span></div><div class="metric-sub">Canlı Veri</div></div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="metric-card-ondo"><div class="metric-title">TOPLAM İZLENME</div><div class="metric-value"><span id="counter-1">0</span></div><div class="metric-sub">Canlı Veri</div></div>', unsafe_allow_html=True)
     with c2:
-        st.markdown(f'<div class="metric-card-ondo reveal-box"><div class="metric-title">ABONE SAYISI</div><div class="metric-value"><span id="counter-2">0</span></div><div class="metric-sub">Aktif İzleyici</div></div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="metric-card-ondo"><div class="metric-title">ABONE SAYISI</div><div class="metric-value"><span id="counter-2">0</span></div><div class="metric-sub">Aktif İzleyici</div></div>', unsafe_allow_html=True)
     with c3:
-        st.markdown(f'<div class="metric-card-ondo reveal-box"><div class="metric-title">ORTALAMA ETKİLEŞİM</div><div class="metric-value"><span id="counter-3">0.00</span></div><div class="metric-sub">Kanal Performansı</div></div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="metric-card-ondo"><div class="metric-title">ORTALAMA ETKİLEŞİM</div><div class="metric-value"><span id="counter-3">0.00</span></div><div class="metric-sub">Kanal Performansı</div></div>', unsafe_allow_html=True)
     with c4:
-        st.markdown(f'<div class="metric-card-ondo reveal-box"><div class="metric-title">İÇERİK SAYISI</div><div class="metric-value"><span id="counter-4">0</span></div><div class="metric-sub">Yayınlanan Video</div></div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="metric-card-ondo"><div class="metric-title">İÇERİK SAYISI</div><div class="metric-value"><span id="counter-4">0</span></div><div class="metric-sub">Yayınlanan Video</div></div>', unsafe_allow_html=True)
 
     components.html(f"""
     <script>
@@ -457,9 +447,9 @@ if "loaded" in st.session_state and st.session_state.loaded:
     </script>
     """, height=0)
 
-    # --- SEKME BUTONLARI ---
+    # --- 4'LÜ SEKME BUTONLARI ---
     st.markdown("<br>", unsafe_allow_html=True)
-    tab_col1, tab_col2, tab_col3 = st.columns(3)
+    tab_col1, tab_col2, tab_col3, tab_col4 = st.columns(4)
 
     with tab_col1:
         css_class = "tab-active" if st.session_state.active_tab == "Performans Matrisi" else "tab-inactive"
@@ -470,6 +460,14 @@ if "loaded" in st.session_state and st.session_state.loaded:
         st.markdown('</div>', unsafe_allow_html=True)
 
     with tab_col2:
+        css_class = "tab-active" if st.session_state.active_tab == "Gelen Yorumlar" else "tab-inactive"
+        st.markdown(f'<div class="{css_class}">', unsafe_allow_html=True)
+        if st.button("💬 GELEN YORUMLAR", use_container_width=True):
+            st.session_state.active_tab = "Gelen Yorumlar"
+            st.rerun()
+        st.markdown('</div>', unsafe_allow_html=True)
+
+    with tab_col3:
         css_class = "tab-active" if st.session_state.active_tab == "Detaylı Analiz" else "tab-inactive"
         st.markdown(f'<div class="{css_class}">', unsafe_allow_html=True)
         if st.button("🔍 DETAYLI ANALİZ", use_container_width=True):
@@ -477,7 +475,7 @@ if "loaded" in st.session_state and st.session_state.loaded:
             st.rerun()
         st.markdown('</div>', unsafe_allow_html=True)
 
-    with tab_col3:
+    with tab_col4:
         css_class = "tab-active" if st.session_state.active_tab == "AI Strateji Raporu" else "tab-inactive"
         st.markdown(f'<div class="{css_class}">', unsafe_allow_html=True)
         if st.button("🤖 AI STRATEJİ RAPORU", use_container_width=True):
@@ -491,17 +489,12 @@ if "loaded" in st.session_state and st.session_state.loaded:
     current_tab = st.session_state.active_tab
 
     if current_tab == "Performans Matrisi":
-        st.markdown('<div class="reveal-box">', unsafe_allow_html=True)
         st.write("### ⚡ Shorts ve Büyük Video Karşılaştırmalı Periyot Analizi")
-        st.markdown('</div>', unsafe_allow_html=True)
         
         shorts_df = df[df["Tür"] == "Shorts"]
         long_df = df[df["Tür"] == "Büyük Video"]
 
-        st.markdown('<div class="reveal-box">', unsafe_allow_html=True)
         st.markdown("#### 📱 Shorts (Dikey) İçerik Performansı")
-        st.markdown('</div>', unsafe_allow_html=True)
-
         s_c1, s_c2, s_c3 = st.columns(3)
         for periyot, col in zip(["Günlük", "Haftalık", "Aylık"], [s_c1, s_c2, s_c3]):
             p_data = shorts_df[shorts_df["Periyot"] == periyot]
@@ -510,7 +503,7 @@ if "loaded" in st.session_state and st.session_state.loaded:
             p_time = p_data["Süre (Dk)"].sum()
             with col:
                 st.markdown(f'''
-                <div class="metric-card-ondo reveal-box" style="min-height: 120px; padding: 18px;">
+                <div class="metric-card-ondo" style="min-height: 120px; padding: 18px;">
                     <div class="metric-title">SHORTS ({periyot.upper()})</div>
                     <div class="metric-value" style="font-size: 28px;">{p_views:,}</div>
                     <div class="metric-sub">{p_likes} Beğeni | {p_time:.1f} Dk</div>
@@ -518,10 +511,7 @@ if "loaded" in st.session_state and st.session_state.loaded:
                 ''', unsafe_allow_html=True)
 
         st.markdown("<br>", unsafe_allow_html=True)
-        st.markdown('<div class="reveal-box">', unsafe_allow_html=True)
         st.markdown("#### 🖥️ Büyük Video (Long-form) İçerik Performansı")
-        st.markdown('</div>', unsafe_allow_html=True)
-
         l_c1, l_c2, l_c3 = st.columns(3)
         for periyot, col in zip(["Günlük", "Haftalık", "Aylık"], [l_c1, l_c2, l_c3]):
             p_data = long_df[long_df["Periyot"] == periyot]
@@ -530,7 +520,7 @@ if "loaded" in st.session_state and st.session_state.loaded:
             p_time = p_data["Süre (Dk)"].sum()
             with col:
                 st.markdown(f'''
-                <div class="metric-card-ondo reveal-box" style="min-height: 120px; padding: 18px;">
+                <div class="metric-card-ondo" style="min-height: 120px; padding: 18px;">
                     <div class="metric-title">BÜYÜK VİDEO ({periyot.upper()})</div>
                     <div class="metric-value" style="font-size: 28px;">{p_views:,}</div>
                     <div class="metric-sub">{p_likes} Beğeni | {p_time:.1f} Dk</div>
@@ -543,7 +533,7 @@ if "loaded" in st.session_state and st.session_state.loaded:
 
         col_g1, col_g2 = st.columns(2)
         with col_g1:
-            st.markdown('<div class="ondo-glass-card reveal-box">', unsafe_allow_html=True)
+            st.markdown('<div class="ondo-glass-card">', unsafe_allow_html=True)
             st.write("### 📊 İçerik Türüne Göre İzlenme Dağılımı")
             fig_bar = px.bar(
                 df_grouped, 
@@ -559,7 +549,7 @@ if "loaded" in st.session_state and st.session_state.loaded:
             st.markdown('</div>', unsafe_allow_html=True)
 
         with col_g2:
-            st.markdown('<div class="ondo-glass-card reveal-box">', unsafe_allow_html=True)
+            st.markdown('<div class="ondo-glass-card">', unsafe_allow_html=True)
             st.write("### 📈 Beğeni ve Etkileşim Trendi")
             fig_line = px.line(
                 df_grouped.sort_values("Yayın Tarihi"), 
@@ -574,15 +564,35 @@ if "loaded" in st.session_state and st.session_state.loaded:
             st.plotly_chart(fig_line, use_container_width=True)
             st.markdown('</div>', unsafe_allow_html=True)
 
+    elif current_tab == "Gelen Yorumlar":
+        st.markdown('<div class="ondo-glass-card">', unsafe_allow_html=True)
+        st.write("### 💬 YouTube Kanalı Canlı Yorum Yönetim Merkezi")
+        
+        if not df_comments.empty:
+            # Filtreleme Seçenekleri
+            filter_choice = st.radio("Yorum Durumu Filtresi", ["Tümü", "Cevap Bekliyor", "Cevaplanan"], horizontal=True)
+            
+            if filter_choice == "Cevap Bekliyor":
+                filtered_comments = df_comments[df_comments["Durum"] == "Cevap Bekliyor"]
+            elif filter_choice == "Cevaplanan":
+                filtered_comments = df_comments[df_comments["Durum"] == "Cevaplanan"]
+            else:
+                filtered_comments = df_comments
+
+            st.dataframe(filtered_comments, use_container_width=True)
+        else:
+            st.info("Kanal videolarınızda henüz taranabilir yorum bulunamadı veya canlı veriler yüklenmedi.")
+        st.markdown('</div>', unsafe_allow_html=True)
+
     elif current_tab == "Detaylı Analiz":
-        st.markdown('<div class="ondo-glass-card reveal-box">', unsafe_allow_html=True)
+        st.markdown('<div class="ondo-glass-card">', unsafe_allow_html=True)
         st.write("### 🔍 Tüm İçeriklerin Tür ve Periyot Arşivi")
         df_show = df[["Video Başlığı", "Yayın Tarihi", "Tür", "Periyot", "İzlenme", "Beğeni", "Yorum", "Süre (Dk)"]]
         st.dataframe(df_show, use_container_width=True)
         st.markdown('</div>', unsafe_allow_html=True)
 
     elif current_tab == "AI Strateji Raporu":
-        st.markdown('<div class="ondo-glass-card reveal-box">', unsafe_allow_html=True)
+        st.markdown('<div class="ondo-glass-card">', unsafe_allow_html=True)
         st.write("### 🤖 Profesyonel Kripto & Kanal Büyüme Raporu (Ağustos 2026)")
         with st.spinner("Kanal verileri ve Ağustos 2026 kripto trendleri Llama 3.3 motoru ile sentezleniyor..."):
             client = Groq(api_key=st.session_state.groq_key)
