@@ -47,7 +47,7 @@ def parse_iso8601_duration_seconds(duration_str):
     seconds = int(match.group(3)) if match.group(3) else 0
     return hours * 3600 + minutes * 60 + seconds
 
-# 2. Yöne Duyarlı Gelişmiş Süzülme Animasyon Mimarisi (CSS)
+# 2. Yöne Duyarlı Güvenli Süzülme Animasyon Mimarisi (CSS)
 st.markdown(f"""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&display=swap');
@@ -75,24 +75,22 @@ st.markdown(f"""
         max-width: 100% !important;
     }}
 
-    /* --- DİNAMİK YÖNLÜ ANİMASYON SINIFLARI --- */
+    /* --- GÜVENLİ VE AKICI YÖNLÜ ANİMASYON SINIFLARI --- */
     .reveal-box {{
         opacity: 0;
-        transform: translateX(-120px);
-        transition: opacity 1.8s cubic-bezier(0.16, 1, 0.3, 1), transform 1.8s cubic-bezier(0.16, 1, 0.3, 1);
+        transform: translateX(-100px);
+        transition: opacity 1.6s cubic-bezier(0.16, 1, 0.3, 1), transform 1.6s cubic-bezier(0.16, 1, 0.3, 1);
         will-change: opacity, transform;
     }}
 
-    /* Aşağı kaydırınca soldan normal yerine gelir */
-    .reveal-box.reveal-in {{
+    .reveal-box.slide-in {{
         opacity: 1;
         transform: translateX(0);
     }}
 
-    /* Yukarı kaydırınca kutucuklar soldan çıkıp kaybolur */
-    .reveal-box.reveal-out {{
+    .reveal-box.slide-out-left {{
         opacity: 0;
-        transform: translateX(-120px);
+        transform: translateX(-100px);
     }}
 
     /* --- BANNER --- */
@@ -254,12 +252,12 @@ st.markdown(f"""
 </style>
 """, unsafe_allow_html=True)
 
-# --- YÖNE DUYARLI AKILLI JS TESPİTİ ---
+# --- YÖNE DUYARLI GÜVENLİ SCROLL-REVEAL JS ---
 components.html("""
 <script>
-let lastScrollTop = 0;
+let lastScrollTop = window.parent.pageYOffset || window.parent.document.documentElement.scrollTop;
 
-function initDirectionalScroll() {
+function initDirectionalReveal() {
     const boxes = window.parent.document.querySelectorAll('.reveal-box');
     
     window.parent.addEventListener('scroll', function() {
@@ -269,20 +267,22 @@ function initDirectionalScroll() {
 
         boxes.forEach(box => {
             const rect = box.getBoundingClientRect();
-            if (rect.top < window.parent.innerHeight * 0.9 && rect.bottom >= 0) {
+            if (rect.top < window.parent.innerHeight * 0.95 && rect.bottom >= 0) {
                 if (isDown) {
-                    box.classList.add('reveal-in');
-                    box.classList.remove('reveal-out');
+                    // Aşağı kaydırırken soldan gelsin
+                    box.classList.add('slide-in');
+                    box.classList.remove('slide-out-left');
                 } else {
-                    box.classList.add('reveal-out');
-                    box.classList.remove('reveal-in');
+                    // Yukarı kaydırırken sola doğru kaysın
+                    box.classList.add('slide-out-left');
+                    box.classList.remove('slide-in');
                 }
             }
         });
     }, { passive: true });
 }
 
-setTimeout(initDirectionalScroll, 800);
+setTimeout(initDirectionalReveal, 500);
 </script>
 """, height=0)
 
@@ -311,7 +311,7 @@ if analyze_btn:
         st.error("Lütfen sol paneldeki tüm erişim anahtarlarını eksiksiz girin.")
     else:
         try:
-            with st.spinner("YouTube API üzerinden Shorts and Büyük Video verileri analiz ediliyor..."):
+            with st.spinner("YouTube API üzerinden Shorts ve Büyük Video verileri analiz ediliyor..."):
                 youtube = build('youtube', 'v3', developerKey=st.session_state.youtube_key)
                 
                 ch_req = youtube.channels().list(
@@ -416,13 +416,13 @@ if "loaded" in st.session_state and st.session_state.loaded:
     # Üst Metrik Kartları
     c1, c2, c3, c4 = st.columns(4)
     with c1:
-        st.markdown(f'<div class="metric-card-ondo reveal-box"><div class="metric-title">TOPLAM İZLENME</div><div class="metric-value"><span id="counter-1">0</span></div><div class="metric-sub">Canlı Veri</div></div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="metric-card-ondo reveal-box slide-in"><div class="metric-title">TOPLAM İZLENME</div><div class="metric-value"><span id="counter-1">0</span></div><div class="metric-sub">Canlı Veri</div></div>', unsafe_allow_html=True)
     with c2:
-        st.markdown(f'<div class="metric-card-ondo reveal-box"><div class="metric-title">ABONE SAYISI</div><div class="metric-value"><span id="counter-2">0</span></div><div class="metric-sub">Aktif İzleyici</div></div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="metric-card-ondo reveal-box slide-in"><div class="metric-title">ABONE SAYISI</div><div class="metric-value"><span id="counter-2">0</span></div><div class="metric-sub">Aktif İzleyici</div></div>', unsafe_allow_html=True)
     with c3:
-        st.markdown(f'<div class="metric-card-ondo reveal-box"><div class="metric-title">ORTALAMA ETKİLEŞİM</div><div class="metric-value"><span id="counter-3">0.00</span></div><div class="metric-sub">Kanal Performansı</div></div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="metric-card-ondo reveal-box slide-in"><div class="metric-title">ORTALAMA ETKİLEŞİM</div><div class="metric-value"><span id="counter-3">0.00</span></div><div class="metric-sub">Kanal Performansı</div></div>', unsafe_allow_html=True)
     with c4:
-        st.markdown(f'<div class="metric-card-ondo reveal-box"><div class="metric-title">İÇERİK SAYISI</div><div class="metric-value"><span id="counter-4">0</span></div><div class="metric-sub">Yayınlanan Video</div></div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="metric-card-ondo reveal-box slide-in"><div class="metric-title">İÇERİK SAYISI</div><div class="metric-value"><span id="counter-4">0</span></div><div class="metric-sub">Yayınlanan Video</div></div>', unsafe_allow_html=True)
 
     components.html(f"""
     <script>
@@ -499,14 +499,14 @@ if "loaded" in st.session_state and st.session_state.loaded:
     current_tab = st.session_state.active_tab
 
     if current_tab == "Performans Matrisi":
-        st.markdown('<div class="reveal-box">', unsafe_allow_html=True)
+        st.markdown('<div class="reveal-box slide-in">', unsafe_allow_html=True)
         st.write("### ⚡ Shorts ve Büyük Video Karşılaştırmalı Periyot Analizi")
         st.markdown('</div>', unsafe_allow_html=True)
         
         shorts_df = df[df["Tür"] == "Shorts"]
         long_df = df[df["Tür"] == "Büyük Video"]
 
-        st.markdown('<div class="reveal-box">', unsafe_allow_html=True)
+        st.markdown('<div class="reveal-box slide-in">', unsafe_allow_html=True)
         st.markdown("#### 📱 Shorts (Dikey) İçerik Performansı")
         st.markdown('</div>', unsafe_allow_html=True)
 
@@ -518,7 +518,7 @@ if "loaded" in st.session_state and st.session_state.loaded:
             p_time = p_data["Süre (Dk)"].sum()
             with col:
                 st.markdown(f'''
-                <div class="metric-card-ondo reveal-box" style="min-height: 120px; padding: 18px;">
+                <div class="metric-card-ondo reveal-box slide-in" style="min-height: 120px; padding: 18px;">
                     <div class="metric-title">SHORTS ({periyot.upper()})</div>
                     <div class="metric-value" style="font-size: 28px;">{p_views:,}</div>
                     <div class="metric-sub">{p_likes} Beğeni | {p_time:.1f} Dk</div>
@@ -526,7 +526,7 @@ if "loaded" in st.session_state and st.session_state.loaded:
                 ''', unsafe_allow_html=True)
 
         st.markdown("<br>", unsafe_allow_html=True)
-        st.markdown('<div class="reveal-box">', unsafe_allow_html=True)
+        st.markdown('<div class="reveal-box slide-in">', unsafe_allow_html=True)
         st.markdown("#### 🖥️ Büyük Video (Long-form) İçerik Performansı")
         st.markdown('</div>', unsafe_allow_html=True)
 
@@ -538,7 +538,7 @@ if "loaded" in st.session_state and st.session_state.loaded:
             p_time = p_data["Süre (Dk)"].sum()
             with col:
                 st.markdown(f'''
-                <div class="metric-card-ondo reveal-box" style="min-height: 120px; padding: 18px;">
+                <div class="metric-card-ondo reveal-box slide-in" style="min-height: 120px; padding: 18px;">
                     <div class="metric-title">BÜYÜK VİDEO ({periyot.upper()})</div>
                     <div class="metric-value" style="font-size: 28px;">{p_views:,}</div>
                     <div class="metric-sub">{p_likes} Beğeni | {p_time:.1f} Dk</div>
@@ -551,7 +551,7 @@ if "loaded" in st.session_state and st.session_state.loaded:
 
         col_g1, col_g2 = st.columns(2)
         with col_g1:
-            st.markdown('<div class="ondo-glass-card reveal-box">', unsafe_allow_html=True)
+            st.markdown('<div class="ondo-glass-card reveal-box slide-in">', unsafe_allow_html=True)
             st.write("### 📊 İçerik Türüne Göre İzlenme Dağılımı")
             fig_bar = px.bar(
                 df_grouped, 
@@ -567,7 +567,7 @@ if "loaded" in st.session_state and st.session_state.loaded:
             st.markdown('</div>', unsafe_allow_html=True)
 
         with col_g2:
-            st.markdown('<div class="ondo-glass-card reveal-box">', unsafe_allow_html=True)
+            st.markdown('<div class="ondo-glass-card reveal-box slide-in">', unsafe_allow_html=True)
             st.write("### 📈 Beğeni ve Etkileşim Trendi")
             fig_line = px.line(
                 df_grouped.sort_values("Yayın Tarihi"), 
@@ -583,14 +583,14 @@ if "loaded" in st.session_state and st.session_state.loaded:
             st.markdown('</div>', unsafe_allow_html=True)
 
     elif current_tab == "Detaylı Analiz":
-        st.markdown('<div class="ondo-glass-card reveal-box">', unsafe_allow_html=True)
+        st.markdown('<div class="ondo-glass-card reveal-box slide-in">', unsafe_allow_html=True)
         st.write("### 🔍 Tüm İçeriklerin Tür ve Periyot Arşivi")
         df_show = df[["Video Başlığı", "Yayın Tarihi", "Tür", "Periyot", "İzlenme", "Beğeni", "Yorum", "Süre (Dk)"]]
         st.dataframe(df_show, use_container_width=True)
         st.markdown('</div>', unsafe_allow_html=True)
 
     elif current_tab == "AI Strateji Raporu":
-        st.markdown('<div class="ondo-glass-card reveal-box">', unsafe_allow_html=True)
+        st.markdown('<div class="ondo-glass-card reveal-box slide-in">', unsafe_allow_html=True)
         st.write("### 🤖 Profesyonel Kripto & Kanal Büyüme Raporu (Ağustos 2026)")
         with st.spinner("Kanal verileri ve Ağustos 2026 kripto trendleri Llama 3.3 motoru ile sentezleniyor..."):
             client = Groq(api_key=st.session_state.groq_key)
