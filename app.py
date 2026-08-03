@@ -316,7 +316,7 @@ if analyze_btn:
                 total_videos = int(channel['statistics']['videoCount'])
                 uploads_playlist_id = channel['contentDetails']['relatedPlaylists']['uploads']
 
-                # Geçmişe dayalı TÜM videoları sayfalandırma (pagination) ile çek
+                # Geçmişe dayalı TÜM videoları sayfalandırma ile çek
                 v_ids = []
                 next_page_token = None
                 while True:
@@ -338,7 +338,6 @@ if analyze_btn:
                 comment_list = []
                 now = datetime.utcnow()
 
-                # Videoları 50'şerli gruplar halinde detaylı çek
                 for i in range(0, len(v_ids), 50):
                     chunk_ids = v_ids[i:i+50]
                     videos_req = youtube.videos().list(
@@ -639,6 +638,31 @@ if "loaded" in st.session_state and st.session_state.loaded:
         st.write("### 💬 YouTube Kanalı Geçmişe Dayalı Canlı Yorum Yönetim Merkezi")
         
         if not df_comments.empty:
+            # Cevaplanan ve Bekleyen sayılarını hesapla
+            answered_count = len(df_comments[df_comments["Durum"] == "Cevaplanan"])
+            pending_count = len(df_comments[df_comments["Durum"] == "Cevap Bekliyor"])
+
+            # Üst Kısma Özel İstatistik Kutuları
+            comm_c1, comm_c2 = st.columns(2)
+            with comm_c1:
+                st.markdown(f'''
+                <div class="metric-card-ondo" style="min-height: 100px; padding: 15px;">
+                    <div class="metric-title">CEVAPLANAN YORUMLAR</div>
+                    <div class="metric-value" style="font-size: 32px; color: #10b981;">{answered_count}</div>
+                    <div class="metric-sub">Etkileşim Kurulan</div>
+                </div>
+                ''', unsafe_allow_html=True)
+            with comm_c2:
+                st.markdown(f'''
+                <div class="metric-card-ondo" style="min-height: 100px; padding: 15px;">
+                    <div class="metric-title">CEVAP BEKLEYEN YORUMLAR</div>
+                    <div class="metric-value" style="font-size: 32px; color: #f59e0b;">{pending_count}</div>
+                    <div class="metric-sub">Yanıt Bekleyen</div>
+                </div>
+                ''', unsafe_allow_html=True)
+
+            st.markdown("<br>", unsafe_allow_html=True)
+
             filter_choice = st.radio("Yorum Durumu Filtresi", ["Tümü", "Cevap Bekliyor", "Cevaplanan"], horizontal=True)
             
             if filter_choice == "Cevap Bekliyor":
