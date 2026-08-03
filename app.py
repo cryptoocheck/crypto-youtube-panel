@@ -756,7 +756,7 @@ if "loaded" in st.session_state and st.session_state.loaded:
                 </div>
                 ''', unsafe_allow_html=True)
 
-        # Shorts Altına Yavaşça Uzayan 3D Sütun Grafiği (Intersection Observer Animasyonlu)
+        # Shorts Altına Scroll Tetiklemeli 3D Süzülen ve Uzayan Grafik (Intersection Observer)
         max_s_val = max([max(d["İzlenme"], d["Beğeni"]) for d in shorts_chart_data] + [1])
         
         s_bar_html = f'''
@@ -800,7 +800,7 @@ if "loaded" in st.session_state and st.session_state.loaded:
             }}
             .css-3d-bar {{
                 width: 40px;
-                height: 0px; /* Başlangıçta sıfır, animasyonla uzayacak */
+                height: 0px;
                 border-radius: 6px 6px 0 0;
                 position: relative;
                 transform-style: preserve-3d;
@@ -827,9 +827,7 @@ if "loaded" in st.session_state and st.session_state.loaded:
                 opacity: 0;
                 transition: opacity 1s ease 1s;
             }}
-            .animated .bar-val-label {{
-                opacity: 1;
-            }}
+            .animated .bar-val-label {{ opacity: 1; }}
             .css-3d-label {{
                 margin-top: 12px;
                 font-size: 13px;
@@ -849,7 +847,6 @@ if "loaded" in st.session_state and st.session_state.loaded:
             .legend-item {{ display: flex; align-items: center; gap: 8px; }}
             .legend-dot-y {{ width: 12px; height: 12px; background: #f1c40f; border-radius: 3px; box-shadow: 0 0 8px #f1c40f; }}
             .legend-dot-b {{ width: 12px; height: 12px; background: #3b82f6; border-radius: 3px; box-shadow: 0 0 8px #3b82f6; }}
-            .legend-dot-g {{ width: 12px; height: 12px; background: #10b981; border-radius: 3px; box-shadow: 0 0 8px #10b981; }}
         </style>
         </head>
         <body>
@@ -881,13 +878,23 @@ if "loaded" in st.session_state and st.session_state.loaded:
             </div>
         </div>
         <script>
-            setTimeout(() => {
-                const card = document.getElementById('chartCard1');
-                card.classList.add('animated');
-                document.querySelectorAll('#chartCard1 .css-3d-bar').forEach(bar => {
-                    bar.style.height = bar.getAttribute('data-height') + 'px';
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    const card = document.getElementById('chartCard1');
+                    if (entry.isIntersecting) {
+                        card.classList.add('animated');
+                        document.querySelectorAll('#chartCard1 .css-3d-bar').forEach(bar => {
+                            bar.style.height = bar.getAttribute('data-height') + 'px';
+                        });
+                    } else {
+                        card.classList.remove('animated');
+                        document.querySelectorAll('#chartCard1 .css-3d-bar').forEach(bar => {
+                            bar.style.height = '0px';
+                        });
+                    }
                 });
-            }, 300);
+            }, { threshold: 0.2 });
+            observer.observe(document.getElementById('chartCard1'));
         </script>
         </body>
         </html>
@@ -922,7 +929,7 @@ if "loaded" in st.session_state and st.session_state.loaded:
                 </div>
                 ''', unsafe_allow_html=True)
 
-        # Büyük Video Altına Yavaşça Uzayan 3D Sütun Grafiği
+        # Büyük Video Altına Scroll Tetiklemeli 3D Süzülen ve Uzayan Grafik
         max_l_val = max([max(d["İzlenme"], d["Beğeni"]) for d in long_chart_data] + [1])
         
         l_bar_html = f'''
@@ -992,9 +999,7 @@ if "loaded" in st.session_state and st.session_state.loaded:
                 opacity: 0;
                 transition: opacity 1s ease 1s;
             }}
-            .animated .bar-val-label {{
-                opacity: 1;
-            }}
+            .animated .bar-val-label {{ opacity: 1; }}
             .css-3d-label {{
                 margin-top: 12px;
                 font-size: 13px;
@@ -1045,13 +1050,23 @@ if "loaded" in st.session_state and st.session_state.loaded:
             </div>
         </div>
         <script>
-            setTimeout(() => {
-                const card = document.getElementById('chartCard2');
-                card.classList.add('animated');
-                document.querySelectorAll('#chartCard2 .css-3d-bar').forEach(bar => {
-                    bar.style.height = bar.getAttribute('data-height') + 'px';
+            const observer2 = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    const card = document.getElementById('chartCard2');
+                    if (entry.isIntersecting) {
+                        card.classList.add('animated');
+                        document.querySelectorAll('#chartCard2 .css-3d-bar').forEach(bar => {
+                            bar.style.height = bar.getAttribute('data-height') + 'px';
+                        });
+                    } else {
+                        card.classList.remove('animated');
+                        document.querySelectorAll('#chartCard2 .css-3d-bar').forEach(bar => {
+                            bar.style.height = '0px';
+                        });
+                    }
                 });
-            }, 300);
+            }, { threshold: 0.2 });
+            observer2.observe(document.getElementById('chartCard2'));
         </script>
         </body>
         </html>
