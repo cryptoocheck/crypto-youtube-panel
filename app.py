@@ -47,7 +47,7 @@ def parse_iso8601_duration_seconds(duration_str):
     seconds = int(match.group(3)) if match.group(3) else 0
     return hours * 3600 + minutes * 60 + seconds
 
-# 2. Tasarım Mimarisi (CSS)
+# 2. Sağlam, Stabil ve Şık Cam Tasarım Mimarisi (CSS)
 st.markdown(f"""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&display=swap');
@@ -86,8 +86,8 @@ st.markdown(f"""
     }}
     .banner-ondo-box {{
         background: rgba(17, 24, 39, 0.75);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
         border: 1px solid rgba(255, 255, 255, 0.12);
         border-radius: 24px;
         padding: 24px;
@@ -114,11 +114,11 @@ st.markdown(f"""
         margin: 0 auto;
     }}
 
-    /* --- KUTULAR --- */
+    /* --- KUTULAR VE MERKEZLEME --- */
     .metric-card-ondo, .ondo-glass-card {{
         background: rgba(17, 24, 39, 0.75);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
         border: 1px solid rgba(255, 255, 255, 0.08);
         border-radius: 20px;
         padding: 28px 20px;
@@ -130,7 +130,7 @@ st.markdown(f"""
         justify-content: center;
         text-align: center;
         min-height: 140px;
-        transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s ease, box-shadow 0.3s ease;
+        transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
     }}
     .metric-card-ondo:hover, .ondo-glass-card:hover {{
         transform: translateY(-6px) scale(1.01);
@@ -173,12 +173,12 @@ st.markdown(f"""
     /* Tablo Cam Efekti */
     .stDataFrame {{
         background: rgba(17, 24, 39, 0.75) !important;
-        backdrop-filter: blur(10px) !important;
+        backdrop-filter: blur(16px) !important;
         border: 1px solid rgba(255, 255, 255, 0.08) !important;
         border-radius: 20px !important;
         padding: 15px !important;
         box-shadow: 0 15px 35px -10px rgba(0, 0, 0, 0.5) !important;
-        transition: transform 0.3s ease, border-color 0.3s ease !important;
+        transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1) !important;
     }}
     .stDataFrame:hover {{
         transform: translateY(-4px) scale(1.005);
@@ -212,7 +212,7 @@ st.markdown(f"""
 
     .tab-active button {{
         background: linear-gradient(135deg, rgba(212, 175, 55, 0.95) 0%, rgba(184, 134, 11, 0.95) 100%) !important;
-        backdrop-filter: blur(10px) !important;
+        backdrop-filter: blur(16px) !important;
         color: #030712 !important;
         font-weight: 800 !important;
         font-size: 15px !important;
@@ -223,7 +223,7 @@ st.markdown(f"""
     }}
     .tab-inactive button {{
         background: rgba(17, 24, 39, 0.65) !important;
-        backdrop-filter: blur(10px) !important;
+        backdrop-filter: blur(16px) !important;
         color: #e5e7eb !important;
         font-weight: 700 !important;
         font-size: 14px !important;
