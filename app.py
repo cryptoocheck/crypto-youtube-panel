@@ -314,7 +314,7 @@ if analyze_btn:
                 total_videos = int(channel['statistics']['videoCount'])
                 uploads_playlist_id = channel['contentDetails']['relatedPlaylists']['uploads']
 
-                # --- KENDİ ABONE TAKİP SİSTEMİMİZ (LOKAL DOSYA) ---
+                # --- KENDİ ABONE TAKİP SİSTEMİMİZ ---
                 tracker_file = "subs_tracker.csv"
                 try:
                     if os.path.exists(tracker_file):
@@ -420,8 +420,7 @@ if analyze_btn:
                         else:
                             time_frame = "Arşiv"
 
-                        # Gerçek İzlenme Süresi Hesabı (Görüntüleme x Video Süresi Dakika cinsinden)
-                        estimated_watch_time_min = round((views * duration_min) * 0.45, 1) # %45 ortalama izlenme oranı varsayımıyla
+                        estimated_watch_time_min = round((views * duration_min) * 0.45, 1)
 
                         v_list.append({
                             "Video Başlığı": title,
@@ -435,7 +434,6 @@ if analyze_btn:
                             "İzlenme Süresi (Dk)": estimated_watch_time_min
                         })
 
-                        # Geçmişe dayalı TÜM yorumları sayfalandırma ile çek
                         if comments_count > 0:
                             try:
                                 c_next_token = None
@@ -531,6 +529,13 @@ if "loaded" in st.session_state and st.session_state.loaded:
         df["İzlenme Süresi (Dk)"] = 5.0
     if "Yaş (Gün)" not in df.columns:
         df["Yaş (Gün)"] = 31
+
+    # Hesaplamalar (Yeni eklenen satır için)
+    shorts_df_all = df[df["Tür"] == "Shorts"]
+    long_df_all = df[df["Tür"] == "Büyük Video"]
+
+    total_all_watch_time_min = round(df["İzlenme Süresi (Dk)"].sum(), 1) if not df.empty else 0.0
+    total_shorts_watch_time_min = round(shorts_df_all["İzlenme Süresi (Dk)"].sum(), 1) if not shorts_df_all.empty else 0.0
 
     # Üst Metrik Kartları (4'lü)
     c1, c2, c3, c4 = st.columns(4)
@@ -736,6 +741,30 @@ if "loaded" in st.session_state and st.session_state.loaded:
                     <div class="metric-sub">{p_likes:,} Beğeni | {p_watch_time:,.1f} Dk İzlenme</div>
                 </div>
                 ''', unsafe_allow_html=True)
+
+        # --- 3. YENİ EKLENEN SATIR: KANAL GENELİ İZLENME SÜRESİ METRİKLERİ ---
+        st.markdown("<br>", unsafe_allow_html=True)
+        st.markdown('<div class="reveal-box">', unsafe_allow_html=True)
+        st.write("### ⏱️ Kanal Geneli İzlenme Süresi Detayları")
+        st.markdown('</div>', unsafe_allow_html=True)
+
+        r_c1, r_c2 = st.columns(2)
+        with r_c1:
+            st.markdown(f'''
+            <div class="metric-card-ondo reveal-box" style="min-height: 130px; padding: 20px;">
+                <div class="metric-title">BU ZAMANA KADAR TOPLAM İZLENME SÜRESİ</div>
+                <div class="metric-value" style="font-size: 32px;">{total_all_watch_time_min:,.1f} <span style="font-size: 18px; color: #9ca3af;">Dk</span></div>
+                <div class="metric-sub">Tüm Videoların Toplamı (~{total_watch_hours} Saat)</div>
+            </div>
+            ''', unsafe_allow_html=True)
+        with r_c2:
+            st.markdown(f'''
+            <div class="metric-card-ondo reveal-box" style="min-height: 130px; padding: 20px;">
+                <div class="metric-title">GEÇERLİ SHORTS GÖRÜNTÜLEME SÜRESİ</div>
+                <div class="metric-value" style="font-size: 32px; color: #d4af37;">{total_shorts_watch_time_min:,.1f} <span style="font-size: 18px; color: #9ca3af;">Dk</span></div>
+                <div class="metric-sub">Yalnızca Shorts İçeriklerinin Toplamı</div>
+            </div>
+            ''', unsafe_allow_html=True)
 
     elif current_tab == "Gelen Yorumlar":
         st.markdown('<div class="ondo-glass-card reveal-box">', unsafe_allow_html=True)
