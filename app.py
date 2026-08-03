@@ -47,7 +47,7 @@ def parse_iso8601_duration_seconds(duration_str):
     seconds = int(match.group(3)) if match.group(3) else 0
     return hours * 3600 + minutes * 60 + seconds
 
-# 2. Kaydırma Efektli (Fade-in & Slide-up) Gelişmiş Cam Tasarım Mimarisi (CSS)
+# 2. Akıcı Kaydırma ve Süzülme Animasyon Mimarisi (CSS)
 st.markdown(f"""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&display=swap');
@@ -75,11 +75,11 @@ st.markdown(f"""
         max-width: 100% !important;
     }}
 
-    /* --- AŞAĞIDAN SÜZÜLEREK GELME ANİMASYONU (FADE-IN & SLIDE-UP) --- */
-    @keyframes fadeInUp {{
+    /* --- AŞAĞIDAN YUMUŞAKÇA SÜZÜLEREK GELME (SCROLL REVEAL EFFECT) --- */
+    @keyframes smoothSlideUp {{
         0% {{
             opacity: 0;
-            transform: translateY(40px) scale(0.98);
+            transform: translateY(50px) scale(0.97);
         }}
         100% {{
             opacity: 1;
@@ -87,8 +87,8 @@ st.markdown(f"""
         }}
     }}
 
-    .animated-box {{
-        animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    .reveal-box {{
+        animation: smoothSlideUp 0.9s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }}
 
     /* --- BANNER --- */
@@ -99,7 +99,7 @@ st.markdown(f"""
         width: 100%;
         margin-top: 120px;
         margin-bottom: 25px;
-        animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        animation: smoothSlideUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }}
     .banner-ondo-box {{
         background: rgba(17, 24, 39, 0.75);
@@ -131,7 +131,7 @@ st.markdown(f"""
         margin: 0 auto;
     }}
 
-    /* --- MERKEZLENMİŞ VE ANİMASYONLU KUTULAR --- */
+    /* --- MERKEZLENMİŞ, ANİMASYONLU VE CAM EFEKTLİ KUTULAR --- */
     .metric-card-ondo, .ondo-glass-card {{
         background: rgba(17, 24, 39, 0.75);
         backdrop-filter: blur(16px);
@@ -148,7 +148,7 @@ st.markdown(f"""
         text-align: center;
         min-height: 140px;
         transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-        animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        animation: smoothSlideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }}
     .metric-card-ondo:hover, .ondo-glass-card:hover {{
         transform: translateY(-6px) scale(1.01);
@@ -188,7 +188,7 @@ st.markdown(f"""
         width: 100%;
     }}
 
-    /* Tablo Cam Efekti */
+    /* Tablo Cam Efekti & Animasyon */
     .stDataFrame {{
         background: rgba(17, 24, 39, 0.75) !important;
         backdrop-filter: blur(16px) !important;
@@ -197,7 +197,7 @@ st.markdown(f"""
         padding: 15px !important;
         box-shadow: 0 15px 35px -10px rgba(0, 0, 0, 0.5) !important;
         transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1) !important;
-        animation: fadeInUp 0.9s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        animation: smoothSlideUp 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }}
     .stDataFrame:hover {{
         transform: translateY(-4px) scale(1.005);
@@ -486,14 +486,17 @@ if "loaded" in st.session_state and st.session_state.loaded:
     current_tab = st.session_state.active_tab
 
     if current_tab == "Performans Matrisi":
-        st.markdown('<div class="animated-box">', unsafe_allow_html=True)
+        st.markdown('<div class="reveal-box">', unsafe_allow_html=True)
         st.write("### ⚡ Shorts ve Büyük Video Karşılaştırmalı Periyot Analizi")
         st.markdown('</div>', unsafe_allow_html=True)
         
         shorts_df = df[df["Tür"] == "Shorts"]
         long_df = df[df["Tür"] == "Büyük Video"]
 
+        st.markdown('<div class="reveal-box">', unsafe_allow_html=True)
         st.markdown("#### 📱 Shorts (Dikey) İçerik Performansı")
+        st.markdown('</div>', unsafe_allow_html=True)
+
         s_c1, s_c2, s_c3 = st.columns(3)
         for periyot, col in zip(["Günlük", "Haftalık", "Aylık"], [s_c1, s_c2, s_c3]):
             p_data = shorts_df[shorts_df["Periyot"] == periyot]
@@ -502,7 +505,7 @@ if "loaded" in st.session_state and st.session_state.loaded:
             p_time = p_data["Süre (Dk)"].sum()
             with col:
                 st.markdown(f'''
-                <div class="metric-card-ondo" style="min-height: 120px; padding: 18px;">
+                <div class="metric-card-ondo reveal-box" style="min-height: 120px; padding: 18px;">
                     <div class="metric-title">SHORTS ({periyot.upper()})</div>
                     <div class="metric-value" style="font-size: 28px;">{p_views:,}</div>
                     <div class="metric-sub">{p_likes} Beğeni | {p_time:.1f} Dk</div>
@@ -510,7 +513,10 @@ if "loaded" in st.session_state and st.session_state.loaded:
                 ''', unsafe_allow_html=True)
 
         st.markdown("<br>", unsafe_allow_html=True)
+        st.markdown('<div class="reveal-box">', unsafe_allow_html=True)
         st.markdown("#### 🖥️ Büyük Video (Long-form) İçerik Performansı")
+        st.markdown('</div>', unsafe_allow_html=True)
+
         l_c1, l_c2, l_c3 = st.columns(3)
         for periyot, col in zip(["Günlük", "Haftalık", "Aylık"], [l_c1, l_c2, l_c3]):
             p_data = long_df[long_df["Periyot"] == periyot]
@@ -519,7 +525,7 @@ if "loaded" in st.session_state and st.session_state.loaded:
             p_time = p_data["Süre (Dk)"].sum()
             with col:
                 st.markdown(f'''
-                <div class="metric-card-ondo" style="min-height: 120px; padding: 18px;">
+                <div class="metric-card-ondo reveal-box" style="min-height: 120px; padding: 18px;">
                     <div class="metric-title">BÜYÜK VİDEO ({periyot.upper()})</div>
                     <div class="metric-value" style="font-size: 28px;">{p_views:,}</div>
                     <div class="metric-sub">{p_likes} Beğeni | {p_time:.1f} Dk</div>
@@ -532,7 +538,7 @@ if "loaded" in st.session_state and st.session_state.loaded:
 
         col_g1, col_g2 = st.columns(2)
         with col_g1:
-            st.markdown('<div class="ondo-glass-card">', unsafe_allow_html=True)
+            st.markdown('<div class="ondo-glass-card reveal-box">', unsafe_allow_html=True)
             st.write("### 📊 İçerik Türüne Göre İzlenme Dağılımı")
             fig_bar = px.bar(
                 df_grouped, 
@@ -548,7 +554,7 @@ if "loaded" in st.session_state and st.session_state.loaded:
             st.markdown('</div>', unsafe_allow_html=True)
 
         with col_g2:
-            st.markdown('<div class="ondo-glass-card">', unsafe_allow_html=True)
+            st.markdown('<div class="ondo-glass-card reveal-box">', unsafe_allow_html=True)
             st.write("### 📈 Beğeni ve Etkileşim Trendi")
             fig_line = px.line(
                 df_grouped.sort_values("Yayın Tarihi"), 
@@ -564,14 +570,14 @@ if "loaded" in st.session_state and st.session_state.loaded:
             st.markdown('</div>', unsafe_allow_html=True)
 
     elif current_tab == "Detaylı Analiz":
-        st.markdown('<div class="ondo-glass-card">', unsafe_allow_html=True)
+        st.markdown('<div class="ondo-glass-card reveal-box">', unsafe_allow_html=True)
         st.write("### 🔍 Tüm İçeriklerin Tür ve Periyot Arşivi")
         df_show = df[["Video Başlığı", "Yayın Tarihi", "Tür", "Periyot", "İzlenme", "Beğeni", "Yorum", "Süre (Dk)"]]
         st.dataframe(df_show, use_container_width=True)
         st.markdown('</div>', unsafe_allow_html=True)
 
     elif current_tab == "AI Strateji Raporu":
-        st.markdown('<div class="ondo-glass-card">', unsafe_allow_html=True)
+        st.markdown('<div class="ondo-glass-card reveal-box">', unsafe_allow_html=True)
         st.write("### 🤖 Profesyonel Kripto & Kanal Büyüme Raporu (Ağustos 2026)")
         with st.spinner("Kanal verileri ve Ağustos 2026 kripto trendleri Llama 3.3 motoru ile sentezleniyor..."):
             client = Groq(api_key=st.session_state.groq_key)
