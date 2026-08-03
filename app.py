@@ -47,7 +47,7 @@ def parse_iso8601_duration_seconds(duration_str):
     seconds = int(match.group(3)) if match.group(3) else 0
     return hours * 3600 + minutes * 60 + seconds
 
-# 2. Akıcı Kaydırma ve Süzülme Animasyon Mimarisi (CSS)
+# 2. Yüksek Performanslı ve Kaydırma Efektli Tasarım Mimarisi (CSS)
 st.markdown(f"""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&display=swap');
@@ -75,20 +75,17 @@ st.markdown(f"""
         max-width: 100% !important;
     }}
 
-    /* --- AŞAĞIDAN YUMUŞAKÇA SÜZÜLEREK GELME (SCROLL REVEAL EFFECT) --- */
-    @keyframes smoothSlideUp {{
-        0% {{
-            opacity: 0;
-            transform: translateY(50px) scale(0.97);
-        }}
-        100% {{
-            opacity: 1;
-            transform: translateY(0) scale(1);
-        }}
+    /* --- SCROLL-REVEAL SLIDE-UP ANIMASYONU --- */
+    .reveal-box {{
+        opacity: 0;
+        transform: translateY(45px);
+        transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+        will-change: opacity, transform;
     }}
 
-    .reveal-box {{
-        animation: smoothSlideUp 0.9s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    .reveal-box.active {{
+        opacity: 1;
+        transform: translateY(0);
     }}
 
     /* --- BANNER --- */
@@ -99,12 +96,11 @@ st.markdown(f"""
         width: 100%;
         margin-top: 120px;
         margin-bottom: 25px;
-        animation: smoothSlideUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }}
     .banner-ondo-box {{
         background: rgba(17, 24, 39, 0.75);
-        backdrop-filter: blur(16px);
-        -webkit-backdrop-filter: blur(16px);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
         border: 1px solid rgba(255, 255, 255, 0.12);
         border-radius: 24px;
         padding: 24px;
@@ -115,6 +111,7 @@ st.markdown(f"""
         position: relative;
         overflow: hidden;
         box-sizing: border-box;
+        will-change: transform;
     }}
     .banner-ondo-box:hover {{
         transform: translateY(-6px) scale(1.01);
@@ -131,11 +128,11 @@ st.markdown(f"""
         margin: 0 auto;
     }}
 
-    /* --- MERKEZLENMİŞ, ANİMASYONLU VE CAM EFEKTLİ KUTULAR --- */
+    /* --- OPTİMİZE EDİLMİŞ KUTULAR --- */
     .metric-card-ondo, .ondo-glass-card {{
         background: rgba(17, 24, 39, 0.75);
-        backdrop-filter: blur(16px);
-        -webkit-backdrop-filter: blur(16px);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
         border: 1px solid rgba(255, 255, 255, 0.08);
         border-radius: 20px;
         padding: 28px 20px;
@@ -147,8 +144,8 @@ st.markdown(f"""
         justify-content: center;
         text-align: center;
         min-height: 140px;
-        transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-        animation: smoothSlideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s ease, box-shadow 0.3s ease;
+        will-change: transform;
     }}
     .metric-card-ondo:hover, .ondo-glass-card:hover {{
         transform: translateY(-6px) scale(1.01);
@@ -188,16 +185,15 @@ st.markdown(f"""
         width: 100%;
     }}
 
-    /* Tablo Cam Efekti & Animasyon */
+    /* Tablo Cam Efekti */
     .stDataFrame {{
         background: rgba(17, 24, 39, 0.75) !important;
-        backdrop-filter: blur(16px) !important;
+        backdrop-filter: blur(10px) !important;
         border: 1px solid rgba(255, 255, 255, 0.08) !important;
         border-radius: 20px !important;
         padding: 15px !important;
         box-shadow: 0 15px 35px -10px rgba(0, 0, 0, 0.5) !important;
-        transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1) !important;
-        animation: smoothSlideUp 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        transition: transform 0.3s ease, border-color 0.3s ease !important;
     }}
     .stDataFrame:hover {{
         transform: translateY(-4px) scale(1.005);
@@ -231,47 +227,54 @@ st.markdown(f"""
 
     .tab-active button {{
         background: linear-gradient(135deg, rgba(212, 175, 55, 0.95) 0%, rgba(184, 134, 11, 0.95) 100%) !important;
-        backdrop-filter: blur(16px) !important;
-        -webkit-backdrop-filter: blur(16px) !important;
+        backdrop-filter: blur(10px) !important;
         color: #030712 !important;
         font-weight: 800 !important;
         font-size: 15px !important;
-        letter-spacing: 0.5px !important;
         border-radius: 9999px !important;
         border: 1px solid rgba(255, 255, 255, 0.5) !important;
-        box-shadow: 0 8px 30px rgba(212, 175, 55, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.6) !important;
+        box-shadow: 0 8px 30px rgba(212, 175, 55, 0.5) !important;
         padding: 14px 24px !important;
-        transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
     }}
-    .tab-active button:hover {{
-        transform: translateY(-3px) scale(1.02);
-        box-shadow: 0 12px 40px rgba(212, 175, 55, 0.7), 0 0 25px rgba(212, 175, 55, 0.4) !important;
-    }}
-    
     .tab-inactive button {{
         background: rgba(17, 24, 39, 0.65) !important;
-        backdrop-filter: blur(16px) !important;
-        -webkit-backdrop-filter: blur(16px) !important;
+        backdrop-filter: blur(10px) !important;
         color: #e5e7eb !important;
         font-weight: 700 !important;
         font-size: 14px !important;
-        letter-spacing: 0.5px !important;
         border-radius: 9999px !important;
         border: 1px solid rgba(255, 255, 255, 0.08) !important;
-        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
         padding: 14px 24px !important;
-        transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
-    }}
-    
-    .tab-inactive button:hover {{
-        background: rgba(31, 41, 55, 0.85) !important;
-        border-color: rgba(212, 175, 55, 0.7) !important;
-        box-shadow: 0 12px 35px rgba(212, 175, 55, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
-        color: #ffffff !important;
-        transform: translateY(-3px) scale(1.02);
     }}
 </style>
 """, unsafe_allow_html=True)
+
+# --- KAYDIRMA ANİMASYONU İÇİN INTERSECTION OBSERVER ENJEKSİYONU ---
+components.html("""
+<script>
+const observerOptions = {
+    root: null,
+    rootMargin: '0px',
+    threshold: 0.1
+};
+
+const observer = new IntersectionObserver((entries, observer) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            entry.target.classList.add('active');
+        }
+    });
+}, observerOptions);
+
+function scanElements() {
+    const boxes = window.parent.document.querySelectorAll('.reveal-box');
+    boxes.forEach(box => observer.observe(box));
+}
+
+// Periyodik tarama ile Streamlit bileşen değişimlerini yakala
+setInterval(scanElements, 400);
+</script>
+""", height=0)
 
 # --- BANNER ---
 if img_b64:
@@ -403,13 +406,13 @@ if "loaded" in st.session_state and st.session_state.loaded:
     # Üst Metrik Kartları
     c1, c2, c3, c4 = st.columns(4)
     with c1:
-        st.markdown(f'<div class="metric-card-ondo"><div class="metric-title">TOPLAM İZLENME</div><div class="metric-value"><span id="counter-1">0</span></div><div class="metric-sub">Canlı Veri</div></div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="metric-card-ondo reveal-box"><div class="metric-title">TOPLAM İZLENME</div><div class="metric-value"><span id="counter-1">0</span></div><div class="metric-sub">Canlı Veri</div></div>', unsafe_allow_html=True)
     with c2:
-        st.markdown(f'<div class="metric-card-ondo"><div class="metric-title">ABONE SAYISI</div><div class="metric-value"><span id="counter-2">0</span></div><div class="metric-sub">Aktif İzleyici</div></div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="metric-card-ondo reveal-box"><div class="metric-title">ABONE SAYISI</div><div class="metric-value"><span id="counter-2">0</span></div><div class="metric-sub">Aktif İzleyici</div></div>', unsafe_allow_html=True)
     with c3:
-        st.markdown(f'<div class="metric-card-ondo"><div class="metric-title">ORTALAMA ETKİLEŞİM</div><div class="metric-value"><span id="counter-3">0.00</span></div><div class="metric-sub">Kanal Performansı</div></div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="metric-card-ondo reveal-box"><div class="metric-title">ORTALAMA ETKİLEŞİM</div><div class="metric-value"><span id="counter-3">0.00</span></div><div class="metric-sub">Kanal Performansı</div></div>', unsafe_allow_html=True)
     with c4:
-        st.markdown(f'<div class="metric-card-ondo"><div class="metric-title">İÇERİK SAYISI</div><div class="metric-value"><span id="counter-4">0</span></div><div class="metric-sub">Yayınlanan Video</div></div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="metric-card-ondo reveal-box"><div class="metric-title">İÇERİK SAYISI</div><div class="metric-value"><span id="counter-4">0</span></div><div class="metric-sub">Yayınlanan Video</div></div>', unsafe_allow_html=True)
 
     components.html(f"""
     <script>
@@ -583,7 +586,7 @@ if "loaded" in st.session_state and st.session_state.loaded:
             client = Groq(api_key=st.session_state.groq_key)
             
             prompt = f"""
-            Sen kurumsal düzeyde Web3, kripto varlık ve YouTube kanal büyüme stratejisi geliştiren üst düzey bir analistsin.
+            Sen kurumsal düzeyde Web3, kripto varlık ve kanal büyüme stratejisi geliştiren üst düzey bir analistsin.
             Mevcut Tarih: Ağustos 2026.
             Kanal Adı: {ch_title}
             Toplam İzlenme: {total_views} | Abone Sayısı: {subscribers} | Toplam Video: {total_videos}
