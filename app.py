@@ -32,12 +32,11 @@ def get_img_as_base64(file_path):
         return base64.b64encode(data).decode()
     return None
 
-# Depodaki olası tüm isim varyasyonlarını tek tek kontrol edip yakalıyoruz
 possible_files = ["bg2.jpg.jpg", "bg2.jpg", "bg.jpg"]
 banner_file = next((f for f in possible_files if os.path.exists(f)), None)
 img_b64 = get_img_as_base64(banner_file) if banner_file else None
 
-# 2. Diğer Kutularla Birebir Aynı Kalıpta, Çerçeveli ve Hover Büyüme Efektli Mimarisi (CSS)
+# 2. Üst Kısmı Dahil 360 Derece Eşit Çerçeveli Banner Mimarisi (CSS)
 st.markdown(f"""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&display=swap');
@@ -65,22 +64,22 @@ st.markdown(f"""
         max-width: 100% !important;
     }}
 
-    /* --- DİĞER KUTULARLA KUSURSUZ UYUMLU ÇERÇEVELİ BANNER KUTUSU --- */
+    /* --- ÜST ÇİZGİNİN KAPANMASINI ÖNLEYEN EŞİT İÇ BOŞLUKLU ÇERÇEVE --- */
     .absolute-center-banner {{
         display: flex;
         justify-content: center;
         align-items: center;
         width: 100%;
-        margin-top: 15px;
+        margin-top: 20px;
         margin-bottom: 25px;
     }}
     .banner-ondo-box {{
         background: rgba(17, 24, 39, 0.7);
         backdrop-filter: blur(16px);
         -webkit-backdrop-filter: blur(16px);
-        border: 1px solid rgba(255, 255, 255, 0.07);
+        border: 1px solid rgba(255, 255, 255, 0.1);
         border-radius: 24px;
-        padding: 24px;
+        padding: 20px;
         box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.7);
         transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
         width: 75%;
@@ -96,10 +95,11 @@ st.markdown(f"""
     .banner-ondo-box img {{
         width: 100% !important;
         height: auto !important;
-        max-height: 400px !important;
+        max-height: 380px !important;
         object-fit: contain !important;
         border-radius: 16px;
         display: block;
+        margin: 0 auto;
     }}
 
     /* Grafik ve İçerik Kutuları */
@@ -240,7 +240,7 @@ st.markdown(f"""
 </style>
 """, unsafe_allow_html=True)
 
-# --- BANNER (HTML Bazlı Kesin Çerçeveli ve Hover Özellikli Yapı) ---
+# --- BANNER ---
 if img_b64:
     st.markdown(f'''
     <div class="absolute-center-banner">
