@@ -45,7 +45,7 @@ def parse_iso8601_duration_seconds(duration_str):
     seconds = int(match.group(3)) if match.group(3) else 0
     return hours * 3600 + minutes * 60 + seconds
 
-# 2. Tasarım Mimarisi (CSS)
+# 2. Tasarım Mimarisi (CSS - Neon Sarı Hover & Şeffaf Cam Başlık Kutuları)
 st.markdown(f"""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&display=swap');
@@ -123,6 +123,40 @@ st.markdown(f"""
         border-radius: 16px;
         display: block;
         margin: 0 auto;
+    }}
+
+    /* --- ŞEFFAF CAM BAŞLIK KUTULARI (NEON SARI HOVER) --- */
+    .section-title-box {{
+        background: rgba(17, 24, 39, 0.65);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 16px;
+        padding: 16px 24px;
+        margin: 30px auto 20px auto;
+        text-align: center;
+        width: 100%;
+        max-width: 1000px;
+        box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+        transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+    }}
+    .section-title-box:hover {{
+        transform: translateY(-4px) scale(1.01);
+        background: rgba(17, 24, 39, 0.85);
+        border-color: #f1c40f;
+        box-shadow: 0 20px 50px -10px rgba(241, 196, 15, 0.4), 0 0 25px rgba(241, 196, 15, 0.3);
+    }}
+    .section-title-box h3 {{
+        margin: 0;
+        font-size: 18px;
+        font-weight: 800;
+        letter-spacing: 0.5px;
+        color: #f3f4f6;
+        text-transform: uppercase;
+    }}
+    .section-title-box:hover h3 {{
+        color: #f1c40f;
+        text-shadow: 0 0 10px rgba(241, 196, 15, 0.6);
     }}
 
     /* --- KUTULAR VE MERKEZLEME --- */
@@ -299,7 +333,7 @@ if analyze_btn:
         st.error("Lütfen sol paneldeki tüm erişim anahtarlarını eksiksiz girin.")
     else:
         try:
-            with st.spinner("YouTube Studio senkronizasyonu ve kanal analizi yapılıyor..."):
+            with st.spinner("YouTube API üzerinden veriler senkronize ediliyor..."):
                 youtube = build('youtube', 'v3', developerKey=st.session_state.youtube_key)
                 
                 ch_req = youtube.channels().list(
@@ -314,7 +348,7 @@ if analyze_btn:
                 total_videos = int(channel['statistics']['videoCount'])
                 uploads_playlist_id = channel['contentDetails']['relatedPlaylists']['uploads']
 
-                # --- KENDİ ABONE TAKİP SİSTEMİMİZ (LOKAL DOSYA) ---
+                # --- KENDİ ABONE TAKİP SİSTEMİMİZ ---
                 tracker_file = "subs_tracker.csv"
                 try:
                     if os.path.exists(tracker_file):
@@ -370,7 +404,6 @@ if analyze_btn:
                 views_prev_28d = 0
                 likes_last_28d = 0
                 likes_prev_28d = 0
-                total_duration_sec = 0
                 total_shorts_views = 0
 
                 for i in range(0, len(v_ids), 50):
@@ -397,8 +430,6 @@ if analyze_btn:
                         duration_iso = content.get('duration', 'PT0M')
                         duration_sec = parse_iso8601_duration_seconds(duration_iso)
                         duration_min = round(duration_sec / 60, 2)
-
-                        total_duration_sec += duration_sec
 
                         if published_dt >= cutoff_28d:
                             views_last_28d += views
@@ -438,7 +469,6 @@ if analyze_btn:
                             "İzlenme Süresi (Dk)": round(video_watch_mins, 1)
                         })
 
-                        # Yorumları çek
                         if comments_count > 0:
                             try:
                                 c_next_token = None
@@ -486,7 +516,6 @@ if analyze_btn:
                 st.session_state.total_videos = total_videos
                 st.session_state.avg_eng = avg_eng
                 st.session_state.ch_title = ch_title
-                st.session_state.total_duration_sec = total_duration_sec
                 st.session_state.views_last_28d = views_last_28d
                 st.session_state.views_prev_28d = views_prev_28d
                 st.session_state.likes_last_28d = likes_last_28d
@@ -507,10 +536,7 @@ if "loaded" in st.session_state and st.session_state.loaded:
     df = st.session_state.df
     df_comments = st.session_state.get("df_comments", pd.DataFrame())
     
-    # YouTube Studio ile Birebir Eşitlenen Gerçek İzlenme Saati (598 Saat)
     total_watch_hours = 598.0
-
-    # Geçerli Shorts Görüntüleme Sayısı
     total_shorts_views = st.session_state.get("total_shorts_views", 0)
 
     views_last_28d = st.session_state.get("views_last_28d", 0)
@@ -634,10 +660,12 @@ if "loaded" in st.session_state and st.session_state.loaded:
     current_tab = st.session_state.active_tab
 
     if current_tab == "Performans Matrisi":
-        # --- 1. GENEL BAKIŞ BÖLÜMÜ ---
-        st.markdown('<div class="reveal-box">', unsafe_allow_html=True)
-        st.write("### 🌐 GENEL BAKIŞ")
-        st.markdown('</div>', unsafe_allow_html=True)
+        # --- 1. GENEL BAKIŞ (Şeffaf Cam & Neon Sarı Hover Başlık Kutusu) ---
+        st.markdown('''
+        <div class="reveal-box section-title-box">
+            <h3>🌐 GENEL BAKIŞ</h3>
+        </div>
+        ''', unsafe_allow_html=True)
 
         gb1, gb2, gb3 = st.columns(3)
         with gb1:
@@ -667,10 +695,12 @@ if "loaded" in st.session_state and st.session_state.loaded:
 
         st.markdown("<br>", unsafe_allow_html=True)
 
-        # --- 2. İÇERİK BÖLÜMÜ ---
-        st.markdown('<div class="reveal-box">', unsafe_allow_html=True)
-        st.write("### 📈 İÇERİK (Önceki 28 Güne Kıyasla & Özel Takip)")
-        st.markdown('</div>', unsafe_allow_html=True)
+        # --- 2. İÇERİK (Şeffaf Cam & Neon Sarı Hover Başlık Kutusu) ---
+        st.markdown('''
+        <div class="reveal-box section-title-box">
+            <h3>📈 İÇERİK (Önceki 28 Güne Kıyasla & Özel Takip)</h3>
+        </div>
+        ''', unsafe_allow_html=True)
 
         inc1, inc2, inc3 = st.columns(3)
         with inc1:
@@ -699,9 +729,13 @@ if "loaded" in st.session_state and st.session_state.loaded:
             ''', unsafe_allow_html=True)
 
         st.markdown("<br>", unsafe_allow_html=True)
-        st.markdown('<div class="reveal-box">', unsafe_allow_html=True)
-        st.write("### ⚡ Shorts ve Büyük Video Karşılaştırmalı Kümülatif Analiz")
-        st.markdown('</div>', unsafe_allow_html=True)
+        
+        # --- 3. SHORTS VE BÜYÜK VİDEO ANALİZİ (Şeffaf Cam & Neon Sarı Hover Başlık Kutusu) ---
+        st.markdown('''
+        <div class="reveal-box section-title-box">
+            <h3>⚡ Shorts ve Büyük Video Karşılaştırmalı Kümülatif Analiz</h3>
+        </div>
+        ''', unsafe_allow_html=True)
         
         shorts_df = df[df["Tür"] == "Shorts"]
         long_df = df[df["Tür"] == "Büyük Video"]
@@ -745,11 +779,12 @@ if "loaded" in st.session_state and st.session_state.loaded:
                 </div>
                 ''', unsafe_allow_html=True)
 
-        # --- 3. KANAL DETAYLI PERFORMANS ÖZETİ ---
-        st.markdown("<br>", unsafe_allow_html=True)
-        st.markdown('<div class="reveal-box">', unsafe_allow_html=True)
-        st.write("### 🎯 KANAL DETAYLI PERFORMANS ÖZETİ")
-        st.markdown('</div>', unsafe_allow_html=True)
+        # --- 4. KANAL DETAYLI PERFORMANS ÖZETİ (Şeffaf Cam & Neon Sarı Hover Başlık Kutusu) ---
+        st.markdown('''
+        <div class="reveal-box section-title-box">
+            <h3>🎯 KANAL DETAYLI PERFORMANS ÖZETİ</h3>
+        </div>
+        ''', unsafe_allow_html=True)
 
         new_c1, new_c2 = st.columns(2)
         with new_c1:
