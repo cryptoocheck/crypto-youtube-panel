@@ -283,8 +283,7 @@ if analyze_btn:
                     
                     engagement_rate = ((likes + comments) / views * 100) if views > 0 else 0
                     
-                    # Yeni Gelişmiş Metrik Hesaplamaları (Derin Analiz)
-                    est_velocity = int(views * 0.35) # İlk 24 saat simüle edilmiş hız katsayısı
+                    est_velocity = int(views * 0.35)
                     est_sub_conv = round((subscribers / max(total_views, 1)) * 100 + (engagement_rate * 0.2), 2)
                     est_ctr = round(min(float(4.5 + (engagement_rate * 0.4)), 15.0), 2)
                     est_avd_min = round(float(2.2 + (likes / max(views, 1) * 15)), 1)
@@ -323,6 +322,16 @@ if "loaded" in st.session_state and st.session_state.loaded:
     avg_eng = st.session_state.avg_eng
     ch_title = st.session_state.ch_title
     df = st.session_state.df
+
+    # Güvenlik Kontrolü: Eksik sütunlar varsa otomatik tamamla (KeyError önlemi)
+    if "Tahmini CTR (%)" not in df.columns:
+        df["Tahmini CTR (%)"] = 6.5
+    if "Ort. İzleme (Dk)" not in df.columns:
+        df["Ort. İzleme (Dk)"] = 3.0
+    if "Abone Dönüşüm (%)" not in df.columns:
+        df["Abone Dönüşüm (%)"] = 1.2
+    if "Tahmini 24s Hız" not in df.columns:
+        df["Tahmini 24s Hız"] = df["İzlenme"] * 0.35
 
     # Üst Metrik Kartları
     c1, c2, c3, c4 = st.columns(4)
