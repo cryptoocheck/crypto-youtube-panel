@@ -36,7 +36,7 @@ possible_files = ["bg2.jpg.jpg", "bg2.jpg", "bg.jpg"]
 banner_file = next((f for f in possible_files if os.path.exists(f)), None)
 img_b64 = get_img_as_base64(banner_file) if banner_file else None
 
-# 2. Şık Web3 Çerçeveli ve Cam Efektli Banner Mimarisi (CSS)
+# 2. Diğer Kutularla Birebir Aynı Tasarıma Sahip Banner Mimarisi (CSS)
 st.markdown(f"""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&display=swap');
@@ -64,7 +64,7 @@ st.markdown(f"""
         max-width: 100% !important;
     }}
 
-    /* --- NET ÇERÇEVELİ, CAM EFEKTLİ VE BÜYÜME (HOVER) ÖZELLİKLİ BANNER --- */
+    /* --- DİĞER KUTULARLA AYNı HİZAYA VE ÇERÇEVEYE SAHİP BANNER --- */
     .absolute-center-banner {{
         display: flex;
         justify-content: center;
@@ -73,33 +73,32 @@ st.markdown(f"""
         margin-top: 15px;
         margin-bottom: 25px;
     }}
-    .banner-framed-card {{
-        background: rgba(17, 24, 39, 0.75);
+    .banner-ondo-box {{
+        background: rgba(17, 24, 39, 0.7);
         backdrop-filter: blur(16px);
         -webkit-backdrop-filter: blur(16px);
-        border: 2px solid rgba(212, 175, 55, 0.4);
+        border: 1px solid rgba(255, 255, 255, 0.07);
         border-radius: 24px;
-        padding: 16px;
-        box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.8), 0 0 20px rgba(212, 175, 55, 0.1);
+        padding: 24px;
+        box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.7);
         transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
         width: 75%;
         max-width: 1200px;
         position: relative;
         overflow: hidden;
     }}
-    .banner-framed-card:hover {{
+    .banner-ondo-box:hover {{
         transform: translateY(-6px) scale(1.01);
-        border-color: rgba(212, 175, 55, 0.9);
-        box-shadow: 0 30px 70px -15px rgba(212, 175, 55, 0.4), 0 0 35px rgba(212, 175, 55, 0.3);
+        border-color: rgba(212, 175, 55, 0.7);
+        box-shadow: 0 30px 70px -15px rgba(212, 175, 55, 0.35), 0 0 35px rgba(212, 175, 55, 0.25);
     }}
-    .banner-framed-card img {{
+    .banner-ondo-box img {{
         width: 100% !important;
         height: auto !important;
-        max-height: 420px !important;
+        max-height: 400px !important;
         object-fit: cover !important;
-        border-radius: 14px;
+        border-radius: 16px;
         display: block;
-        border: 1px solid rgba(255, 255, 255, 0.1);
     }}
 
     /* Grafik ve İçerik Kutuları */
@@ -240,11 +239,11 @@ st.markdown(f"""
 </style>
 """, unsafe_allow_html=True)
 
-# --- ÇERÇEVELİ VE CAM EFEKTLİ BANNER ---
+# --- BANNER (Diğer Kutularla Tam Uyumlu Çerçeve) ---
 if img_b64:
     st.markdown(f'''
     <div class="absolute-center-banner">
-        <div class="banner-framed-card">
+        <div class="banner-ondo-box">
             <img src="data:image/jpeg;base64,{img_b64}" alt="Crypto Check Banner">
         </div>
     </div>
