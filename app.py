@@ -16,7 +16,6 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# Session State Değişkenleri
 if "youtube_key" not in st.session_state:
     st.session_state.youtube_key = ""
 if "groq_key" not in st.session_state:
@@ -46,7 +45,7 @@ def parse_iso8601_duration_seconds(duration_str):
     seconds = int(match.group(3)) if match.group(3) else 0
     return hours * 3600 + minutes * 60 + seconds
 
-# 2. Tasarım Mimarisi (CSS - Optimize Edilmiş)
+# 2. Tasarım Mimarisi (CSS - Gerçek 3D Donanım Hızlandırmalı Hacimsel Sütunlar)
 st.markdown(f"""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&display=swap');
@@ -77,8 +76,8 @@ st.markdown(f"""
     /* --- İPEKSİ SÜZÜLME VE 3D GEÇİŞ --- */
     .reveal-box {{
         opacity: 0;
-        transform: perspective(1200px) rotateX(15deg) translateY(60px) scale(0.95);
-        transition: opacity 1.4s cubic-bezier(0.16, 1, 0.3, 1), transform 1.4s cubic-bezier(0.16, 1, 0.3, 1);
+        transform: perspective(1200px) rotateX(20deg) translateY(90px) scale(0.9);
+        transition: opacity 1.6s cubic-bezier(0.16, 1, 0.3, 1), transform 1.6s cubic-bezier(0.16, 1, 0.3, 1);
         will-change: opacity, transform;
     }}
 
@@ -86,6 +85,116 @@ st.markdown(f"""
         opacity: 1;
         transform: perspective(1200px) rotateX(0deg) translateY(0) scale(1);
     }}
+
+    /* --- GERÇEK 3D HTML5 / CSS HOLOGRAFİK GRAFİK MOTORU --- */
+    .chart-3d-wrapper {{
+        background: rgba(17, 24, 39, 0.85);
+        backdrop-filter: blur(24px);
+        -webkit-backdrop-filter: blur(24px);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        border-radius: 24px;
+        padding: 35px 25px 25px 25px;
+        margin-top: 15px;
+        margin-bottom: 30px;
+        box-shadow: 0 40px 80px -15px rgba(0, 0, 0, 0.9), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+        transform: perspective(1200px) rotateX(6deg) rotateY(-2deg);
+        transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.5s ease, border-color 0.5s ease;
+    }}
+    .chart-3d-wrapper:hover {{
+        transform: perspective(1200px) rotateX(0deg) rotateY(0deg) translateY(-8px) scale(1.01);
+        border-color: rgba(241, 196, 15, 0.9);
+        box-shadow: 0 50px 110px -20px rgba(241, 196, 15, 0.45), 0 0 45px rgba(241, 196, 15, 0.35);
+    }}
+
+    .css-3d-chart-container {{
+        display: flex;
+        justify-content: space-around;
+        align-items: flex-end;
+        height: 260px;
+        padding-top: 40px;
+        border-bottom: 2px solid rgba(255, 255, 255, 0.15);
+        position: relative;
+    }}
+
+    .css-3d-group {{
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 30%;
+        height: 100%;
+        justify-content: flex-end;
+    }}
+
+    .css-3d-bars-flex {{
+        display: flex;
+        gap: 12px;
+        align-items: flex-end;
+        height: 85%;
+        justify-content: center;
+        width: 100%;
+    }}
+
+    /* 3D Hacimli Sütun Tasarımı */
+    .css-3d-bar {{
+        width: 38px;
+        border-radius: 6px 6px 0 0;
+        position: relative;
+        transform-style: preserve-3d;
+        transform: perspective(600px) rotateY(-15deg);
+        box-shadow: -10px 10px 20px rgba(0,0,0,0.6), inset 2px 2px 5px rgba(255,255,255,0.3);
+        transition: transform 0.4s ease, filter 0.4s ease;
+    }}
+    .css-3d-bar:hover {{
+        transform: perspective(600px) rotateY(0deg) scaleY(1.05) translateY(-5px);
+        filter: brightness(1.25);
+    }}
+
+    .bar-yellow {{
+        background: linear-gradient(135deg, #f1c40f 0%, #b7950b 100%);
+    }}
+    .bar-blue {{
+        background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+    }}
+    .bar-green {{
+        background: linear-gradient(135deg, #10b981 0%, #047857 100%);
+    }}
+
+    .bar-val-label {{
+        position: absolute;
+        top: -24px;
+        width: 100%;
+        text-align: center;
+        font-size: 11px;
+        font-weight: 800;
+        color: #ffffff;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+    }}
+
+    .css-3d-label {{
+        margin-top: 12px;
+        font-size: 13px;
+        font-weight: 700;
+        color: #9ca3af;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }}
+
+    .chart-legend {{
+        display: flex;
+        justify-content: center;
+        gap: 25px;
+        margin-top: 15px;
+        font-size: 12px;
+        font-weight: 700;
+    }}
+    .legend-item {{
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }}
+    .legend-dot-y {{ width: 12px; height: 12px; background: #f1c40f; border-radius: 3px; box-shadow: 0 0 8px #f1c40f; }}
+    .legend-dot-b {{ width: 12px; height: 12px; background: #3b82f6; border-radius: 3px; box-shadow: 0 0 8px #3b82f6; }}
+    .legend-dot-g {{ width: 12px; height: 12px; background: #10b981; border-radius: 3px; box-shadow: 0 0 8px #10b981; }}
 
     /* --- BANNER --- */
     .absolute-center-banner {{
@@ -160,7 +269,7 @@ st.markdown(f"""
         text-shadow: 0 0 10px rgba(241, 196, 15, 0.6);
     }}
 
-    /* --- 3D METRİK KUTULARI --- */
+    /* --- 3D KUTULAR --- */
     .metric-card-ondo, .ondo-glass-card {{
         background: rgba(17, 24, 39, 0.75);
         backdrop-filter: blur(16px);
@@ -229,7 +338,6 @@ st.markdown(f"""
         border-right: 1px solid rgba(255, 255, 255, 0.05);
     }}
     
-    /* Sekme Butonları */
     .stButton>button {{
         background: linear-gradient(135deg, rgba(212, 175, 55, 0.85) 0%, rgba(170, 140, 44, 0.85) 100%); 
         color: #030712;
@@ -340,20 +448,21 @@ if analyze_btn:
                 total_videos = int(channel['statistics']['videoCount'])
                 uploads_playlist_id = channel['contentDetails']['relatedPlaylists']['uploads']
 
-                # --- KENDİ ABONE TAKİP SİSTEMİMİZ ---
+                # --- KENDİ ABONE TAKİP SİSTEMİMİZ (Düzeltildi: İlk kaydı baz alır) ---
                 tracker_file = "subs_tracker.csv"
                 try:
                     if os.path.exists(tracker_file):
                         tracker_df = pd.read_csv(tracker_file)
                         if not tracker_df.empty:
-                            last_recorded_subs = int(tracker_df.iloc[-1]['Subscribers'])
+                            # Her zaman sistemi başlattığımız İLK günkü veriyi referans al (Gerçek artış/azalış)
+                            first_recorded_subs = int(tracker_df.iloc[0]['Subscribers'])
                         else:
-                            last_recorded_subs = subscribers
+                            first_recorded_subs = subscribers
                     else:
                         tracker_df = pd.DataFrame(columns=["Date", "Subscribers"])
-                        last_recorded_subs = subscribers
+                        first_recorded_subs = subscribers
                         
-                    subs_diff = subscribers - last_recorded_subs
+                    subs_diff = subscribers - first_recorded_subs
                     
                     today_str = datetime.utcnow().strftime("%Y-%m-%d")
                     if not tracker_df.empty and tracker_df.iloc[-1]['Date'] == today_str:
@@ -716,7 +825,7 @@ if "loaded" in st.session_state and st.session_state.loaded:
             <div class="metric-card-ondo reveal-box" style="min-height: 110px; padding: 18px;">
                 <div class="metric-title">ABONE TAKİBİ (SİSTEM)</div>
                 <div class="metric-value" style="font-size: 26px;">{subscribers:,}</div>
-                <div class="metric-sub">Son Kayda Göre: {subs_arrow} {subs_diff_str}</div>
+                <div class="metric-sub">İlk Kayda Göre: {subs_arrow} {subs_diff_str}</div>
             </div>
             ''', unsafe_allow_html=True)
 
@@ -931,7 +1040,7 @@ if "loaded" in st.session_state and st.session_state.loaded:
                 </div>
                 ''', unsafe_allow_html=True)
 
-        # Büyük Video Altına Scroll Tetiklemeli 3D Süzülen ve Uzayan Grafik (Güvenli CSS Intersection)
+        # Büyük Video Altına Scroll Tetiklemeli 3D Süzülen ve Uzayan Grafik
         max_l_val = max([max(d["İzlenme"], d["Beğeni"]) for d in long_chart_data] + [1])
         
         l_bar_html = f'''
