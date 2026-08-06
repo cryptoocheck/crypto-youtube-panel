@@ -28,8 +28,6 @@ if "active_tab" not in st.session_state:
     st.session_state.active_tab = "Performans"
 if "loaded" not in st.session_state:
     st.session_state.loaded = False
-if "anim_key" not in st.session_state:
-    st.session_state.anim_key = 0
 
 def get_img_as_base64(file_path):
     if os.path.exists(file_path):
@@ -285,7 +283,7 @@ function initAnimations() {
 }
 setTimeout(initAnimations, 300);
 </script>
-""", height=0, key=f"anim_script_{st.session_state.anim_key}")
+""", height=0)
 
 if img_b64:
     st.markdown(f'''
@@ -396,7 +394,6 @@ if analyze_btn:
                 st.session_state.likes_last_28d = likes_last_28d
                 st.session_state.total_shorts_views = total_shorts_views
                 st.session_state.loaded = True
-                st.session_state.anim_key += 1
         except Exception as e:
             st.error(f"Sistem Çalışma Hatası: {e}")
 
