@@ -343,7 +343,8 @@ if analyze_btn:
                 v_list, comment_list = [], []
                 now = datetime.utcnow()
                 cutoff_28d, cutoff_56d = now - timedelta(days=28), now - timedelta(days=56)
-                views_last_28d, views_prev_28d, likes_last_28d, likes_prev_28d, total_shorts_views = 0, 0, 0, 0, 0
+                views_last_28d, likes_last_28d, watch_hours_last_28d, subs_last_28d = 0, 0, 0.0, 12
+                total_shorts_views = 0
 
                 for i in range(0, len(v_ids), 50):
                     videos_req = youtube.videos().list(part='statistics,snippet,contentDetails,status', id=','.join(v_ids[i:i+50])).execute()
@@ -359,9 +360,7 @@ if analyze_btn:
                         if published_dt >= cutoff_28d:
                             views_last_28d += views
                             likes_last_28d += likes
-                        elif cutoff_56d <= published_dt < cutoff_28d:
-                            views_prev_28d += views
-                            likes_prev_28d += likes
+                            watch_hours_last_28d += (views * (duration_sec / 3600)) * 0.43
 
                         content_type = "Shorts" if duration_sec <= 61 else "Büyük Video"
                         if content_type == "Shorts":
@@ -398,9 +397,9 @@ if analyze_btn:
                 st.session_state.df_comments = pd.DataFrame(comment_list) if comment_list else pd.DataFrame(columns=["Video", "Yazar", "Yorum", "Tarih", "Durum"])
                 st.session_state.avg_eng = float(((st.session_state.df['Beğeni'] + st.session_state.df['Yorum']).sum() / max(st.session_state.df['İzlenme'].sum(), 1)) * 100) if not st.session_state.df.empty else 0.0
                 st.session_state.views_last_28d = views_last_28d
-                st.session_state.views_prev_28d = views_prev_28d
                 st.session_state.likes_last_28d = likes_last_28d
-                st.session_state.likes_prev_28d = likes_prev_28d
+                st.session_state.watch_hours_last_28d = round(watch_hours_last_28d, 1)
+                st.session_state.subs_last_28d = subs_last_28d
                 st.session_state.total_shorts_views = total_shorts_views
                 st.session_state.loaded = True
         except Exception as e:
@@ -418,9 +417,9 @@ if st.session_state.loaded:
     
     total_watch_hours = 598.0
     views_last_28d = st.session_state.get("views_last_28d", 0)
-    views_prev_28d = st.session_state.get("views_prev_28d", 0)
     likes_last_28d = st.session_state.get("likes_last_28d", 0)
-    likes_prev_28d = st.session_state.get("likes_prev_28d", 0)
+    watch_hours_last_28d = st.session_state.get("watch_hours_last_28d", 0.0)
+    subs_last_28d = st.session_state.get("subs_last_28d", 12)
     total_shorts_views = st.session_state.get("total_shorts_views", 0)
     subs_diff = 12
 
@@ -474,10 +473,16 @@ if st.session_state.loaded:
         with gb2: st.markdown(f'<div class="metric-card-ondo reveal-box"><div class="metric-title">İZLENME SÜRESİ (SAAT)</div><div class="metric-value counter-val" style="font-size: 26px;" data-target="{total_watch_hours}" data-float="true">0</div></div>', unsafe_allow_html=True)
         with gb3: st.markdown(f'<div class="metric-card-ondo reveal-box"><div class="metric-title">GÜNCEL ABONE</div><div class="metric-value counter-val" style="font-size: 26px;" data-target="{subscribers}" data-float="false">0</div></div>', unsafe_allow_html=True)
 
+        st.markdown('<div class="reveal-box section-title-box"><h3>⚡ Son 28 Günlük Performans Analizi</h3></div>', unsafe_allow_html=True)
+        p28_1, p28_2, p28_3 = st.columns(3)
+        with p28_1: st.markdown(f'<div class="metric-card-ondo reveal-box"><div class="metric-title">SON 28 GÜN TOPLAM GÖRÜNTÜLEME</div><div class="metric-value counter-val" style="font-size: 24px;" data-target="{views_last_28d}" data-float="false">0</div></div>', unsafe_allow_html=True)
+        with p28_2: st.markdown(f'<div class="metric-card-ondo reveal-box"><div class="metric-title">SON 28 GÜN İZLENME SÜRESİ (SAAT)</div><div class="metric-value counter-val" style="font-size: 24px;" data-target="{watch_hours_last_28d}" data-float="true">0</div></div>', unsafe_allow_html=True)
+        with p28_3: st.markdown(f'<div class="metric-card-ondo reveal-box"><div class="metric-title">SON 28 GÜN GELEN ABONE</div><div class="metric-value counter-val" style="font-size: 24px;" data-target="{subs_last_28d}" data-float="false">0</div></div>', unsafe_allow_html=True)
+
         st.markdown('<div class="reveal-box section-title-box"><h3>⚡ İçerik ve Abone Takip Analizi</h3></div>', unsafe_allow_html=True)
         inc1, inc2, inc3 = st.columns(3)
-        with inc1: st.markdown(f'<div class="metric-card-ondo reveal-box"><div class="metric-title">SON 28 GÜN İZLENME</div><div class="metric-value counter-val" style="font-size: 24px;" data-target="{views_last_28d}" data-float="false">0</div><div class="metric-sub">Önceki Dönem: {views_prev_28d:,}</div></div>', unsafe_allow_html=True)
-        with inc2: st.markdown(f'<div class="metric-card-ondo reveal-box"><div class="metric-title">SON 28 GÜN BEĞENİ</div><div class="metric-value counter-val" style="font-size: 24px;" data-target="{likes_last_28d}" data-float="false">0</div><div class="metric-sub">Önceki Dönem: {likes_prev_28d:,}</div></div>', unsafe_allow_html=True)
+        with inc1: st.markdown(f'<div class="metric-card-ondo reveal-box"><div class="metric-title">SON 28 GÜN İZLENME</div><div class="metric-value counter-val" style="font-size: 24px;" data-target="{views_last_28d}" data-float="false">0</div></div>', unsafe_allow_html=True)
+        with inc2: st.markdown(f'<div class="metric-card-ondo reveal-box"><div class="metric-title">SON 28 GÜN BEĞENİ</div><div class="metric-value counter-val" style="font-size: 24px;" data-target="{likes_last_28d}" data-float="false">0</div></div>', unsafe_allow_html=True)
         with inc3: st.markdown(f'<div class="metric-card-ondo reveal-box"><div class="metric-title">ABONE DEĞİŞİMİ</div><div class="metric-value counter-val" style="font-size: 24px;" data-target="{subscribers}" data-float="false">0</div><div class="metric-sub">İlk Kayda Göre: {subs_arrow} {subs_diff_str}</div></div>', unsafe_allow_html=True)
 
         st.markdown('<div class="reveal-box section-title-box"><h3>🚀 Shorts ve İçerik Kırılım Analizi</h3></div>', unsafe_allow_html=True)
