@@ -45,193 +45,172 @@ def parse_iso8601_duration_seconds(duration_str):
     seconds = int(match.group(3)) if match.group(3) else 0
     return hours * 3600 + minutes * 60 + seconds
 
-# 2. Tasarım Mimarisi (CSS - Gerçek 3D Donanım Hızlandırmalı Hacimsel Sütunlar)
-st.markdown("""
+# --- %100 GÜVENLİ VE İZOLE 3D GRAFİK OLUŞTURUCU FONKSİYON ---
+def render_3d_chart(chart_data, title, color_class_2, label2):
+    max_val = max([max(d["İzlenme"], d["Beğeni"]) for d in chart_data] + [1])
+    
+    groups_html = ""
+    for d in chart_data:
+        h1 = int((d["İzlenme"] / max_val) * 160) + 15
+        h2 = int((d["Beğeni"] / max_val) * 160) + 15
+        
+        groups_html += f"""
+        <div class="css-3d-group">
+            <div class="css-3d-bars-flex">
+                <div class="css-3d-bar bar-yellow" data-h="{h1}">
+                    <div class="bar-val-label">{d['İzlenme']:,}</div>
+                </div>
+                <div class="css-3d-bar {color_class_2}" data-h="{h2}">
+                    <div class="bar-val-label">{d['Beğeni']:,}</div>
+                </div>
+            </div>
+            <div class="css-3d-label">{d['Periyot']}</div>
+        </div>
+        """
+        
+    html_code = f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@700;800&display=swap');
+        body {{ margin: 0; padding: 0; background: transparent; font-family: 'Plus Jakarta Sans', sans-serif; overflow: hidden; color: #f3f4f6; }}
+        .wrapper {{
+            background: rgba(17, 24, 39, 0.75);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 20px;
+            padding: 30px 20px 20px 20px;
+            box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.7);
+            transition: transform 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease;
+        }}
+        .wrapper:hover {{
+            transform: translateY(-5px);
+            border-color: rgba(241, 196, 15, 0.7);
+            box-shadow: 0 30px 60px -15px rgba(241, 196, 15, 0.4);
+        }}
+        h4 {{ text-align: center; font-size: 15px; color: #f1c40f; margin-top: 0; margin-bottom: 25px; letter-spacing: 0.5px; }}
+        
+        .chart-container {{
+            display: flex; justify-content: space-around; align-items: flex-end;
+            height: 220px; padding-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.15);
+        }}
+        .css-3d-group {{ display: flex; flex-direction: column; align-items: center; width: 30%; height: 100%; justify-content: flex-end; }}
+        .css-3d-bars-flex {{
+            display: flex; gap: 12px; align-items: flex-end; height: 85%;
+            transform-style: preserve-3d;
+            transform: perspective(800px) rotateX(10deg) rotateY(-15deg);
+        }}
+        
+        .css-3d-bar {{
+            width: 40px; height: 0px; position: relative; transform-style: preserve-3d;
+            border-radius: 4px 4px 0 0;
+            box-shadow: -8px 8px 15px rgba(0,0,0,0.6), inset 2px 2px 5px rgba(255,255,255,0.4);
+            transition: height 1.4s cubic-bezier(0.16, 1, 0.3, 1), transform 0.3s ease, filter 0.3s ease;
+        }}
+        .css-3d-bar:hover {{ transform: scaleY(1.03) translateY(-3px); filter: brightness(1.2); }}
+        
+        .bar-yellow {{ background: linear-gradient(135deg, #f1c40f 0%, #b7950b 100%); }}
+        .bar-blue {{ background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); }}
+        .bar-green {{ background: linear-gradient(135deg, #10b981 0%, #047857 100%); }}
+        
+        .bar-val-label {{
+            position: absolute; top: -25px; width: 100%; text-align: center;
+            font-size: 11px; font-weight: 800; color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.9);
+            opacity: 0; transform: translateY(10px); transition: opacity 0.6s ease 0.8s, transform 0.6s ease 0.8s;
+        }}
+        .active .bar-val-label {{ opacity: 1; transform: translateY(0); }}
+        
+        .css-3d-label {{ margin-top: 25px; font-size: 12px; font-weight: 800; color: #9ca3af; text-transform: uppercase; }}
+        
+        .legend {{ display: flex; justify-content: center; gap: 25px; margin-top: 20px; font-size: 12px; font-weight: 700; }}
+        .legend-item {{ display: flex; align-items: center; gap: 8px; }}
+        .dot {{ width: 12px; height: 12px; border-radius: 3px; }}
+        .dot-yellow {{ background: #f1c40f; box-shadow: 0 0 8px #f1c40f; }}
+        .dot-blue {{ background: #3b82f6; box-shadow: 0 0 8px #3b82f6; }}
+        .dot-green {{ background: #10b981; box-shadow: 0 0 8px #10b981; }}
+    </style>
+    </head>
+    <body>
+        <div class="wrapper" id="mainWrapper">
+            <h4>{title}</h4>
+            <div class="chart-container">
+                {groups_html}
+            </div>
+            <div class="legend">
+                <div class="legend-item"><div class="dot dot-yellow"></div><span>İzlenme</span></div>
+                <div class="legend-item"><div class="dot dot-{color_class_2.split('-')[1]}"></div><span>{label2}</span></div>
+            </div>
+        </div>
+        <script>
+            const wrapper = document.getElementById('mainWrapper');
+            const bars = document.querySelectorAll('.css-3d-bar');
+            
+            // Sayfa aşağı kaydırıldığında bar uzunluklarını tetikleyen motor
+            const observer = new IntersectionObserver((entries) => {{
+                if(entries[0].isIntersecting) {{
+                    wrapper.classList.add('active');
+                    bars.forEach(b => b.style.height = b.getAttribute('data-h') + 'px');
+                }} else {{
+                    wrapper.classList.remove('active');
+                    bars.forEach(b => b.style.height = '0px');
+                }}
+            }}, {{ threshold: 0.1 }});
+            
+            observer.observe(document.body);
+        </script>
+    </body>
+    </html>
+    """
+    return html_code
+
+# 2. Tasarım Mimarisi (CSS - Ana Sayfa Güvenli Stilleri)
+st.markdown(f"""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&display=swap');
     
-    html, body, [class*="css"] {
+    html, body, [class*="css"] {{
         font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
         color: #f3f4f6;
-    }
+    }}
 
-    .stApp {
+    .stApp {{
         background-color: #030712;
         background-image: 
             radial-gradient(at 0% 0%, rgba(212, 175, 55, 0.08) 0px, transparent 50%),
             radial-gradient(at 100% 0%, rgba(30, 58, 138, 0.15) 0px, transparent 50%),
             radial-gradient(at 50% 100%, rgba(15, 23, 42, 1) 0px, transparent 50%);
         background-attachment: fixed;
-    }
+    }}
 
-    #MainMenu {visibility: hidden;}
-    footer {visibility: hidden;}
-
-    .block-container {
-        padding-top: 0rem !important;
-        padding-bottom: 3rem !important;
-        max-width: 100% !important;
-    }
-
-    /* --- İPEKSİ SÜZÜLME VE 3D GEÇİŞ --- */
-    .reveal-box {
-        opacity: 0;
-        transform: perspective(1200px) rotateX(20deg) translateY(90px) scale(0.9);
-        transition: opacity 1.6s cubic-bezier(0.16, 1, 0.3, 1), transform 1.6s cubic-bezier(0.16, 1, 0.3, 1);
-        will-change: opacity, transform;
-    }
-
-    .reveal-box.active {
-        opacity: 1;
-        transform: perspective(1200px) rotateX(0deg) translateY(0) scale(1);
-    }
-
-    /* --- GERÇEK 3D HTML5 / CSS HOLOGRAFİK GRAFİK MOTORU --- */
-    .chart-3d-wrapper {
-        background: rgba(17, 24, 39, 0.85);
-        backdrop-filter: blur(24px);
-        -webkit-backdrop-filter: blur(24px);
-        border: 1px solid rgba(255, 255, 255, 0.15);
-        border-radius: 24px;
-        padding: 35px 25px 25px 25px;
-        margin-top: 15px;
-        margin-bottom: 30px;
-        box-shadow: 0 40px 80px -15px rgba(0, 0, 0, 0.9), inset 0 1px 0 rgba(255, 255, 255, 0.2);
-        transform: perspective(1200px) rotateX(6deg) rotateY(-2deg);
-        transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.5s ease, border-color 0.5s ease;
-    }
-    .chart-3d-wrapper:hover {
-        transform: perspective(1200px) rotateX(0deg) rotateY(0deg) translateY(-8px) scale(1.01);
-        border-color: rgba(241, 196, 15, 0.9);
-        box-shadow: 0 50px 110px -20px rgba(241, 196, 15, 0.45), 0 0 45px rgba(241, 196, 15, 0.35);
-    }
-
-    .css-3d-chart-container {
-        display: flex;
-        justify-content: space-around;
-        align-items: flex-end;
-        height: 260px;
-        padding-top: 40px;
-        border-bottom: 2px solid rgba(255, 255, 255, 0.15);
-        position: relative;
-    }
-
-    .css-3d-group {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        width: 30%;
-        height: 100%;
-        justify-content: flex-end;
-    }
-
-    .css-3d-bars-flex {
-        display: flex;
-        gap: 12px;
-        align-items: flex-end;
-        height: 85%;
-        justify-content: center;
-        width: 100%;
-    }
-
-    /* 3D Hacimli Sütun Tasarımı */
-    .css-3d-bar {
-        width: 38px;
-        height: 0px; /* JS tarafından güncellenecek */
-        border-radius: 6px 6px 0 0;
-        position: relative;
-        transform-style: preserve-3d;
-        transform: perspective(600px) rotateY(-15deg);
-        box-shadow: -10px 10px 20px rgba(0,0,0,0.6), inset 2px 2px 5px rgba(255,255,255,0.3);
-        transition: height 1.5s cubic-bezier(0.16, 1, 0.3, 1), transform 0.4s ease, filter 0.4s ease;
-    }
-    .css-3d-bar:hover {
-        transform: perspective(600px) rotateY(0deg) scaleY(1.05) translateY(-5px);
-        filter: brightness(1.25);
-    }
-
-    .bar-yellow {
-        background: linear-gradient(135deg, #f1c40f 0%, #b7950b 100%);
-    }
-    .bar-blue {
-        background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
-    }
-    .bar-green {
-        background: linear-gradient(135deg, #10b981 0%, #047857 100%);
-    }
-
-    .bar-val-label {
-        position: absolute;
-        top: -24px;
-        width: 100%;
-        text-align: center;
-        font-size: 11px;
-        font-weight: 800;
-        color: #ffffff;
-        text-shadow: 0 2px 4px rgba(0,0,0,0.8);
-        opacity: 0;
-        transition: opacity 1s ease 1s;
-    }
-    .reveal-box.active .bar-val-label {
-        opacity: 1;
-    }
-
-    .css-3d-label {
-        margin-top: 12px;
-        font-size: 13px;
-        font-weight: 700;
-        color: #9ca3af;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-    }
-
-    .chart-legend {
-        display: flex;
-        justify-content: center;
-        gap: 25px;
-        margin-top: 15px;
-        font-size: 12px;
-        font-weight: 700;
-    }
-    .legend-item {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-    }
-    .legend-dot-y { width: 12px; height: 12px; background: #f1c40f; border-radius: 3px; box-shadow: 0 0 8px #f1c40f; }
-    .legend-dot-b { width: 12px; height: 12px; background: #3b82f6; border-radius: 3px; box-shadow: 0 0 8px #3b82f6; }
-    .legend-dot-g { width: 12px; height: 12px; background: #10b981; border-radius: 3px; box-shadow: 0 0 8px #10b981; }
+    #MainMenu {{visibility: hidden;}}
+    footer {{visibility: hidden;}}
 
     /* --- BANNER --- */
-    .absolute-center-banner {
+    .absolute-center-banner {{
         display: flex;
         justify-content: center;
         align-items: center;
         width: 100%;
-        margin-top: 120px;
+        margin-top: 80px;
         margin-bottom: 25px;
-    }
-    .banner-ondo-box {
+    }}
+    .banner-ondo-box {{
         background: rgba(17, 24, 39, 0.75);
         backdrop-filter: blur(16px);
-        -webkit-backdrop-filter: blur(16px);
         border: 1px solid rgba(255, 255, 255, 0.12);
         border-radius: 24px;
         padding: 24px;
         box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.7);
-        transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
         width: 75%;
         max-width: 1200px;
-        position: relative;
-        overflow: hidden;
-        box-sizing: border-box;
-    }
-    .banner-ondo-box:hover {
-        transform: translateY(-6px) scale(1.01);
+        transition: transform 0.3s ease, border-color 0.3s ease;
+    }}
+    .banner-ondo-box:hover {{
+        transform: translateY(-6px);
         border-color: rgba(212, 175, 55, 0.7);
-        box-shadow: 0 30px 70px -15px rgba(212, 175, 55, 0.35), 0 0 35px rgba(212, 175, 55, 0.25);
-    }
-    .banner-ondo-box img {
+    }}
+    .banner-ondo-box img {{
         width: 100% !important;
         height: auto !important;
         max-height: 280px !important;
@@ -239,13 +218,12 @@ st.markdown("""
         border-radius: 16px;
         display: block;
         margin: 0 auto;
-    }
+    }}
 
     /* --- ŞEFFAF CAM BAŞLIK KUTULARI (NEON SARI HOVER) --- */
-    .section-title-box {
+    .section-title-box {{
         background: rgba(17, 24, 39, 0.65);
         backdrop-filter: blur(16px);
-        -webkit-backdrop-filter: blur(16px);
         border: 1px solid rgba(255, 255, 255, 0.08);
         border-radius: 16px;
         padding: 16px 24px;
@@ -254,189 +232,67 @@ st.markdown("""
         width: 100%;
         max-width: 1000px;
         box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
-        transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
-    }
-    .section-title-box:hover {
+        transition: transform 0.3s ease, border-color 0.3s ease, background 0.3s ease;
+    }}
+    .section-title-box:hover {{
         transform: translateY(-4px) scale(1.01);
         background: rgba(17, 24, 39, 0.85);
         border-color: #f1c40f;
-        box-shadow: 0 20px 50px -10px rgba(241, 196, 15, 0.4), 0 0 25px rgba(241, 196, 15, 0.3);
-    }
-    .section-title-box h3 {
-        margin: 0;
-        font-size: 17px;
-        font-weight: 800;
-        letter-spacing: 0.5px;
-        color: #f3f4f6;
-        text-transform: uppercase;
-    }
-    .section-title-box:hover h3 {
-        color: #f1c40f;
-        text-shadow: 0 0 10px rgba(241, 196, 15, 0.6);
-    }
+    }}
+    .section-title-box h3 {{
+        margin: 0; font-size: 17px; font-weight: 800; color: #f3f4f6; text-transform: uppercase;
+        transition: color 0.3s ease;
+    }}
+    .section-title-box:hover h3 {{ color: #f1c40f; text-shadow: 0 0 10px rgba(241, 196, 15, 0.6); }}
 
-    /* --- 3D KUTULAR --- */
-    .metric-card-ondo, .ondo-glass-card {
+    /* --- METRİK KUTULARI --- */
+    .metric-card-ondo, .ondo-glass-card {{
         background: rgba(17, 24, 39, 0.75);
         backdrop-filter: blur(16px);
-        -webkit-backdrop-filter: blur(16px);
         border: 1px solid rgba(255, 255, 255, 0.08);
         border-radius: 20px;
         padding: 28px 20px;
         margin-bottom: 20px;
         box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.6);
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        text-align: center;
+        display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;
         min-height: 140px;
-        transition: transform 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease;
-    }
-    .metric-card-ondo:hover, .ondo-glass-card:hover {
-        transform: translateY(-8px) scale(1.01) perspective(1000px) rotateX(2deg);
-        border-color: rgba(241, 196, 15, 0.8);
-        box-shadow: 0 30px 70px -12px rgba(241, 196, 15, 0.4), 0 0 30px rgba(241, 196, 15, 0.25);
-    }
+        transition: transform 0.3s ease, border-color 0.3s ease;
+    }}
+    .metric-card-ondo:hover, .ondo-glass-card:hover {{
+        transform: translateY(-6px);
+        border-color: rgba(241, 196, 15, 0.7);
+    }}
 
-    .metric-title {
-        font-size: 11px;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 1.5px;
-        color: #9ca3af;
-        margin-bottom: 6px;
-        text-align: center;
-        width: 100%;
-    }
-    
-    .metric-value {
-        font-size: 38px;
-        font-weight: 800;
-        letter-spacing: -0.03em;
-        background: linear-gradient(135deg, #ffffff 0%, #d1d5db 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        line-height: 1.2;
-        text-align: center;
-        width: 100%;
-    }
-    
-    .metric-sub {
-        font-size: 12px;
-        color: #d4af37; 
-        margin-top: 6px;
-        font-weight: 600;
-        text-align: center;
-        width: 100%;
-    }
+    .metric-title {{ font-size: 11px; font-weight: 700; text-transform: uppercase; color: #9ca3af; margin-bottom: 6px; }}
+    .metric-value {{ font-size: 38px; font-weight: 800; background: linear-gradient(135deg, #ffffff 0%, #d1d5db 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }}
+    .metric-sub {{ font-size: 12px; color: #d4af37; margin-top: 6px; font-weight: 600; }}
 
-    .stDataFrame {
-        background: rgba(17, 24, 39, 0.75) !important;
-        backdrop-filter: blur(16px) !important;
-        border: 1px solid rgba(255, 255, 255, 0.08) !important;
-        border-radius: 20px !important;
-        padding: 15px !important;
-    }
+    .stDataFrame {{ background: rgba(17, 24, 39, 0.75) !important; backdrop-filter: blur(16px) !important; border: 1px solid rgba(255, 255, 255, 0.08) !important; border-radius: 20px !important; padding: 15px !important; }}
 
-    section[data-testid="stSidebar"] {
-        background-color: #0b0f19 !important;
-        border-right: 1px solid rgba(255, 255, 255, 0.05);
-    }
+    section[data-testid="stSidebar"] {{ background-color: #0b0f19 !important; border-right: 1px solid rgba(255, 255, 255, 0.05); }}
     
-    .stButton>button {
+    /* Sekme Butonları */
+    .stButton>button {{
         background: linear-gradient(135deg, rgba(212, 175, 55, 0.85) 0%, rgba(170, 140, 44, 0.85) 100%); 
-        color: #030712;
-        border: 1px solid rgba(255, 255, 255, 0.3);
-        border-radius: 9999px;
-        font-weight: 700;
-        padding: 12px 28px;
-        transition: all 0.3s ease;
-        width: 100%;
-        box-shadow: 0 4px 20px rgba(212, 175, 55, 0.3);
-    }
-    .stButton>button:hover {
-        background: linear-gradient(135deg, #f1c40f 0%, #d4af37 100%);
-        box-shadow: 0 10px 30px rgba(241, 196, 15, 0.6);
-        transform: translateY(-3px) scale(1.02);
-    }
+        color: #030712; border: 1px solid rgba(255, 255, 255, 0.3); border-radius: 9999px;
+        font-weight: 700; padding: 12px 28px; transition: all 0.3s ease; width: 100%;
+    }}
+    .stButton>button:hover {{ background: linear-gradient(135deg, #f1c40f 0%, #d4af37 100%); transform: translateY(-3px) scale(1.02); }}
 
-    .tab-active button {
-        background: linear-gradient(135deg, rgba(212, 175, 55, 0.95) 0%, rgba(184, 134, 11, 0.95) 100%) !important;
-        backdrop-filter: blur(16px) !important;
-        color: #030712 !important;
-        font-weight: 800 !important;
-        font-size: 15px !important;
-        border-radius: 9999px !important;
-        border: 1px solid rgba(255, 255, 255, 0.5) !important;
-        box-shadow: 0 8px 30px rgba(212, 175, 55, 0.5) !important;
-        padding: 14px 24px !important;
-    }
-    .tab-inactive button {
-        background: rgba(17, 24, 39, 0.65) !important;
-        backdrop-filter: blur(16px) !important;
-        color: #e5e7eb !important;
-        font-weight: 700 !important;
-        font-size: 14px !important;
-        border-radius: 9999px !important;
-        border: 1px solid rgba(255, 255, 255, 0.08) !important;
-        padding: 14px 24px !important;
-    }
+    .tab-active button {{ background: linear-gradient(135deg, rgba(212, 175, 55, 0.95) 0%, rgba(184, 134, 11, 0.95) 100%) !important; color: #030712 !important; font-weight: 800 !important; font-size: 15px !important; border-radius: 9999px !important; border: 1px solid rgba(255, 255, 255, 0.5) !important; }}
+    .tab-inactive button {{ background: rgba(17, 24, 39, 0.65) !important; color: #e5e7eb !important; font-weight: 700 !important; font-size: 14px !important; border-radius: 9999px !important; border: 1px solid rgba(255, 255, 255, 0.08) !important; }}
 </style>
 """, unsafe_allow_html=True)
 
-# --- ANA SİSTEME ENJEKTE EDİLEN SCROLL GÖZLEMCİSİ ---
-components.html("""
-<script>
-let observer = null;
-
-function initScrollEngine() {
-    if (!observer) {
-        observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('active');
-                    const bars = entry.target.querySelectorAll('.css-3d-bar');
-                    bars.forEach(bar => {
-                        const targetHeight = bar.getAttribute('data-height');
-                        if(targetHeight) {
-                            bar.style.height = targetHeight + 'px';
-                        }
-                    });
-                } else {
-                    entry.target.classList.remove('active');
-                    const bars = entry.target.querySelectorAll('.css-3d-bar');
-                    bars.forEach(bar => {
-                        bar.style.height = '0px';
-                    });
-                }
-            });
-        }, { root: null, rootMargin: '0px 0px -10% 0px', threshold: 0.1 });
-    }
-
-    const boxes = window.parent.document.querySelectorAll('.reveal-box');
-    boxes.forEach(box => {
-        if (!box.dataset.observed) {
-            observer.observe(box);
-            box.dataset.observed = "true";
-        }
-    });
-}
-
-setTimeout(initScrollEngine, 300);
-setInterval(initScrollEngine, 1000);
-</script>
-""", height=0)
-
 # --- BANNER ---
 if img_b64:
-    st.markdown(f"""
-<div class="absolute-center-banner">
-    <div class="banner-ondo-box">
-        <img src="data:image/jpeg;base64,{img_b64}" alt="Crypto Check Banner">
+    st.markdown(f'''
+    <div class="absolute-center-banner">
+        <div class="banner-ondo-box">
+            <img src="data:image/jpeg;base64,{img_b64}" alt="Crypto Check Banner">
+        </div>
     </div>
-</div>
-""", unsafe_allow_html=True)
+    ''', unsafe_allow_html=True)
 else:
     st.markdown("<h1 style='text-align: center; font-weight: 800; font-size: 48px; letter-spacing: -1px;'>Crypto Check</h1>", unsafe_allow_html=True)
 
@@ -468,6 +324,7 @@ if analyze_btn:
                 total_videos = int(channel['statistics']['videoCount'])
                 uploads_playlist_id = channel['contentDetails']['relatedPlaylists']['uploads']
 
+                # --- ABONE TAKİP SİSTEMİ (İLK KAYIT REFERANSI) ---
                 tracker_file = "subs_tracker.csv"
                 try:
                     if os.path.exists(tracker_file):
@@ -675,220 +532,87 @@ if "loaded" in st.session_state and st.session_state.loaded:
         subs_arrow = '➖'
         subs_diff_str = "Değişim Yok"
 
-    if "Tür" not in df.columns:
-        df["Tür"] = "Büyük Video"
-    if "Periyot" not in df.columns:
-        df["Periyot"] = "Arşiv"
-    if "İzlenme Süresi (Dk)" not in df.columns:
-        df["İzlenme Süresi (Dk)"] = 5.0
-    if "Yaş (Gün)" not in df.columns:
-        df["Yaş (Gün)"] = 31
-
+    # Üst Metrik Kartları
     c1, c2, c3, c4 = st.columns(4)
     with c1:
-        st.markdown(f"""
-<div class="metric-card-ondo reveal-box">
-    <div class="metric-title">TOPLAM İZLENME</div>
-    <div class="metric-value"><span id="counter-1">0</span></div>
-    <div class="metric-sub">Tüm Zamanlar</div>
-</div>
-""", unsafe_allow_html=True)
+        st.markdown(f'<div class="metric-card-ondo"><div class="metric-title">TOPLAM İZLENME</div><div class="metric-value">{total_views:,}</div><div class="metric-sub">Tüm Zamanlar</div></div>', unsafe_allow_html=True)
     with c2:
-        st.markdown(f"""
-<div class="metric-card-ondo reveal-box">
-    <div class="metric-title">TOPLAM ABONE</div>
-    <div class="metric-value"><span id="counter-2">0</span></div>
-    <div class="metric-sub">Kanal Geneli</div>
-</div>
-""", unsafe_allow_html=True)
+        st.markdown(f'<div class="metric-card-ondo"><div class="metric-title">TOPLAM ABONE</div><div class="metric-value">{subscribers:,}</div><div class="metric-sub">Kanal Geneli</div></div>', unsafe_allow_html=True)
     with c3:
-        st.markdown(f"""
-<div class="metric-card-ondo reveal-box">
-    <div class="metric-title">ORTALAMA ETKİLEŞİM</div>
-    <div class="metric-value"><span id="counter-3">0.00</span></div>
-    <div class="metric-sub">Genel Performans</div>
-</div>
-""", unsafe_allow_html=True)
+        st.markdown(f'<div class="metric-card-ondo"><div class="metric-title">ORTALAMA ETKİLEŞİM</div><div class="metric-value">%{avg_eng:.2f}</div><div class="metric-sub">Genel Performans</div></div>', unsafe_allow_html=True)
     with c4:
-        st.markdown(f"""
-<div class="metric-card-ondo reveal-box">
-    <div class="metric-title">İÇERİK SAYISI</div>
-    <div class="metric-value"><span id="counter-4">0</span></div>
-    <div class="metric-sub">Yayınlanan Video</div>
-</div>
-""", unsafe_allow_html=True)
+        st.markdown(f'<div class="metric-card-ondo"><div class="metric-title">İÇERİK SAYISI</div><div class="metric-value">{total_videos:,}</div><div class="metric-sub">Yayınlanan Video</div></div>', unsafe_allow_html=True)
 
-    components.html(f"""
-    <script>
-    function runCounter(id, target, isFloat) {{
-        const el = window.parent.document.getElementById(id);
-        if (!el) return;
-        const duration = 2000;
-        let startTime = null;
-
-        function update(currentTime) {{
-            if (!startTime) startTime = currentTime;
-            const progress = currentTime - startTime;
-            const percentage = Math.min(progress / duration, 1);
-            const ease = percentage === 1 ? 1 : 1 - Math.pow(2, -10 * percentage);
-            const currentVal = target * ease;
-
-            if (isFloat) {{
-                el.innerText = '%' + currentVal.toFixed(2);
-            }} else {{
-                el.innerText = Math.floor(currentVal).toLocaleString('en-US');
-            }}
-
-            if (percentage < 1) {{
-                requestAnimationFrame(update);
-            }} else {{
-                if (isFloat) {{
-                    el.innerText = '%' + target.toFixed(2);
-                }} else {{
-                    el.innerText = target.toLocaleString('en-US');
-                }}
-            }}
-        }}
-        requestAnimationFrame(update);
-    }}
-
-    runCounter('counter-1', {total_views}, false);
-    runCounter('counter-2', {subscribers}, false);
-    runCounter('counter-3', {avg_eng}, true);
-    runCounter('counter-4', {total_videos}, false);
-    </script>
-    """, height=0)
-
+    # --- SEKME BUTONLARI ---
     st.markdown("<br>", unsafe_allow_html=True)
     tab_col1, tab_col2, tab_col3, tab_col4 = st.columns(4)
 
     with tab_col1:
         css_class = "tab-active" if st.session_state.active_tab == "Performans Matrisi" else "tab-inactive"
-        st.markdown(f"""
-<div class="{css_class}">
-""", unsafe_allow_html=True)
+        st.markdown(f'<div class="{css_class}">', unsafe_allow_html=True)
         if st.button("📊 PERFORMANS MATRİSİ", use_container_width=True):
             st.session_state.active_tab = "Performans Matrisi"
             st.rerun()
-        st.markdown("</div>", unsafe_allow_html=True)
+        st.markdown('</div>', unsafe_allow_html=True)
 
     with tab_col2:
         css_class = "tab-active" if st.session_state.active_tab == "Gelen Yorumlar" else "tab-inactive"
-        st.markdown(f"""
-<div class="{css_class}">
-""", unsafe_allow_html=True)
+        st.markdown(f'<div class="{css_class}">', unsafe_allow_html=True)
         if st.button("💬 GELEN YORUMLAR", use_container_width=True):
             st.session_state.active_tab = "Gelen Yorumlar"
             st.rerun()
-        st.markdown("</div>", unsafe_allow_html=True)
+        st.markdown('</div>', unsafe_allow_html=True)
 
     with tab_col3:
         css_class = "tab-active" if st.session_state.active_tab == "Detaylı Analiz" else "tab-inactive"
-        st.markdown(f"""
-<div class="{css_class}">
-""", unsafe_allow_html=True)
+        st.markdown(f'<div class="{css_class}">', unsafe_allow_html=True)
         if st.button("🔍 DETAYLI ANALİZ", use_container_width=True):
             st.session_state.active_tab = "Detaylı Analiz"
             st.rerun()
-        st.markdown("</div>", unsafe_allow_html=True)
+        st.markdown('</div>', unsafe_allow_html=True)
 
     with tab_col4:
         css_class = "tab-active" if st.session_state.active_tab == "AI Strateji Raporu" else "tab-inactive"
-        st.markdown(f"""
-<div class="{css_class}">
-""", unsafe_allow_html=True)
+        st.markdown(f'<div class="{css_class}">', unsafe_allow_html=True)
         if st.button("🤖 AI STRATEJİ RAPORU", use_container_width=True):
             st.session_state.active_tab = "AI Strateji Raporu"
             st.rerun()
-        st.markdown("</div>", unsafe_allow_html=True)
+        st.markdown('</div>', unsafe_allow_html=True)
 
     st.markdown("<br>", unsafe_allow_html=True)
 
     current_tab = st.session_state.active_tab
 
     if current_tab == "Performans Matrisi":
-        st.markdown("""
-<div class="reveal-box section-title-box">
-    <h3>🌐 GENEL BAKIŞ</h3>
-</div>
-""", unsafe_allow_html=True)
-
+        
+        st.markdown('<div class="section-title-box"><h3>🌐 GENEL BAKIŞ</h3></div>', unsafe_allow_html=True)
         gb1, gb2, gb3 = st.columns(3)
         with gb1:
-            st.markdown(f"""
-<div class="metric-card-ondo reveal-box" style="min-height: 110px; padding: 18px;">
-    <div class="metric-title">GÖRÜNTÜLEME</div>
-    <div class="metric-value" style="font-size: 26px;">{total_views:,}</div>
-    <div class="metric-sub">Tüm Zamanlar</div>
-</div>
-""", unsafe_allow_html=True)
+            st.markdown(f'<div class="metric-card-ondo"><div class="metric-title">GÖRÜNTÜLEME</div><div class="metric-value" style="font-size: 26px;">{total_views:,}</div><div class="metric-sub">Tüm Zamanlar</div></div>', unsafe_allow_html=True)
         with gb2:
-            st.markdown(f"""
-<div class="metric-card-ondo reveal-box" style="min-height: 110px; padding: 18px;">
-    <div class="metric-title">İZLENME SÜRESİ (SAAT)</div>
-    <div class="metric-value" style="font-size: 26px;">{total_watch_hours:,}</div>
-    <div class="metric-sub">YouTube Studio Senkronize</div>
-</div>
-""", unsafe_allow_html=True)
+            st.markdown(f'<div class="metric-card-ondo"><div class="metric-title">İZLENME SÜRESİ (SAAT)</div><div class="metric-value" style="font-size: 26px;">{total_watch_hours:,}</div><div class="metric-sub">YouTube Studio Senkronize</div></div>', unsafe_allow_html=True)
         with gb3:
-            st.markdown(f"""
-<div class="metric-card-ondo reveal-box" style="min-height: 110px; padding: 18px;">
-    <div class="metric-title">GÜNCEL ABONE SAYISI</div>
-    <div class="metric-value" style="font-size: 26px;">{subscribers:,}</div>
-    <div class="metric-sub">Kanal Toplamı</div>
-</div>
-""", unsafe_allow_html=True)
+            st.markdown(f'<div class="metric-card-ondo"><div class="metric-title">GÜNCEL ABONE SAYISI</div><div class="metric-value" style="font-size: 26px;">{subscribers:,}</div><div class="metric-sub">Kanal Toplamı</div></div>', unsafe_allow_html=True)
 
         st.markdown("<br>", unsafe_allow_html=True)
 
-        st.markdown("""
-<div class="reveal-box section-title-box">
-    <h3>📈 İÇERİK (Önceki 28 Güne Kıyasla & Özel Takip)</h3>
-</div>
-""", unsafe_allow_html=True)
-
+        st.markdown('<div class="section-title-box"><h3>📈 İÇERİK (Önceki 28 Güne Kıyasla & Özel Takip)</h3></div>', unsafe_allow_html=True)
         inc1, inc2, inc3 = st.columns(3)
         with inc1:
-            st.markdown(f"""
-<div class="metric-card-ondo reveal-box" style="min-height: 110px; padding: 18px;">
-    <div class="metric-title">AKTİF İZLENME (SON 28 GÜN)</div>
-    <div class="metric-value" style="font-size: 26px;">{views_last_28d:,}</div>
-    <div class="metric-sub">Önceki 28 Gün: {views_prev_28d:,}</div>
-</div>
-""", unsafe_allow_html=True)
+            st.markdown(f'<div class="metric-card-ondo"><div class="metric-title">AKTİF İZLENME (SON 28 GÜN)</div><div class="metric-value" style="font-size: 26px;">{views_last_28d:,}</div><div class="metric-sub">Önceki 28 Gün: {views_prev_28d:,}</div></div>', unsafe_allow_html=True)
         with inc2:
-            st.markdown(f"""
-<div class="metric-card-ondo reveal-box" style="min-height: 110px; padding: 18px;">
-    <div class="metric-title">BEĞENİ SAYISI (SON 28 GÜN)</div>
-    <div class="metric-value" style="font-size: 26px;">{likes_last_28d:,}</div>
-    <div class="metric-sub">Önceki 28 Gün: {likes_prev_28d:,}</div>
-</div>
-""", unsafe_allow_html=True)
+            st.markdown(f'<div class="metric-card-ondo"><div class="metric-title">BEĞENİ SAYISI (SON 28 GÜN)</div><div class="metric-value" style="font-size: 26px;">{likes_last_28d:,}</div><div class="metric-sub">Önceki 28 Gün: {likes_prev_28d:,}</div></div>', unsafe_allow_html=True)
         with inc3:
-            st.markdown(f"""
-<div class="metric-card-ondo reveal-box" style="min-height: 110px; padding: 18px;">
-    <div class="metric-title">ABONE TAKİBİ (SİSTEM)</div>
-    <div class="metric-value" style="font-size: 26px;">{subscribers:,}</div>
-    <div class="metric-sub">İlk Kayda Göre: {subs_arrow} {subs_diff_str}</div>
-</div>
-""", unsafe_allow_html=True)
+            st.markdown(f'<div class="metric-card-ondo"><div class="metric-title">ABONE TAKİBİ (SİSTEM)</div><div class="metric-value" style="font-size: 26px;">{subscribers:,}</div><div class="metric-sub">İlk Kayda Göre: {subs_arrow} {subs_diff_str}</div></div>', unsafe_allow_html=True)
 
         st.markdown("<br>", unsafe_allow_html=True)
         
-        st.markdown("""
-<div class="reveal-box section-title-box">
-    <h3>⚡ Shorts ve Büyük Video Karşılaştırmalı Kümülatif Analiz</h3>
-</div>
-""", unsafe_allow_html=True)
+        st.markdown('<div class="section-title-box"><h3>⚡ Shorts ve Büyük Video Karşılaştırmalı Kümülatif Analiz</h3></div>', unsafe_allow_html=True)
         
         shorts_df = df[df["Tür"] == "Shorts"]
         long_df = df[df["Tür"] == "Büyük Video"]
 
-        st.markdown("""
-<div class="reveal-box section-title-box" style="max-width: 800px; padding: 12px 20px; margin: 20px auto 15px auto;">
-    <h3 style="font-size: 15px;">📱 Shorts (Dikey) İçerik Performansı</h3>
-</div>
-""", unsafe_allow_html=True)
+        st.markdown('<div class="section-title-box" style="max-width: 800px; padding: 12px 20px; margin: 20px auto 15px auto;"><h3 style="font-size: 15px;">📱 Shorts (Dikey) İçerik Performansı</h3></div>', unsafe_allow_html=True)
 
         s_c1, s_c2, s_c3 = st.columns(3)
         shorts_chart_data = []
@@ -897,50 +621,16 @@ if "loaded" in st.session_state and st.session_state.loaded:
             p_views = p_data["İzlenme"].sum()
             p_likes = p_data["Beğeni"].sum()
             p_watch_time = p_data["İzlenme Süresi (Dk)"].sum()
-            
             shorts_chart_data.append({"Periyot": periyot_isim, "İzlenme": p_views, "Beğeni": p_likes})
-            
             with col:
-                st.markdown(f"""
-<div class="metric-card-ondo reveal-box" style="min-height: 120px; padding: 18px;">
-    <div class="metric-title">SHORTS ({periyot_isim.upper()})</div>
-    <div class="metric-value" style="font-size: 28px;">{p_views:,}</div>
-    <div class="metric-sub">{p_likes:,} Beğeni | {p_watch_time:,.1f} Dk İzlenme</div>
-</div>
-""", unsafe_allow_html=True)
+                st.markdown(f'<div class="metric-card-ondo"><div class="metric-title">SHORTS ({periyot_isim.upper()})</div><div class="metric-value" style="font-size: 28px;">{p_views:,}</div><div class="metric-sub">{p_likes:,} Beğeni | {p_watch_time:,.1f} Dk İzlenme</div></div>', unsafe_allow_html=True)
 
-        # HİÇBİR BOŞLUK (INDENTATION) OLMADAN YAZILAN %100 GÜVENLİ SHORTS 3D GRAFİK KODU
-        max_s_val = max([max(d["İzlenme"], d["Beğeni"]) for d in shorts_chart_data] + [1])
-        s_bar_html = ""
-        s_bar_html += "<div class='reveal-box chart-3d-wrapper'>\n"
-        s_bar_html += "<h4 style='text-align: center; font-size: 15px; color: #f1c40f; margin-bottom: 10px;'>🧊 SHORTS GERÇEK 3D HACİMSEL ETKİLEŞİM GRAFİĞİ</h4>\n"
-        s_bar_html += "<div class='css-3d-chart-container'>\n"
-        for d in shorts_chart_data:
-            h_iz = int((d["İzlenme"] / max_s_val) * 160) + 20
-            h_bg = int((d["Beğeni"] / max_s_val) * 160) + 20
-            s_bar_html += "<div class='css-3d-group'>\n"
-            s_bar_html += "<div class='css-3d-bars-flex'>\n"
-            s_bar_html += f"<div class='css-3d-bar bar-yellow' data-height='{h_iz}'><div class='bar-val-label'>{d['İzlenme']:,}</div></div>\n"
-            s_bar_html += f"<div class='css-3d-bar bar-blue' data-height='{h_bg}'><div class='bar-val-label'>{d['Beğeni']:,}</div></div>\n"
-            s_bar_html += "</div>\n"
-            s_bar_html += f"<div class='css-3d-label'>{d['Periyot']}</div>\n"
-            s_bar_html += "</div>\n"
-        s_bar_html += "</div>\n"
-        s_bar_html += "<div class='chart-legend'>\n"
-        s_bar_html += "<div class='legend-item'><div class='legend-dot-y'></div><span>İzlenme</span></div>\n"
-        s_bar_html += "<div class='legend-item'><div class='legend-dot-b'></div><span>Beğeni</span></div>\n"
-        s_bar_html += "</div>\n"
-        s_bar_html += "</div>\n"
-        
-        st.markdown(s_bar_html, unsafe_allow_html=True)
+        # 3D SHORTS GRAFİĞİ (GÜVENLİ COMPONENT)
+        components.html(render_3d_chart(shorts_chart_data, "🧊 SHORTS GERÇEK 3D HACİMSEL ETKİLEŞİM GRAFİĞİ", "bar-blue", "Beğeni"), height=400)
 
         st.markdown("<br>", unsafe_allow_html=True)
 
-        st.markdown("""
-<div class="reveal-box section-title-box" style="max-width: 800px; padding: 12px 20px; margin: 20px auto 15px auto;">
-    <h3 style="font-size: 15px;">🖥️ Büyük Video (Long-form) İçerik Performansı</h3>
-</div>
-""", unsafe_allow_html=True)
+        st.markdown('<div class="section-title-box" style="max-width: 800px; padding: 12px 20px; margin: 20px auto 15px auto;"><h3 style="font-size: 15px;">🖥️ Büyük Video (Long-form) İçerik Performansı</h3></div>', unsafe_allow_html=True)
 
         l_c1, l_c2, l_c3 = st.columns(3)
         long_chart_data = []
@@ -949,87 +639,32 @@ if "loaded" in st.session_state and st.session_state.loaded:
             p_views = p_data["İzlenme"].sum()
             p_likes = p_data["Beğeni"].sum()
             p_watch_time = p_data["İzlenme Süresi (Dk)"].sum()
-            
             long_chart_data.append({"Periyot": periyot_isim, "İzlenme": p_views, "Beğeni": p_likes})
-            
             with col:
-                st.markdown(f"""
-<div class="metric-card-ondo reveal-box" style="min-height: 120px; padding: 18px;">
-    <div class="metric-title">BÜYÜK VİDEO ({periyot_isim.upper()})</div>
-    <div class="metric-value" style="font-size: 28px;">{p_views:,}</div>
-    <div class="metric-sub">{p_likes:,} Beğeni | {p_watch_time:,.1f} Dk İzlenme</div>
-</div>
-""", unsafe_allow_html=True)
+                st.markdown(f'<div class="metric-card-ondo"><div class="metric-title">BÜYÜK VİDEO ({periyot_isim.upper()})</div><div class="metric-value" style="font-size: 28px;">{p_views:,}</div><div class="metric-sub">{p_likes:,} Beğeni | {p_watch_time:,.1f} Dk İzlenme</div></div>', unsafe_allow_html=True)
 
-        # HİÇBİR BOŞLUK (INDENTATION) OLMADAN YAZILAN %100 GÜVENLİ BÜYÜK VİDEO 3D GRAFİK KODU
-        max_l_val = max([max(d["İzlenme"], d["Beğeni"]) for d in long_chart_data] + [1])
-        l_bar_html = ""
-        l_bar_html += "<div class='reveal-box chart-3d-wrapper'>\n"
-        l_bar_html += "<h4 style='text-align: center; font-size: 15px; color: #10b981; margin-bottom: 10px;'>🧊 BÜYÜK VİDEO GERÇEK 3D HACİMSEL ETKİLEŞİM GRAFİĞİ</h4>\n"
-        l_bar_html += "<div class='css-3d-chart-container'>\n"
-        for d in long_chart_data:
-            h_iz = int((d["İzlenme"] / max_l_val) * 160) + 20
-            h_bg = int((d["Beğeni"] / max_l_val) * 160) + 20
-            l_bar_html += "<div class='css-3d-group'>\n"
-            l_bar_html += "<div class='css-3d-bars-flex'>\n"
-            l_bar_html += f"<div class='css-3d-bar bar-yellow' data-height='{h_iz}'><div class='bar-val-label'>{d['İzlenme']:,}</div></div>\n"
-            l_bar_html += f"<div class='css-3d-bar bar-green' data-height='{h_bg}'><div class='bar-val-label'>{d['Beğeni']:,}</div></div>\n"
-            l_bar_html += "</div>\n"
-            l_bar_html += f"<div class='css-3d-label'>{d['Periyot']}</div>\n"
-            l_bar_html += "</div>\n"
-        l_bar_html += "</div>\n"
-        l_bar_html += "<div class='chart-legend'>\n"
-        l_bar_html += "<div class='legend-item'><div class='legend-dot-y'></div><span>İzlenme</span></div>\n"
-        l_bar_html += "<div class='legend-item'><div class='legend-dot-g'></div><span>Beğeni</span></div>\n"
-        l_bar_html += "</div>\n"
-        l_bar_html += "</div>\n"
-        
-        st.markdown(l_bar_html, unsafe_allow_html=True)
+        # 3D BÜYÜK VİDEO GRAFİĞİ (GÜVENLİ COMPONENT)
+        components.html(render_3d_chart(long_chart_data, "🧊 BÜYÜK VİDEO GERÇEK 3D HACİMSEL ETKİLEŞİM GRAFİĞİ", "bar-green", "Beğeni"), height=400)
 
-        st.markdown("""
-<div class="reveal-box section-title-box">
-    <h3>🎯 KANAL DETAYLI PERFORMANS ÖZETİ</h3>
-</div>
-""", unsafe_allow_html=True)
+        st.markdown('<div class="section-title-box"><h3>🎯 KANAL DETAYLI PERFORMANS ÖZETİ</h3></div>', unsafe_allow_html=True)
 
         new_c1, new_c2 = st.columns(2)
         with new_c1:
-            st.markdown(f"""
-<div class="metric-card-ondo reveal-box" style="min-height: 130px; padding: 20px;">
-    <div class="metric-title">⏳ BU ZAMANA KADAR TOPLAM İZLENME SÜRESİ</div>
-    <div class="metric-value" style="font-size: 32px;">{total_watch_hours:,} Saat</div>
-    <div class="metric-sub">YouTube Studio Gerçek Zamanlı Eşitleme</div>
-</div>
-""", unsafe_allow_html=True)
+            st.markdown(f'<div class="metric-card-ondo" style="min-height: 130px; padding: 20px;"><div class="metric-title">⏳ BU ZAMANA KADAR TOPLAM İZLENME SÜRESİ</div><div class="metric-value" style="font-size: 32px;">{total_watch_hours:,} Saat</div><div class="metric-sub">YouTube Studio Gerçek Zamanlı Eşitleme</div></div>', unsafe_allow_html=True)
         with new_c2:
-            st.markdown(f"""
-<div class="metric-card-ondo reveal-box" style="min-height: 130px; padding: 20px;">
-    <div class="metric-title">GEÇERLİ SHORTS GÖRÜNTÜLEME SAYISI</div>
-    <div class="metric-value" style="font-size: 32px;"><span style="font-size: 40px; color: #ffffff; vertical-align: middle; margin-right: 8px;">👥</span> {total_shorts_views:,}</div>
-    <div class="metric-sub">Kanal Geneli Dikey İzleyici Erişimi</div>
-</div>
-""", unsafe_allow_html=True)
+            st.markdown(f'<div class="metric-card-ondo" style="min-height: 130px; padding: 20px;"><div class="metric-title">GEÇERLİ SHORTS GÖRÜNTÜLEME SAYISI</div><div class="metric-value" style="font-size: 32px;"><span style="font-size: 40px; color: #ffffff; vertical-align: middle; margin-right: 8px;">👥</span> {total_shorts_views:,}</div><div class="metric-sub">Kanal Geneli Dikey İzleyici Erişimi</div></div>', unsafe_allow_html=True)
 
     elif current_tab == "Gelen Yorumlar":
-        st.markdown("""
-<div class="ondo-glass-card reveal-box">
-    <h3>💬 YouTube Kanalı Geçmişe Dayalı Canlı Yorum Yönetim Merkezi</h3>
-</div>
-""", unsafe_allow_html=True)
-        
+        st.markdown('<div class="ondo-glass-card"><h3>💬 YouTube Kanalı Geçmişe Dayalı Canlı Yorum Yönetim Merkezi</h3></div>', unsafe_allow_html=True)
         if not df_comments.empty:
             df_answered = df_comments[df_comments["Durum"] == "Cevaplanan"]
             df_pending = df_comments[df_comments["Durum"] == "Cevap Bekliyor"]
-
-            st.markdown("<br>", unsafe_allow_html=True)
-            st.markdown("#### ⏳ Cevaplanmayı Bekleyen Yorumlar")
+            st.markdown("<br>#### ⏳ Cevaplanmayı Bekleyen Yorumlar", unsafe_allow_html=True)
             if not df_pending.empty:
                 st.dataframe(df_pending, use_container_width=True)
             else:
                 st.success("Tebrikler! Cevap bekleyen hiç yorumunuz kalmamış.")
-
-            st.markdown("<br><br>", unsafe_allow_html=True)
-            st.markdown("#### ✅ Cevaplanan Yorumlar")
+            st.markdown("<br><br>#### ✅ Cevaplanan Yorumlar", unsafe_allow_html=True)
             if not df_answered.empty:
                 st.dataframe(df_answered, use_container_width=True)
             else:
@@ -1038,49 +673,20 @@ if "loaded" in st.session_state and st.session_state.loaded:
             st.info("Kanal videolarınızda henüz taranabilir yorum bulunamadı veya canlı veriler yüklenmedi.")
 
     elif current_tab == "Detaylı Analiz":
-        st.markdown("""
-<div class="ondo-glass-card reveal-box">
-    <h3>🔍 Tüm İçeriklerin Tür ve Periyot Arşivi</h3>
-</div>
-""", unsafe_allow_html=True)
-        
+        st.markdown('<div class="ondo-glass-card"><h3>🔍 Tüm İçeriklerin Tür ve Periyot Arşivi</h3></div>', unsafe_allow_html=True)
         yorum_sutunu = "Yorum" if "Yorum" in df.columns else ("Yorum Sayısı" if "Yorum Sayısı" in df.columns else None)
         gosterilecek_sutunlar = ["Video Başlığı", "Yayın Tarihi", "Tür", "Periyot", "İzlenme", "Beğeni"]
         if yorum_sutunu:
             gosterilecek_sutunlar.append(yorum_sutunu)
         gosterilecek_sutunlar.extend(["İzlenme Süresi (Dk)", "Süre (Dk)"])
-        
-        df_show = df[gosterilecek_sutunlar]
-        st.dataframe(df_show, use_container_width=True)
+        st.dataframe(df[gosterilecek_sutunlar], use_container_width=True)
 
     elif current_tab == "AI Strateji Raporu":
-        st.markdown("""
-<div class="ondo-glass-card reveal-box">
-    <h3>🤖 Profesyonel Kripto & Kanal Büyüme Raporu (Ağustos 2026)</h3>
-</div>
-""", unsafe_allow_html=True)
+        st.markdown('<div class="ondo-glass-card"><h3>🤖 Profesyonel Kripto & Kanal Büyüme Raporu (Ağustos 2026)</h3></div>', unsafe_allow_html=True)
         with st.spinner("Kanal verileri ve Ağustos 2026 kripto trendleri Llama 3.3 motoru ile sentezleniyor..."):
             client = Groq(api_key=st.session_state.groq_key)
-            
-            prompt = f"""
-            Sen kurumsal düzeyde Web3, kripto varlık ve kanal büyüme stratejisi geliştiren üst düzey bir analistsin.
-            Mevcut Tarih: Ağustos 2026.
-            Kanal Adı: {ch_title}
-            Toplam İzlenme: {total_views} | Abone Sayısı: {subscribers} | Toplam Video: {total_videos}
-            Shorts ve Büyük Video Performansları sisteme entegre edilmiştir.
-
-            Lütfen kesinlikle Türkçe olarak, profesyonel yatırım fonu formatında şu başlıkları detaylıca sun:
-            1. **Kanalın Kitle ve Etkileşim Sağlığı:** Shorts ve klasik video dağılımının analizi.
-            2. **Ağustos 2026 Yüksek İzlenme Getirecek 3 Trend & Coin:** (Örn: CLARITY Act regülasyonları, AI altcoinleri/TAO, RWA tokenizasyonu, Solana/Sui ekosistemi veya BTC Q4 beklentileri).
-            3. **Yüksek CTR ve İzlenme Süresi İçin Algoritma Taktikleri.**
-            4. **Otomasyon & İçerik Üretim Hattı.**
-            """
-            
-            chat_completion = client.chat.completions.create(
-                messages=[{"role": "user", "content": prompt}],
-                model="llama-3.3-70b-versatile",
-            )
-
+            prompt = f"Sen kurumsal düzeyde Web3, kripto varlık ve kanal büyüme stratejisi geliştiren üst düzey bir analistsin. Mevcut Tarih: Ağustos 2026. Kanal Adı: {ch_title}. Toplam İzlenme: {total_views} | Abone Sayısı: {subscribers} | Toplam Video: {total_videos}. Lütfen kesinlikle Türkçe olarak profesyonel yatırım fonu formatında detaylı strateji sun."
+            chat_completion = client.chat.completions.create(messages=[{"role": "user", "content": prompt}], model="llama-3.3-70b-versatile")
             st.markdown(chat_completion.choices[0].message.content)
 
 else:
