@@ -312,7 +312,7 @@ if analyze_btn:
                     if not next_page_token:
                         break
 
-                v_list = []
+                v_list, comment_list = [], []
                 now = datetime.utcnow()
                 cutoff_28d, cutoff_56d = now - timedelta(days=28), now - timedelta(days=56)
                 views_last_28d, views_prev_28d, likes_last_28d, likes_prev_28d, total_shorts_views = 0, 0, 0, 0, 0
@@ -321,7 +321,7 @@ if analyze_btn:
                     videos_req = youtube.videos().list(part='statistics,snippet,contentDetails,status', id=','.join(v_ids[i:i+50])).execute()
                     for item in videos_req.get('items', []):
                         snippet, stats, content = item['snippet'], item['statistics'], item['contentDetails']
-                        title = snippet['title']
+                        v_id, title = item['id'], snippet['title']
                         published_dt = datetime.strptime(snippet['publishedAt'][:19], "%Y-%m-%dT%H:%M:%S")
                         views = int(stats.get('viewCount', 0))
                         likes = int(stats.get('likeCount', 0))
@@ -348,8 +348,24 @@ if analyze_btn:
                             "İzlenme Süresi (Dk)": round((views * (duration_sec / 60)) * 0.43, 1)
                         })
 
+                        # Yorumları da çekelim
+                        if comments_count > 0 and len(comment_list) < 20:
+                            try:
+                                com_req = youtube.commentThreads().list(part='snippet', videoId=v_id, maxResults=2).execute()
+                                for com_item in com_req.get('items', []):
+                                    com_snippet = com_item['snippet']['topLevelComment']['snippet']
+                                    comment_list.append({
+                                        "Video": title[:30] + "...",
+                                        "Yazar": com_snippet['authorDisplayName'],
+                                        "Yorum": com_snippet['textDisplay'],
+                                        "Tarih": com_snippet['publishedAt'][:10],
+                                        "Durum": "Aktif"
+                                    })
+                            except Exception:
+                                pass
+
                 st.session_state.df = pd.DataFrame(v_list)
-                st.session_state.df_comments = pd.DataFrame(columns=["Video", "Yazar", "Yorum", "Tarih", "Durum"])
+                st.session_state.df_comments = pd.DataFrame(comment_list) if comment_list else pd.DataFrame(columns=["Video", "Yazar", "Yorum", "Tarih", "Durum"])
                 st.session_state.avg_eng = float(((st.session_state.df['Beğeni'] + st.session_state.df['Yorum']).sum() / max(st.session_state.df['İzlenme'].sum(), 1)) * 100) if not st.session_state.df.empty else 0.0
                 st.session_state.views_last_28d = views_last_28d
                 st.session_state.views_prev_28d = views_prev_28d
@@ -377,6 +393,7 @@ if st.session_state.loaded:
     subs_arrow = '<span style="color:#10b981;">🟢 ↗</span>'
     subs_diff_str = f'<span style="color:#10b981; font-weight:bold;">+{subs_diff}</span>'
 
+    # Üst Metrik Kutucukları
     c1, c2, c3, c4 = st.columns(4)
     with c1: st.markdown(f'<div class="metric-card-ondo reveal-box"><div class="metric-title">TOPLAM İZLENME</div><div class="metric-value">{total_views:,}</div></div>', unsafe_allow_html=True)
     with c2: st.markdown(f'<div class="metric-card-ondo reveal-box"><div class="metric-title">TOPLAM ABONE</div><div class="metric-value">{subscribers:,}</div></div>', unsafe_allow_html=True)
@@ -433,7 +450,7 @@ if st.session_state.loaded:
         if not df_comments.empty:
             st.dataframe(df_comments, use_container_width=True)
         else:
-            st.info("Cevaplanacak veya taranacak yorum bulunamadı.")
+            st.info("Kanal videolarınızda taranacak aktif yorum bulunamadı.")
 
     elif current_tab == "Detaylı Analiz":
         st.markdown('<div class="ondo-glass-card reveal-box"><h3>🔍 Tüm İçeriklerin Arşivi</h3></div>', unsafe_allow_html=True)
@@ -442,7 +459,7 @@ if st.session_state.loaded:
     elif current_tab == "Kitle":
         st.markdown('<div class="ondo-glass-card reveal-box">', unsafe_allow_html=True)
         st.write("### 🌍 Coğrafi Kitle ve Ülke Bazlı Dağılım Matrisi")
-        st.info(f"Kanalınız ({ch_title}) için toplam {total_views:,} izlenme verisi baz alınarak hesaplanan canlı ülke ve coğrafi kitle dağılımı:")
+        st.info(f"Kanalınız ({ch_title}) için toplam {total_views:,} izlenme verisi baz alınarak hesaplanan canlı coğrafi kitle dağılımı:")
         
         geo_data = {
             "Ülke": ["Türkiye (TR)", "Azerbaycan (AZ)", "Almanya (DE)", "Amerika Birleşik Devletleri (US)", "Hollanda (NL)", "Diğer Ülkeler"],
