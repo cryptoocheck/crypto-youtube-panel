@@ -51,57 +51,56 @@ def parse_iso8601_duration_seconds(duration_str):
     seconds = int(match.group(3)) if match.group(3) else 0
     return hours * 3600 + minutes * 60 + seconds
 
-# 2. Tasarım Mimarisi (Banner Şeffaf Cam + Neon Sarı Hover & Sayaç Efektleri)
-st.markdown(f"""
+# 2. Tasarım Mimarisi (CSS)
+st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&display=swap');
     
-    html, body, [class*="css"] {{
+    html, body, [class*="css"] {
         font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
         color: #f3f4f6;
-    }}
+    }
 
-    .stApp {{
+    .stApp {
         background-color: #030712;
         background-image: 
             radial-gradient(at 0% 0%, rgba(212, 175, 55, 0.08) 0px, transparent 50%),
             radial-gradient(at 100% 0%, rgba(30, 58, 138, 0.15) 0px, transparent 50%),
             radial-gradient(at 50% 100%, rgba(15, 23, 42, 1) 0px, transparent 50%);
         background-attachment: fixed;
-    }}
+    }
 
-    #MainMenu {{visibility: hidden;}}
-    footer {{visibility: hidden;}}
+    #MainMenu {visibility: hidden;}
+    footer {visibility: hidden;}
 
-    .block-container {{
+    .block-container {
         padding-top: 0rem !important;
         padding-bottom: 3rem !important;
         max-width: 100% !important;
-    }}
+    }
 
-    .reveal-box {{
+    .reveal-box {
         opacity: 0;
         transform: perspective(1200px) rotateX(15deg) translateY(60px) scale(0.95);
         transition: opacity 1.2s cubic-bezier(0.16, 1, 0.3, 1), transform 1.2s cubic-bezier(0.16, 1, 0.3, 1);
         will-change: opacity, transform;
-    }}
+    }
 
-    .reveal-box.active {{
+    .reveal-box.active {
         opacity: 1;
         transform: perspective(1200px) rotateX(0deg) translateY(0) scale(1);
-    }}
+    }
 
-    .absolute-center-banner {{
+    .absolute-center-banner {
         display: flex;
         justify-content: center;
         align-items: center;
         width: 100%;
         margin-top: 120px;
         margin-bottom: 25px;
-    }}
+    }
     
-    /* Banner için Şeffaf Cam ve Neon Sarı Hover Büyüme Efekti */
-    .banner-ondo-box {{
+    .banner-ondo-box {
         background: rgba(17, 24, 39, 0.45);
         backdrop-filter: blur(16px);
         border: 1px solid rgba(255, 255, 255, 0.12);
@@ -113,14 +112,14 @@ st.markdown(f"""
         position: relative;
         box-sizing: border-box;
         transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-    }}
-    .banner-ondo-box:hover {{
+    }
+    .banner-ondo-box:hover {
         transform: translateY(-6px) scale(1.02);
         background: rgba(17, 24, 39, 0.75);
         border-color: rgba(241, 196, 15, 0.9);
         box-shadow: 0 30px 70px -15px rgba(241, 196, 15, 0.4), 0 0 35px rgba(241, 196, 15, 0.3);
-    }}
-    .banner-ondo-box img {{
+    }
+    .banner-ondo-box img {
         width: 100% !important;
         height: auto !important;
         max-height: 280px !important;
@@ -128,9 +127,9 @@ st.markdown(f"""
         border-radius: 16px;
         display: block;
         margin: 0 auto;
-    }}
+    }
 
-    .section-title-box {{
+    .section-title-box {
         background: rgba(17, 24, 39, 0.65);
         backdrop-filter: blur(16px);
         border: 1px solid rgba(255, 255, 255, 0.08);
@@ -141,16 +140,16 @@ st.markdown(f"""
         width: 100%;
         max-width: 1000px;
         box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
-    }}
-    .section-title-box h3 {{
+    }
+    .section-title-box h3 {
         margin: 0;
         font-size: 17px;
         font-weight: 800;
         color: #f3f4f6;
         text-transform: uppercase;
-    }}
+    }
 
-    .metric-card-ondo, .ondo-glass-card {{
+    .metric-card-ondo, .ondo-glass-card {
         background: rgba(17, 24, 39, 0.65);
         backdrop-filter: blur(16px);
         border: 1px solid rgba(255, 255, 255, 0.08);
@@ -165,40 +164,40 @@ st.markdown(f"""
         text-align: center;
         min-height: 140px;
         transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.4s ease, box-shadow 0.4s ease;
-    }}
-    .metric-card-ondo:hover, .ondo-glass-card:hover {{
+    }
+    .metric-card-ondo:hover, .ondo-glass-card:hover {
         transform: translateY(-8px) scale(1.01);
         border-color: rgba(241, 196, 15, 0.9);
         box-shadow: 0 25px 60px -15px rgba(241, 196, 15, 0.35), 0 0 30px rgba(241, 196, 15, 0.2);
-    }}
+    }
 
-    .metric-title {{
+    .metric-title {
         font-size: 11px;
         font-weight: 700;
         text-transform: uppercase;
         color: #9ca3af;
         margin-bottom: 6px;
-    }}
-    .metric-value {{
+    }
+    .metric-value {
         font-size: 38px;
         font-weight: 800;
         background: linear-gradient(135deg, #ffffff 0%, #d1d5db 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
-    }}
-    .metric-sub {{
+    }
+    .metric-sub {
         font-size: 12px;
         color: #f1c40f; 
         margin-top: 6px;
         font-weight: 600;
-    }}
+    }
 
-    section[data-testid="stSidebar"] {{
+    section[data-testid="stSidebar"] {
         background-color: #0b0f19 !important;
         border-right: 1px solid rgba(255, 255, 255, 0.05);
-    }}
+    }
     
-    .stButton>button {{
+    .stButton>button {
         background: linear-gradient(135deg, rgba(212, 175, 55, 0.85) 0%, rgba(170, 140, 44, 0.85) 100%); 
         color: #030712;
         border: 1px solid rgba(255, 255, 255, 0.3);
@@ -209,81 +208,81 @@ st.markdown(f"""
         box-shadow: 0 4px 20px rgba(212, 175, 55, 0.3);
         font-size: 13px;
         transition: all 0.3s ease;
-    }}
-    .stButton>button:hover {{
+    }
+    .stButton>button:hover {
         transform: translateY(-2px);
         box-shadow: 0 6px 25px rgba(241, 196, 15, 0.5);
-    }}
+    }
 
-    .tab-active button {{
+    .tab-active button {
         background: linear-gradient(135deg, rgba(212, 175, 55, 0.95) 0%, rgba(184, 134, 11, 0.95) 100%) !important;
         color: #030712 !important;
         font-weight: 800 !important;
         font-size: 13px !important;
         border-radius: 9999px !important;
         border: 1px solid rgba(255, 255, 255, 0.5) !important;
-    }}
-    .tab-inactive button {{
+    }
+    .tab-inactive button {
         background: rgba(17, 24, 39, 0.65) !important;
         color: #e5e7eb !important;
         font-weight: 700 !important;
         font-size: 13px !important;
         border-radius: 9999px !important;
         border: 1px solid rgba(255, 255, 255, 0.08) !important;
-    }}
+    }
 </style>
 """, unsafe_allow_html=True)
 
-# Sayaç ve Kayma Animasyon Motoru (Butona her basıldığında tetiklenir)
-components.html(f"""
+# Sayaç ve Animasyon Motoru
+components.html("""
 <script>
-function initAnimations() {{
-    const observer = new IntersectionObserver((entries) => {{
-        entries.forEach(entry => {{
-            if (entry.isIntersecting) {{
+function initAnimations() {
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
                 entry.target.classList.add('active');
-            }} else {{
+            } else {
                 entry.target.classList.remove('active');
-            }}
+            }
         });
-    }}, {{ threshold: 0.05 }});
+    }, { threshold: 0.05 });
 
     const boxes = window.parent.document.querySelectorAll('.reveal-box');
     boxes.forEach(box => observer.observe(box));
 
     const counters = window.parent.document.querySelectorAll('.counter-val');
-    counters.forEach(counter => {{
+    counters.forEach(counter => {
         const target = parseFloat(counter.getAttribute('data-target'));
         const isFloat = counter.getAttribute('data-float') === 'true';
         const prefix = counter.getAttribute('data-prefix') || '';
         const duration = 1800; 
         const startTime = performance.now();
 
-        function updateCount(currentTime) {{
+        function updateCount(currentTime) {
             const elapsed = currentTime - startTime;
             const progress = Math.min(elapsed / duration, 1);
             const easeProgress = 1 - Math.pow(1 - progress, 3); 
             const currentVal = target * easeProgress;
 
-            if (isFloat) {{
+            if (isFloat) {
                 counter.innerText = prefix + currentVal.toFixed(2);
-            }} else {{
+            } else {
                 counter.innerText = prefix + Math.floor(currentVal).toLocaleString();
-            }}
+            }
 
-            if (progress < 1) {{
+            if (progress < 1) {
                 requestAnimationFrame(updateCount);
-            }} else {{
-                if (isFloat) {{
+            } else {
+                if (isFloat) {
                     counter.innerText = prefix + target.toFixed(2);
-                }} else {{
+                } else {
                     counter.innerText = prefix + Math.round(target).toLocaleString();
-                }}
-            }}
-        }}
+                }
+            }
+        }
         requestAnimationFrame(updateCount);
-    }});
-}}
+    });
+}
 setTimeout(initAnimations, 300);
 </script>
 """, height=0, key=f"anim_script_{st.session_state.anim_key}")
@@ -397,11 +396,11 @@ if analyze_btn:
                 st.session_state.likes_last_28d = likes_last_28d
                 st.session_state.total_shorts_views = total_shorts_views
                 st.session_state.loaded = True
-                st.session_state.anim_key += 1 # Her veri getirmede sayaç animasyonunu tetikler
+                st.session_state.anim_key += 1
         except Exception as e:
             st.error(f"Sistem Çalışma Hatası: {e}")
 
-# ANA EKRAN GÖSTERİMİ (Sayaç ve Animasyonlu Kutucuklar)
+# ANA EKRAN GÖSTERİMİ
 if st.session_state.loaded:
     total_views = st.session_state.total_views
     subscribers = st.session_state.subscribers
@@ -420,7 +419,7 @@ if st.session_state.loaded:
     subs_arrow = '<span style="color:#10b981;">🟢 ↗</span>'
     subs_diff_str = f'<span style="color:#10b981; font-weight:bold;">+{subs_diff}</span>'
 
-    # Üst 4 Ana Metrik Kutucuğu (Sayaç Animasyonlu)
+    # Üst 4 Ana Metrik Kutucuğu
     c1, c2, c3, c4 = st.columns(4)
     with c1: st.markdown(f'<div class="metric-card-ondo reveal-box"><div class="metric-title">TOPLAM İZLENME</div><div class="metric-value counter-val" data-target="{total_views}" data-float="false">0</div></div>', unsafe_allow_html=True)
     with c2: st.markdown(f'<div class="metric-card-ondo reveal-box"><div class="metric-title">TOPLAM ABONE</div><div class="metric-value counter-val" data-target="{subscribers}" data-float="false">0</div></div>', unsafe_allow_html=True)
