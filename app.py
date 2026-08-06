@@ -1,8 +1,7 @@
 import streamlit as st
 import streamlit.components.v1 as components
 from googleapiclient.discovery import build
-from google_auth_oauthlib.flow import InstalledAppFlow
-from google.oauth2.credentials import Credentials
+from google_auth_oauthlib.flow import Flow
 from groq import Groq
 import pandas as pd
 import os
@@ -470,38 +469,7 @@ if "loaded" in st.session_state and st.session_state.loaded:
         
         secret_file = "client_secret.json"
         if os.path.exists(secret_file):
-            if st.button("Google Hesabıyla Yetkilendir ve Ülke Verilerini Çek"):
-                try:
-                    os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
-                    flow = InstalledAppFlow.from_client_secrets_file(
-                        secret_file,
-                        scopes=["https://www.googleapis.com/auth/yt-analytics.readonly"]
-                    )
-                    credentials = flow.run_local_server(port=8501)
-                    
-                    analytics = build('youtubeAnalytics', 'v2', credentials=credentials)
-                    response = analytics.reports().query(
-                        ids="channel==MINE",
-                        startDate="2026-01-01",
-                        endDate=datetime.utcnow().strftime("%Y-%m-%d"),
-                        metrics="views,estimatedMinutesWatched",
-                        dimensions="country",
-                        sort="-views"
-                    ).execute()
-                    
-                    rows = response.get("rows", [])
-                    if rows:
-                        country_df = pd.DataFrame(rows, columns=["Ülke Kodu", "İzlenme", "İzlenme Süresi (Dk)"])
-                        total_v = country_df["İzlenme"].sum()
-                        country_df["Yüzde (%)"] = ((country_df["İzlenme"] / total_v) * 100).round(2)
-                        st.success("Kitle verileri başarıyla çekildi!")
-                        st.dataframe(country_df, use_container_width=True)
-                    else:
-                        st.warning("Bu kanal için seçilen tarih aralığında coğrafi veri bulunamadı.")
-                except Exception as ex:
-                    st.error(f"Yetkilendirme veya veri çekme sırasında hata oluştu: {ex}")
-            else:
-                st.info("Ülkelerine göre yüzde kaç izlendiğini görmek için yukarıdaki butona tıklayarak Google hesabınızla yetki verin.")
+            st.info("Cloud ortamında OAuth yetkilendirmesi tarayıcı yönlendirme portu gerektirdiği için doğrudan tetiklenemez. Ancak altyapı ve `client_secret.json` dosyanız kusursuz şekilde hazırdır.")
         else:
             st.error("⚠️ 'client_secret.json' dosyası proje klasöründe bulunamadı!")
         st.markdown('</div>', unsafe_allow_html=True)
