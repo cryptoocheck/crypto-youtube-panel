@@ -1,6 +1,8 @@
 import streamlit as st
 import streamlit.components.v1 as components
 from googleapiclient.discovery import build
+from google_auth_oauthlib.flow import InstalledAppFlow
+from google.oauth2.credentials import Credentials
 from groq import Groq
 import pandas as pd
 import os
@@ -73,7 +75,6 @@ st.markdown(f"""
         max-width: 100% !important;
     }}
 
-    /* --- İPEKSİ SÜZÜLME VE 3D GEÇİŞ --- */
     .reveal-box {{
         opacity: 0;
         transform: perspective(1200px) rotateX(15deg) translateY(60px) scale(0.95);
@@ -86,7 +87,6 @@ st.markdown(f"""
         transform: perspective(1200px) rotateX(0deg) translateY(0) scale(1);
     }}
 
-    /* --- BANNER --- */
     .absolute-center-banner {{
         display: flex;
         justify-content: center;
@@ -98,7 +98,6 @@ st.markdown(f"""
     .banner-ondo-box {{
         background: rgba(17, 24, 39, 0.75);
         backdrop-filter: blur(16px);
-        -webkit-backdrop-filter: blur(16px);
         border: 1px solid rgba(255, 255, 255, 0.12);
         border-radius: 24px;
         padding: 24px;
@@ -125,11 +124,9 @@ st.markdown(f"""
         margin: 0 auto;
     }}
 
-    /* --- ŞEFFAF CAM BAŞLIK KUTULARI (NEON SARI HOVER) --- */
     .section-title-box {{
         background: rgba(17, 24, 39, 0.65);
         backdrop-filter: blur(16px);
-        -webkit-backdrop-filter: blur(16px);
         border: 1px solid rgba(255, 255, 255, 0.08);
         border-radius: 16px;
         padding: 16px 24px;
@@ -138,32 +135,24 @@ st.markdown(f"""
         width: 100%;
         max-width: 1000px;
         box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
-        transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+        transition: transform 0.3s ease, border-color 0.3s ease, background 0.3s ease;
     }}
     .section-title-box:hover {{
         transform: translateY(-4px) scale(1.01);
         background: rgba(17, 24, 39, 0.85);
         border-color: #f1c40f;
-        box-shadow: 0 20px 50px -10px rgba(241, 196, 15, 0.4), 0 0 25px rgba(241, 196, 15, 0.3);
     }}
     .section-title-box h3 {{
         margin: 0;
         font-size: 17px;
         font-weight: 800;
-        letter-spacing: 0.5px;
         color: #f3f4f6;
         text-transform: uppercase;
     }}
-    .section-title-box:hover h3 {{
-        color: #f1c40f;
-        text-shadow: 0 0 10px rgba(241, 196, 15, 0.6);
-    }}
 
-    /* --- 3D METRİK KUTULARI --- */
     .metric-card-ondo, .ondo-glass-card {{
         background: rgba(17, 24, 39, 0.75);
         backdrop-filter: blur(16px);
-        -webkit-backdrop-filter: blur(16px);
         border: 1px solid rgba(255, 255, 255, 0.08);
         border-radius: 20px;
         padding: 28px 20px;
@@ -175,44 +164,32 @@ st.markdown(f"""
         justify-content: center;
         text-align: center;
         min-height: 140px;
-        transition: transform 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease;
+        transition: transform 0.4s ease, border-color 0.4s ease;
     }}
     .metric-card-ondo:hover, .ondo-glass-card:hover {{
-        transform: translateY(-8px) scale(1.01) perspective(1000px) rotateX(2deg);
+        transform: translateY(-8px) scale(1.01);
         border-color: rgba(241, 196, 15, 0.8);
-        box-shadow: 0 30px 70px -12px rgba(241, 196, 15, 0.4), 0 0 30px rgba(241, 196, 15, 0.25);
     }}
 
     .metric-title {{
         font-size: 11px;
         font-weight: 700;
         text-transform: uppercase;
-        letter-spacing: 1.5px;
         color: #9ca3af;
         margin-bottom: 6px;
-        text-align: center;
-        width: 100%;
     }}
-    
     .metric-value {{
         font-size: 38px;
         font-weight: 800;
-        letter-spacing: -0.03em;
         background: linear-gradient(135deg, #ffffff 0%, #d1d5db 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
-        line-height: 1.2;
-        text-align: center;
-        width: 100%;
     }}
-    
     .metric-sub {{
         font-size: 12px;
         color: #d4af37; 
         margin-top: 6px;
         font-weight: 600;
-        text-align: center;
-        width: 100%;
     }}
 
     .stDataFrame {{
@@ -228,7 +205,6 @@ st.markdown(f"""
         border-right: 1px solid rgba(255, 255, 255, 0.05);
     }}
     
-    /* Sekme Butonları */
     .stButton>button {{
         background: linear-gradient(135deg, rgba(212, 175, 55, 0.85) 0%, rgba(170, 140, 44, 0.85) 100%); 
         color: #030712;
@@ -243,44 +219,31 @@ st.markdown(f"""
     }}
     .stButton>button:hover {{
         background: linear-gradient(135deg, #f1c40f 0%, #d4af37 100%);
-        box-shadow: 0 10px 30px rgba(241, 196, 15, 0.6);
         transform: translateY(-3px) scale(1.02);
     }}
 
     .tab-active button {{
         background: linear-gradient(135deg, rgba(212, 175, 55, 0.95) 0%, rgba(184, 134, 11, 0.95) 100%) !important;
-        backdrop-filter: blur(16px) !important;
         color: #030712 !important;
         font-weight: 800 !important;
         font-size: 13px !important;
         border-radius: 9999px !important;
         border: 1px solid rgba(255, 255, 255, 0.5) !important;
-        box-shadow: 0 8px 30px rgba(212, 175, 55, 0.5) !important;
-        padding: 12px 18px !important;
     }}
     .tab-inactive button {{
         background: rgba(17, 24, 39, 0.65) !important;
-        backdrop-filter: blur(16px) !important;
         color: #e5e7eb !important;
         font-weight: 700 !important;
         font-size: 13px !important;
         border-radius: 9999px !important;
         border: 1px solid rgba(255, 255, 255, 0.08) !important;
-        padding: 12px 18px !important;
     }}
 </style>
 """, unsafe_allow_html=True)
 
-# --- ÇİFT YÖNLÜ İPEKSİ SÜZÜLME JS ---
 components.html("""
 <script>
 function initDualWayReveal() {
-    const observerOptions = {
-        root: null,
-        rootMargin: '0px 0px -30px 0px',
-        threshold: 0.05
-    };
-
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
@@ -289,18 +252,16 @@ function initDualWayReveal() {
                 entry.target.classList.remove('active');
             }
         });
-    }, observerOptions);
+    }, { threshold: 0.05 });
 
     const boxes = window.parent.document.querySelectorAll('.reveal-box');
     boxes.forEach(box => observer.observe(box));
 }
-
 setTimeout(initDualWayReveal, 500);
 setInterval(initDualWayReveal, 1500);
 </script>
 """, height=0)
 
-# --- BANNER ---
 if img_b64:
     st.markdown(f'''
     <div class="absolute-center-banner">
@@ -310,9 +271,8 @@ if img_b64:
     </div>
     ''', unsafe_allow_html=True)
 else:
-    st.markdown("<h1 style='text-align: center; font-weight: 800; font-size: 48px; letter-spacing: -1px;'>Crypto Check</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 style='text-align: center; font-weight: 800; font-size: 48px;'>Crypto Check</h1>", unsafe_allow_html=True)
 
-# Sidebar (Kontrol Paneli)
 st.sidebar.markdown("### 🌐 Web3 Kontrol Paneli")
 st.session_state.youtube_key = st.sidebar.text_input("YouTube Data API Anahtarı", value=st.session_state.youtube_key, type="password")
 st.session_state.groq_key = st.sidebar.text_input("Groq AI Anahtarı", value=st.session_state.groq_key, type="password")
@@ -340,88 +300,51 @@ if analyze_btn:
                 total_videos = int(channel['statistics']['videoCount'])
                 uploads_playlist_id = channel['contentDetails']['relatedPlaylists']['uploads']
 
-                # --- KENDİ ABONE TAKİP SİSTEMİMİZ ---
                 tracker_file = "subs_tracker.csv"
                 try:
                     if os.path.exists(tracker_file):
                         tracker_df = pd.read_csv(tracker_file)
-                        if not tracker_df.empty:
-                            last_recorded_subs = int(tracker_df.iloc[0]['Subscribers'])
-                        else:
-                            last_recorded_subs = subscribers
+                        last_recorded_subs = int(tracker_df.iloc[0]['Subscribers']) if not tracker_df.empty else subscribers
                     else:
                         tracker_df = pd.DataFrame(columns=["Date", "Subscribers"])
                         last_recorded_subs = subscribers
                         
                     subs_diff = subscribers - last_recorded_subs
-                    
                     today_str = datetime.utcnow().strftime("%Y-%m-%d")
                     if not tracker_df.empty and tracker_df.iloc[-1]['Date'] == today_str:
                         tracker_df.loc[tracker_df.index[-1], 'Subscribers'] = subscribers
                     else:
-                        new_row = pd.DataFrame([{"Date": today_str, "Subscribers": subscribers}])
-                        tracker_df = pd.concat([tracker_df, new_row], ignore_index=True)
-                        
+                        tracker_df = pd.concat([tracker_df, pd.DataFrame([{"Date": today_str, "Subscribers": subscribers}])], ignore_index=True)
                     tracker_df.to_csv(tracker_file, index=False)
                     st.session_state.subs_diff = subs_diff
-
-                except Exception as e:
+                except Exception:
                     st.session_state.subs_diff = 0
 
-                # Videoları Çekme
                 v_ids = []
                 next_page_token = None
                 while True:
                     playlist_req = youtube.playlistItems().list(
-                        part='snippet,contentDetails',
-                        playlistId=uploads_playlist_id,
-                        maxResults=50,
-                        pageToken=next_page_token
+                        part='snippet,contentDetails', playlistId=uploads_playlist_id, maxResults=50, pageToken=next_page_token
                     ).execute()
-
                     for item in playlist_req.get('items', []):
                         v_ids.append(item['contentDetails']['videoId'])
-
                     next_page_token = playlist_req.get('nextPageToken')
                     if not next_page_token:
                         break
 
-                v_list = []
-                comment_list = []
+                v_list, comment_list = [], []
                 now = datetime.utcnow()
-                cutoff_28d = now - timedelta(days=28)
-                cutoff_56d = now - timedelta(days=56)
-
-                views_last_28d = 0
-                views_prev_28d = 0
-                likes_last_28d = 0
-                likes_prev_28d = 0
-                total_shorts_views = 0
+                cutoff_28d, cutoff_56d = now - timedelta(days=28), now - timedelta(days=56)
+                views_last_28d, views_prev_28d, likes_last_28d, likes_prev_28d, total_shorts_views = 0, 0, 0, 0, 0
 
                 for i in range(0, len(v_ids), 50):
-                    chunk_ids = v_ids[i:i+50]
-                    videos_req = youtube.videos().list(
-                        part='statistics,snippet,contentDetails,status',
-                        id=','.join(chunk_ids)
-                    ).execute()
-
+                    videos_req = youtube.videos().list(part='statistics,snippet,contentDetails,status', id=','.join(v_ids[i:i+50])).execute()
                     for item in videos_req.get('items', []):
-                        snippet = item['snippet']
-                        stats = item['statistics']
-                        content = item['contentDetails']
-
-                        v_id = item['id']
-                        title = snippet['title']
-                        published_str = snippet['publishedAt']
-                        published_dt = datetime.strptime(published_str[:19], "%Y-%m-%dT%H:%M:%S")
-                        
-                        views = int(stats.get('viewCount', 0))
-                        likes = int(stats.get('likeCount', 0))
-                        comments_count = int(stats.get('commentCount', 0))
-                        
-                        duration_iso = content.get('duration', 'PT0M')
-                        duration_sec = parse_iso8601_duration_seconds(duration_iso)
-                        duration_min = round(duration_sec / 60, 2)
+                        snippet, stats, content = item['snippet'], item['statistics'], item['contentDetails']
+                        v_id, title = item['id'], snippet['title']
+                        published_dt = datetime.strptime(snippet['publishedAt'][:19], "%Y-%m-%dT%H:%M:%S")
+                        views, likes, comments_count = int(stats.get('viewCount', 0)), int(stats.get('likeCount', 0)), int(stats.get('commentCount', 0))
+                        duration_sec = parse_iso8601_duration_seconds(content.get('duration', 'PT0M'))
 
                         if published_dt >= cutoff_28d:
                             views_last_28d += views
@@ -431,82 +354,24 @@ if analyze_btn:
                             likes_prev_28d += likes
 
                         content_type = "Shorts" if duration_sec <= 61 else "Büyük Video"
-
                         if content_type == "Shorts":
                             total_shorts_views += views
 
-                        delta = now - published_dt
-                        delta_days = delta.total_seconds() / 86400
-
-                        if delta_days <= 1:
-                            time_frame = "Son 24 Saat"
-                        elif delta_days <= 7:
-                            time_frame = "Son 7 Gün"
-                        elif delta_days <= 30:
-                            time_frame = "Son 30 Gün"
-                        else:
-                            time_frame = "Arşiv"
-
-                        video_watch_mins = (views * duration_min) * 0.43
+                        delta_days = (now - published_dt).total_seconds() / 86400
+                        time_frame = "Son 24 Saat" if delta_days <= 1 else ("Son 7 Gün" if delta_days <= 7 else ("Son 30 Gün" if delta_days <= 30 else "Arşiv"))
 
                         v_list.append({
-                            "Video Başlığı": title,
-                            "Yayın Tarihi": published_str[:10],
-                            "Yaş (Gün)": delta_days,
-                            "Tür": content_type,
-                            "Periyot": time_frame,
-                            "İzlenme": views,
-                            "Beğeni": likes,
-                            "Yorum": comments_count,
-                            "İzlenme Süresi (Dk)": round(video_watch_mins, 1)
+                            "Video Başlığı": title, "Yayın Tarihi": snippet['publishedAt'][:10], "Yaş (Gün)": delta_days,
+                            "Tür": content_type, "Periyot": time_frame, "İzlenme": views, "Beğeni": likes, "Yorum": comments_count,
+                            "İzlenme Süresi (Dk)": round((views * (duration_sec / 60)) * 0.43, 1)
                         })
 
-                        if comments_count > 0:
-                            try:
-                                c_next_token = None
-                                while True:
-                                    c_req = youtube.commentThreads().list(
-                                        part='snippet',
-                                        videoId=v_id,
-                                        maxResults=100,
-                                        pageToken=c_next_token
-                                    ).execute()
-
-                                    for thread in c_req.get('items', []):
-                                        c_snippet = thread['snippet']['topLevelComment']['snippet']
-                                        author = c_snippet['authorDisplayName']
-                                        text = c_snippet['textDisplay']
-                                        c_date = c_snippet['publishedAt'][:10]
-                                        total_replies = thread['snippet']['totalReplyCount']
-                                        
-                                        status = "Cevaplanan" if total_replies > 0 else "Cevap Bekliyor"
-
-                                        comment_list.append({
-                                            "Video": title,
-                                            "Yazar": author,
-                                            "Yorum": text,
-                                            "Tarih": c_date,
-                                            "Durum": status
-                                        })
-
-                                    c_next_token = c_req.get('nextPageToken')
-                                    if not c_next_token:
-                                        break
-                            except Exception:
-                                pass
-
-                df = pd.DataFrame(v_list)
-                df_comments = pd.DataFrame(comment_list) if comment_list else pd.DataFrame(columns=["Video", "Yazar", "Yorum", "Tarih", "Durum"])
-                
-                yorum_col_name = "Yorum" if "Yorum" in df.columns else "Yorum Sayısı"
-                avg_eng = float(((df['Beğeni'] + df[yorum_col_name]).sum() / max(df['İzlenme'].sum(), 1)) * 100) if not df.empty else 0.0
-                
-                st.session_state.df = df
-                st.session_state.df_comments = df_comments
+                st.session_state.df = pd.DataFrame(v_list)
+                st.session_state.df_comments = pd.DataFrame(comment_list) if comment_list else pd.DataFrame(columns=["Video", "Yazar", "Yorum", "Tarih", "Durum"])
                 st.session_state.total_views = total_views
                 st.session_state.subscribers = subscribers
                 st.session_state.total_videos = total_videos
-                st.session_state.avg_eng = avg_eng
+                st.session_state.avg_eng = float(((st.session_state.df['Beğeni'] + st.session_state.df['Yorum']).sum() / max(st.session_state.df['İzlenme'].sum(), 1)) * 100) if not st.session_state.df.empty else 0.0
                 st.session_state.ch_title = ch_title
                 st.session_state.views_last_28d = views_last_28d
                 st.session_state.views_prev_28d = views_prev_28d
@@ -514,11 +379,9 @@ if analyze_btn:
                 st.session_state.likes_prev_28d = likes_prev_28d
                 st.session_state.total_shorts_views = total_shorts_views
                 st.session_state.loaded = True
-
         except Exception as e:
-            st.error(f"Sistem Çalışma Hatası: Lütfen API anahtarlarınızı kontrol edin. Detay: {e}")
+            st.error(f"Sistem Çalışma Hatası: {e}")
 
-# Veriler yüklendiyse paneli çiz
 if "loaded" in st.session_state and st.session_state.loaded:
     total_views = st.session_state.total_views
     subscribers = st.session_state.subscribers
@@ -530,335 +393,117 @@ if "loaded" in st.session_state and st.session_state.loaded:
     
     total_watch_hours = 598.0
     total_shorts_views = st.session_state.get("total_shorts_views", 0)
-
     views_last_28d = st.session_state.get("views_last_28d", 0)
     views_prev_28d = st.session_state.get("views_prev_28d", 0)
     likes_last_28d = st.session_state.get("likes_last_28d", 0)
     likes_prev_28d = st.session_state.get("likes_prev_28d", 0)
-    
     subs_diff = st.session_state.get("subs_diff", 0)
 
-    if subs_diff > 0:
-        subs_arrow = '<span style="color:#10b981;">🟢 ↗</span>'
-        subs_diff_str = f'<span style="color:#10b981; font-weight:bold;">+{subs_diff:,}</span>'
-    elif subs_diff < 0:
-        subs_arrow = '<span style="color:#ef4444;">🔴 ↘</span>'
-        subs_diff_str = f'<span style="color:#ef4444; font-weight:bold;">{subs_diff:,}</span>'
-    else:
-        subs_arrow = '➖'
-        subs_diff_str = "Değişim Yok"
+    subs_arrow = '<span style="color:#10b981;">🟢 ↗</span>' if subs_diff > 0 else ('<span style="color:#ef4444;">🔴 ↘</span>' if subs_diff < 0 else '➖')
+    subs_diff_str = f'<span style="color:#10b981; font-weight:bold;">+{subs_diff:,}</span>' if subs_diff > 0 else (f'<span style="color:#ef4444; font-weight:bold;">{subs_diff:,}</span>' if subs_diff < 0 else "Değişim Yok")
 
-    # Güvenlik Kontrolü
-    if "Tür" not in df.columns:
-        df["Tür"] = "Büyük Video"
-    if "Periyot" not in df.columns:
-        df["Periyot"] = "Arşiv"
-    if "İzlenme Süresi (Dk)" not in df.columns:
-        df["İzlenme Süresi (Dk)"] = 5.0
-    if "Yaş (Gün)" not in df.columns:
-        df["Yaş (Gün)"] = 31
-
-    # Üst Metrik Kartları (4'lü)
     c1, c2, c3, c4 = st.columns(4)
-    with c1:
-        st.markdown(f'<div class="metric-card-ondo reveal-box"><div class="metric-title">TOPLAM İZLENME</div><div class="metric-value"><span id="counter-1">0</span></div><div class="metric-sub">Tüm Zamanlar</div></div>', unsafe_allow_html=True)
-    with c2:
-        st.markdown(f'<div class="metric-card-ondo reveal-box"><div class="metric-title">TOPLAM ABONE</div><div class="metric-value"><span id="counter-2">0</span></div><div class="metric-sub">Kanal Geneli</div></div>', unsafe_allow_html=True)
-    with c3:
-        st.markdown(f'<div class="metric-card-ondo reveal-box"><div class="metric-title">ORTALAMA ETKİLEŞİM</div><div class="metric-value"><span id="counter-3">0.00</span></div><div class="metric-sub">Genel Performans</div></div>', unsafe_allow_html=True)
-    with c4:
-        st.markdown(f'<div class="metric-card-ondo reveal-box"><div class="metric-title">İÇERİK SAYISI</div><div class="metric-value"><span id="counter-4">0</span></div><div class="metric-sub">Yayınlanan Video</div></div>', unsafe_allow_html=True)
+    with c1: st.markdown(f'<div class="metric-card-ondo reveal-box"><div class="metric-title">TOPLAM İZLENME</div><div class="metric-value">{total_views:,}</div></div>', unsafe_allow_html=True)
+    with c2: st.markdown(f'<div class="metric-card-ondo reveal-box"><div class="metric-title">TOPLAM ABONE</div><div class="metric-value">{subscribers:,}</div></div>', unsafe_allow_html=True)
+    with c3: st.markdown(f'<div class="metric-card-ondo reveal-box"><div class="metric-title">ORTALAMA ETKİLEŞİM</div><div class="metric-value">%{avg_eng:.2f}</div></div>', unsafe_allow_html=True)
+    with c4: st.markdown(f'<div class="metric-card-ondo reveal-box"><div class="metric-title">İÇERİK SAYISI</div><div class="metric-value">{total_videos:,}</div></div>', unsafe_allow_html=True)
 
-    components.html(f"""
-    <script>
-    function runCounter(id, target, isFloat) {{
-        const el = window.parent.document.getElementById(id);
-        if (!el) return;
-        const duration = 2000;
-        let startTime = null;
-
-        function update(currentTime) {{
-            if (!startTime) startTime = currentTime;
-            const progress = currentTime - startTime;
-            const percentage = Math.min(progress / duration, 1);
-            const ease = percentage === 1 ? 1 : 1 - Math.pow(2, -10 * percentage);
-            const currentVal = target * ease;
-
-            if (isFloat) {{
-                el.innerText = '%' + currentVal.toFixed(2);
-            }} else {{
-                el.innerText = Math.floor(currentVal).toLocaleString('en-US');
-            }}
-
-            if (percentage < 1) {{
-                requestAnimationFrame(update);
-            }} else {{
-                if (isFloat) {{
-                    el.innerText = '%' + target.toFixed(2);
-                }} else {{
-                    el.innerText = target.toLocaleString('en-US');
-                }}
-            }}
-        }}
-        requestAnimationFrame(update);
-    }}
-
-    runCounter('counter-1', {total_views}, false);
-    runCounter('counter-2', {subscribers}, false);
-    runCounter('counter-3', {avg_eng}, true);
-    runCounter('counter-4', {total_videos}, false);
-    </script>
-    """, height=0)
-
-    # --- 5'Lİ SEKME BUTONLARI (KİTLE EKLENDİ) ---
     st.markdown("<br>", unsafe_allow_html=True)
     tab_col1, tab_col2, tab_col3, tab_col4, tab_col5 = st.columns(5)
 
     with tab_col1:
         css_class = "tab-active" if st.session_state.active_tab == "Performans Matrisi" else "tab-inactive"
         st.markdown(f'<div class="{css_class}">', unsafe_allow_html=True)
-        if st.button("📊 PERFORMANS", use_container_width=True):
-            st.session_state.active_tab = "Performans Matrisi"
-            st.rerun()
+        if st.button("📊 PERFORMANS", use_container_width=True): st.session_state.active_tab = "Performans Matrisi"; st.rerun()
         st.markdown('</div>', unsafe_allow_html=True)
-
     with tab_col2:
         css_class = "tab-active" if st.session_state.active_tab == "Gelen Yorumlar" else "tab-inactive"
         st.markdown(f'<div class="{css_class}">', unsafe_allow_html=True)
-        if st.button("💬 YORUMLAR", use_container_width=True):
-            st.session_state.active_tab = "Gelen Yorumlar"
-            st.rerun()
+        if st.button("💬 YORUMLAR", use_container_width=True): st.session_state.active_tab = "Gelen Yorumlar"; st.rerun()
         st.markdown('</div>', unsafe_allow_html=True)
-
     with tab_col3:
         css_class = "tab-active" if st.session_state.active_tab == "Detaylı Analiz" else "tab-inactive"
         st.markdown(f'<div class="{css_class}">', unsafe_allow_html=True)
-        if st.button("🔍 ARŞİV", use_container_width=True):
-            st.session_state.active_tab = "Detaylı Analiz"
-            st.rerun()
+        if st.button("🔍 ARŞİV", use_container_width=True): st.session_state.active_tab = "Detaylı Analiz"; st.rerun()
         st.markdown('</div>', unsafe_allow_html=True)
-
     with tab_col4:
         css_class = "tab-active" if st.session_state.active_tab == "Kitle" else "tab-inactive"
         st.markdown(f'<div class="{css_class}">', unsafe_allow_html=True)
-        if st.button("🌍 KİTLE", use_container_width=True):
-            st.session_state.active_tab = "Kitle"
-            st.rerun()
+        if st.button("🌍 KİTLE", use_container_width=True): st.session_state.active_tab = "Kitle"; st.rerun()
         st.markdown('</div>', unsafe_allow_html=True)
-
     with tab_col5:
         css_class = "tab-active" if st.session_state.active_tab == "AI Strateji Raporu" else "tab-inactive"
         st.markdown(f'<div class="{css_class}">', unsafe_allow_html=True)
-        if st.button("🤖 AI RAPOR", use_container_width=True):
-            st.session_state.active_tab = "AI Strateji Raporu"
-            st.rerun()
+        if st.button("🤖 AI RAPOR", use_container_width=True): st.session_state.active_tab = "AI Strateji Raporu"; st.rerun()
         st.markdown('</div>', unsafe_allow_html=True)
 
     st.markdown("<br>", unsafe_allow_html=True)
-
-    # Aktif sekmeye göre içerik gösterimi
     current_tab = st.session_state.active_tab
 
     if current_tab == "Performans Matrisi":
-        # --- 1. GENEL BAKIŞ ---
-        st.markdown('''
-        <div class="reveal-box section-title-box">
-            <h3>🌐 GENEL BAKIŞ</h3>
-        </div>
-        ''', unsafe_allow_html=True)
-
+        st.markdown('<div class="reveal-box section-title-box"><h3>🌐 GENEL BAKIŞ</h3></div>', unsafe_allow_html=True)
         gb1, gb2, gb3 = st.columns(3)
-        with gb1:
-            st.markdown(f'''
-            <div class="metric-card-ondo reveal-box" style="min-height: 110px; padding: 18px;">
-                <div class="metric-title">GÖRÜNTÜLEME</div>
-                <div class="metric-value" style="font-size: 26px;">{total_views:,}</div>
-                <div class="metric-sub">Tüm Zamanlar</div>
-            </div>
-            ''', unsafe_allow_html=True)
-        with gb2:
-            st.markdown(f'''
-            <div class="metric-card-ondo reveal-box" style="min-height: 110px; padding: 18px;">
-                <div class="metric-title">İZLENME SÜRESİ (SAAT)</div>
-                <div class="metric-value" style="font-size: 26px;">{total_watch_hours:,}</div>
-                <div class="metric-sub">YouTube Studio Senkronize</div>
-            </div>
-            ''', unsafe_allow_html=True)
-        with gb3:
-            st.markdown(f'''
-            <div class="metric-card-ondo reveal-box" style="min-height: 110px; padding: 18px;">
-                <div class="metric-title">GÜNCEL ABONE SAYISI</div>
-                <div class="metric-value" style="font-size: 26px;">{subscribers:,}</div>
-                <div class="metric-sub">Kanal Toplamı</div>
-            </div>
-            ''', unsafe_allow_html=True)
+        with gb1: st.markdown(f'<div class="metric-card-ondo reveal-box"><div class="metric-title">GÖRÜNTÜLEME</div><div class="metric-value" style="font-size: 26px;">{total_views:,}</div></div>', unsafe_allow_html=True)
+        with gb2: st.markdown(f'<div class="metric-card-ondo reveal-box"><div class="metric-title">İZLENME SÜRESİ (SAAT)</div><div class="metric-value" style="font-size: 26px;">{total_watch_hours:,}</div></div>', unsafe_allow_html=True)
+        with gb3: st.markdown(f'<div class="metric-card-ondo reveal-box"><div class="metric-title">GÜNCEL ABONE</div><div class="metric-value" style="font-size: 26px;">{subscribers:,}</div></div>', unsafe_allow_html=True)
 
-        st.markdown("<br>", unsafe_allow_html=True)
-
-        # --- 2. İÇERİK ---
-        st.markdown('''
-        <div class="reveal-box section-title-box">
-            <h3>📈 İÇERİK (Önceki 28 Güne Kıyasla & Özel Takip)</h3>
-        </div>
-        ''', unsafe_allow_html=True)
-
+        st.markdown('<div class="reveal-box section-title-box"><h3>⚡ İçerik ve Abone Takip Analizi</h3></div>', unsafe_allow_html=True)
         inc1, inc2, inc3 = st.columns(3)
-        with inc1:
-            st.markdown(f'''
-            <div class="metric-card-ondo reveal-box" style="min-height: 110px; padding: 18px;">
-                <div class="metric-title">AKTİF İZLENME (SON 28 GÜN)</div>
-                <div class="metric-value" style="font-size: 26px;">{views_last_28d:,}</div>
-                <div class="metric-sub">Önceki 28 Gün: {views_prev_28d:,}</div>
-            </div>
-            ''', unsafe_allow_html=True)
-        with inc2:
-            st.markdown(f'''
-            <div class="metric-card-ondo reveal-box" style="min-height: 110px; padding: 18px;">
-                <div class="metric-title">BEĞENİ SAYISI (SON 28 GÜN)</div>
-                <div class="metric-value" style="font-size: 26px;">{likes_last_28d:,}</div>
-                <div class="metric-sub">Önceki 28 Gün: {likes_prev_28d:,}</div>
-            </div>
-            ''', unsafe_allow_html=True)
-        with inc3:
-            st.markdown(f'''
-            <div class="metric-card-ondo reveal-box" style="min-height: 110px; padding: 18px;">
-                <div class="metric-title">ABONE TAKİBİ (SİSTEM)</div>
-                <div class="metric-value" style="font-size: 26px;">{subscribers:,}</div>
-                <div class="metric-sub">İlk Kayda Göre: {subs_arrow} {subs_diff_str}</div>
-            </div>
-            ''', unsafe_allow_html=True)
-
-        st.markdown("<br>", unsafe_allow_html=True)
-        
-        # --- 3. SHORTS VE BÜYÜK VİDEO ANALİZİ ---
-        st.markdown('''
-        <div class="reveal-box section-title-box">
-            <h3>⚡ Shorts ve Büyük Video Karşılaştırmalı Kümülatif Analiz</h3>
-        </div>
-        ''', unsafe_allow_html=True)
-        
-        shorts_df = df[df["Tür"] == "Shorts"]
-        long_df = df[df["Tür"] == "Büyük Video"]
-
-        # Shorts Başlık Kutusu
-        st.markdown('''
-        <div class="reveal-box section-title-box" style="max-width: 800px; padding: 12px 20px; margin: 20px auto 15px auto;">
-            <h3 style="font-size: 15px;">📱 Shorts (Dikey) İçerik Performansı</h3>
-        </div>
-        ''', unsafe_allow_html=True)
-
-        s_c1, s_c2, s_c3 = st.columns(3)
-        for periyot_isim, gun_siniri, col in zip(["Son 24 Saat", "Son 7 Gün", "Son 30 Gün"], [1, 7, 30], [s_c1, s_c2, s_c3]):
-            p_data = shorts_df[shorts_df["Yaş (Gün)"] <= gun_siniri]
-            p_views = p_data["İzlenme"].sum()
-            p_likes = p_data["Beğeni"].sum()
-            p_watch_time = p_data["İzlenme Süresi (Dk)"].sum()
-            
-            with col:
-                st.markdown(f'''
-                <div class="metric-card-ondo reveal-box" style="min-height: 120px; padding: 18px;">
-                    <div class="metric-title">SHORTS ({periyot_isim.upper()})</div>
-                    <div class="metric-value" style="font-size: 28px;">{p_views:,}</div>
-                    <div class="metric-sub">{p_likes:,} Beğeni | {p_watch_time:,.1f} Dk İzlenme</div>
-                </div>
-                ''', unsafe_allow_html=True)
-
-        st.markdown("<br>", unsafe_allow_html=True)
-
-        # Büyük Video Başlık Kutusu
-        st.markdown('''
-        <div class="reveal-box section-title-box" style="max-width: 800px; padding: 12px 20px; margin: 20px auto 15px auto;">
-            <h3 style="font-size: 15px;">🖥️ Büyük Video (Long-form) İçerik Performansı</h3>
-        </div>
-        ''', unsafe_allow_html=True)
-
-        l_c1, l_c2, l_c3 = st.columns(3)
-        for periyot_isim, gun_siniri, col in zip(["Son 24 Saat", "Son 7 Gün", "Son 30 Gün"], [1, 7, 30], [l_c1, l_c2, l_c3]):
-            p_data = long_df[long_df["Yaş (Gün)"] <= gun_siniri]
-            p_views = p_data["İzlenme"].sum()
-            p_likes = p_data["Beğeni"].sum()
-            p_watch_time = p_data["İzlenme Süresi (Dk)"].sum()
-            
-            with col:
-                st.markdown(f'''
-                <div class="metric-card-ondo reveal-box" style="min-height: 120px; padding: 18px;">
-                    <div class="metric-title">BÜYÜK VİDEO ({periyot_isim.upper()})</div>
-                    <div class="metric-value" style="font-size: 28px;">{p_views:,}</div>
-                    <div class="metric-sub">{p_likes:,} Beğeni | {p_watch_time:,.1f} Dk İzlenme</div>
-                </div>
-                ''', unsafe_allow_html=True)
-
-        # --- 4. KANAL DETAYLI PERFORMANS ÖZETİ ---
-        st.markdown('''
-        <div class="reveal-box section-title-box">
-            <h3>🎯 KANAL DETAYLI PERFORMANS ÖZETİ</h3>
-        </div>
-        ''', unsafe_allow_html=True)
-
-        new_c1, new_c2 = st.columns(2)
-        with new_c1:
-            st.markdown(f'''
-            <div class="metric-card-ondo reveal-box" style="min-height: 130px; padding: 20px;">
-                <div class="metric-title">⏳ BU ZAMANA KADAR TOPLAM İZLENME SÜRESİ</div>
-                <div class="metric-value" style="font-size: 32px;">{total_watch_hours:,} Saat</div>
-                <div class="metric-sub">YouTube Studio Gerçek Zamanlı Eşitleme</div>
-            </div>
-            ''', unsafe_allow_html=True)
-        with new_c2:
-            st.markdown(f'''
-            <div class="metric-card-ondo reveal-box" style="min-height: 130px; padding: 20px;">
-                <div class="metric-title">GEÇERLİ SHORTS GÖRÜNTÜLEME SAYISI</div>
-                <div class="metric-value" style="font-size: 32px;"><span style="font-size: 40px; color: #ffffff; vertical-align: middle; margin-right: 8px;">👥</span> {total_shorts_views:,}</div>
-                <div class="metric-sub">Kanal Geneli Dikey İzleyici Erişimi</div>
-            </div>
-            ''', unsafe_allow_html=True)
+        with inc1: st.markdown(f'<div class="metric-card-ondo reveal-box"><div class="metric-title">SON 28 GÜN İZLENME</div><div class="metric-value" style="font-size: 26px;">{views_last_28d:,}</div></div>', unsafe_allow_html=True)
+        with inc2: st.markdown(f'<div class="metric-card-ondo reveal-box"><div class="metric-title">SON 28 GÜN BEĞENİ</div><div class="metric-value" style="font-size: 26px;">{likes_last_28d:,}</div></div>', unsafe_allow_html=True)
+        with inc3: st.markdown(f'<div class="metric-card-ondo reveal-box"><div class="metric-title">ABONE DEĞİŞİMİ</div><div class="metric-value" style="font-size: 26px;">{subscribers:,}</div><div class="metric-sub">İlk Kayda Göre: {subs_arrow} {subs_diff_str}</div></div>', unsafe_allow_html=True)
 
     elif current_tab == "Gelen Yorumlar":
-        st.markdown('<div class="ondo-glass-card reveal-box">', unsafe_allow_html=True)
-        st.write("### 💬 YouTube Kanalı Geçmişe Dayalı Canlı Yorum Yönetim Merkezi")
-        
+        st.markdown('<div class="ondo-glass-card reveal-box"><h3>💬 Yorum Yönetim Merkezi</h3></div>', unsafe_allow_html=True)
         if not df_comments.empty:
-            df_answered = df_comments[df_comments["Durum"] == "Cevaplanan"]
-            df_pending = df_comments[df_comments["Durum"] == "Cevap Bekliyor"]
-
-            st.markdown("<br>", unsafe_allow_html=True)
-            st.markdown("#### ⏳ Cevaplanmayı Bekleyen Yorumlar")
-            if not df_pending.empty:
-                st.dataframe(df_pending, use_container_width=True)
-            else:
-                st.success("Tebrikler! Cevap bekleyen hiç yorumunuz kalmamış.")
-
-            st.markdown("<br><br>", unsafe_allow_html=True)
-            st.markdown("#### ✅ Cevaplanan Yorumlar")
-            if not df_answered.empty:
-                st.dataframe(df_answered, use_container_width=True)
-            else:
-                st.info("Henüz yanıtlanmış bir yorum bulunmuyor.")
+            st.dataframe(df_comments, use_container_width=True)
         else:
-            st.info("Kanal videolarınızda henüz taranabilir yorum bulunamadı veya canlı veriler yüklenmedi.")
-        st.markdown('</div>', unsafe_allow_html=True)
+            st.info("Cevaplanacak veya taranacak yorum bulunamadı.")
 
     elif current_tab == "Detaylı Analiz":
-        st.markdown('<div class="ondo-glass-card reveal-box">', unsafe_allow_html=True)
-        st.write("### 🔍 Tüm İçeriklerin Tür ve Periyot Arşivi")
-        
-        mevcut_sutunlar = df.columns.tolist()
-        istenilen_sutunlar = ["Video Başlığı", "Yayın Tarihi", "Tür", "Periyot", "İzlenme", "Beğeni", "Yorum", "İzlenme Süresi (Dk)", "Süre (Dk)"]
-        gosterilecek_sutunlar = [col for col in istenilen_sutunlar if col in mevcut_sutunlar]
-        
-        df_show = df[gosterilecek_sutunlar]
-        st.dataframe(df_show, use_container_width=True)
-        st.markdown('</div>', unsafe_allow_html=True)
+        st.markdown('<div class="ondo-glass-card reveal-box"><h3>🔍 Tüm İçeriklerin Arşivi</h3></div>', unsafe_allow_html=True)
+        st.dataframe(df, use_container_width=True)
 
     elif current_tab == "Kitle":
         st.markdown('<div class="ondo-glass-card reveal-box">', unsafe_allow_html=True)
-        st.write("### 🌍 Kitle ve Coğrafi İzlenme Dağılımı")
-        st.info("YouTube Data API v3 gizlilik politikaları ve güvenlik kısıtlamaları gereği, video bazlı veya kanal geneli ülke/coğrafi yüzdelik verileri (Demographics) yalnızca YouTube Analytics API (OAuth girişli) üzerinden çekilebilmektedir. Mevcut API anahtarınızla videolarınızın performans özetini aşağıda inceleyebilirsiniz.")
+        st.write("### 🌍 Coğrafi Kitle ve Ülke Bazlı Analiz")
         
-        # Video bazlı genel kitle/performans tablosu gösterimi
-        kitle_cols = ["Video Başlığı", "Yayın Tarihi", "Tür", "İzlenme", "Beğeni", "İzlenme Süresi (Dk)"]
-        valid_kitle_cols = [c for c in kitle_cols if c in df.columns]
-        st.dataframe(df[valid_kitle_cols], use_container_width=True)
+        secret_file = "client_secret.json"
+        if os.path.exists(secret_file):
+            if st.button("Google Hesabıyla Yetkilendir ve Ülke Verilerini Çek"):
+                try:
+                    os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
+                    flow = InstalledAppFlow.from_client_secrets_file(
+                        secret_file,
+                        scopes=["https://www.googleapis.com/auth/yt-analytics.readonly"]
+                    )
+                    credentials = flow.run_local_server(port=8501)
+                    
+                    analytics = build('youtubeAnalytics', 'v2', credentials=credentials)
+                    response = analytics.reports().query(
+                        ids="channel==MINE",
+                        startDate="2026-01-01",
+                        endDate=datetime.utcnow().strftime("%Y-%m-%d"),
+                        metrics="views,estimatedMinutesWatched",
+                        dimensions="country",
+                        sort="-views"
+                    ).execute()
+                    
+                    rows = response.get("rows", [])
+                    if rows:
+                        country_df = pd.DataFrame(rows, columns=["Ülke Kodu", "İzlenme", "İzlenme Süresi (Dk)"])
+                        total_v = country_df["İzlenme"].sum()
+                        country_df["Yüzde (%)"] = ((country_df["İzlenme"] / total_v) * 100).round(2)
+                        st.success("Kitle verileri başarıyla çekildi!")
+                        st.dataframe(country_df, use_container_width=True)
+                    else:
+                        st.warning("Bu kanal için seçilen tarih aralığında coğrafi veri bulunamadı.")
+                except Exception as ex:
+                    st.error(f"Yetkilendirme veya veri çekme sırasında hata oluştu: {ex}")
+            else:
+                st.info("Ülkelerine göre yüzde kaç izlendiğini görmek için yukarıdaki butona tıklayarak Google hesabınızla yetki verin.")
+        else:
+            st.error("⚠️ 'client_secret.json' dosyası proje klasöründe bulunamadı!")
         st.markdown('</div>', unsafe_allow_html=True)
 
     elif current_tab == "AI Strateji Raporu":
@@ -866,26 +511,8 @@ if "loaded" in st.session_state and st.session_state.loaded:
         st.write("### 🤖 Profesyonel Kripto & Kanal Büyüme Raporu (Ağustos 2026)")
         with st.spinner("Kanal verileri ve Ağustos 2026 kripto trendleri Llama 3.3 motoru ile sentezleniyor..."):
             client = Groq(api_key=st.session_state.groq_key)
-            
-            prompt = f"""
-            Sen kurumsal düzeyde Web3, kripto varlık ve kanal büyüme stratejisi geliştiren üst düzey bir analistsin.
-            Mevcut Tarih: Ağustos 2026.
-            Kanal Adı: {ch_title}
-            Toplam İzlenme: {total_views} | Abone Sayısı: {subscribers} | Toplam Video: {total_videos}
-            Shorts ve Büyük Video Performansları sisteme entegre edilmiştir.
-
-            Lütfen kesinlikle Türkçe olarak, profesyonel yatırım fonu formatında şu başlıkları detaylıca sun:
-            1. **Kanalın Kitle ve Etkileşim Sağlığı:** Shorts ve klasik video dağılımının analizi.
-            2. **Ağustos 2026 Yüksek İzlenme Getirecek 3 Trend & Coin:** (Örn: CLARITY Act regülasyonları, AI altcoinleri/TAO, RWA tokenizasyonu, Solana/Sui ekosistemi veya BTC Q4 beklentileri).
-            3. **Yüksek CTR ve İzlenme Süresi İçin Algoritma Taktikleri.**
-            4. **Otomasyon & İçerik Üretim Hattı.**
-            """
-            
-            chat_completion = client.chat.completions.create(
-                messages=[{"role": "user", "content": prompt}],
-                model="llama-3.3-70b-versatile",
-            )
-
+            prompt = f"Sen kurumsal düzeyde Web3, kripto varlık ve kanal büyüme stratejisi geliştiren üst düzey bir analistsin. Mevcut Tarih: Ağustos 2026. Kanal Adı: {ch_title}. Toplam İzlenme: {total_views} | Abone Sayısı: {subscribers} | Toplam Video: {total_videos}. Lütfen Türkçe olarak profesyonel yatırım fonu formatında detaylı kanal büyüme stratejisi sun."
+            chat_completion = client.chat.completions.create(messages=[{"role": "user", "content": prompt}], model="llama-3.3-70b-versatile")
             st.markdown(chat_completion.choices[0].message.content)
         st.markdown('</div>', unsafe_allow_html=True)
 
