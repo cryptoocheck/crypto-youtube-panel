@@ -16,7 +16,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# Oturum Durumu Sabitleme (Verilerin silinmesini önler)
+# Oturum Durumu Sabitleme (Verilerin uçmasını önler)
 if "youtube_key" not in st.session_state:
     st.session_state.youtube_key = ""
 if "groq_key" not in st.session_state:
@@ -24,7 +24,7 @@ if "groq_key" not in st.session_state:
 if "channel_id" not in st.session_state:
     st.session_state.channel_id = ""
 if "active_tab" not in st.session_state:
-    st.session_state.active_tab = "Performans Matrisi"
+    st.session_state.active_tab = "Performans"
 if "loaded" not in st.session_state:
     st.session_state.loaded = False
 
@@ -48,7 +48,7 @@ def parse_iso8601_duration_seconds(duration_str):
     seconds = int(match.group(3)) if match.group(3) else 0
     return hours * 3600 + minutes * 60 + seconds
 
-# 2. Tasarım Mimarisi (CSS)
+# 2. Şeffaf Cam + Sarı Neon Hover Tasarım Mimarisi (CSS)
 st.markdown(f"""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&display=swap');
@@ -126,8 +126,9 @@ st.markdown(f"""
         text-transform: uppercase;
     }}
 
+    /* Şeffaf Cam + Sarı Neon Hover Kutucukları */
     .metric-card-ondo, .ondo-glass-card {{
-        background: rgba(17, 24, 39, 0.75);
+        background: rgba(17, 24, 39, 0.65);
         backdrop-filter: blur(16px);
         border: 1px solid rgba(255, 255, 255, 0.08);
         border-radius: 20px;
@@ -140,6 +141,12 @@ st.markdown(f"""
         justify-content: center;
         text-align: center;
         min-height: 140px;
+        transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.4s ease, box-shadow 0.4s ease;
+    }}
+    .metric-card-ondo:hover, .ondo-glass-card:hover {{
+        transform: translateY(-8px) scale(1.01);
+        border-color: rgba(241, 196, 15, 0.9);
+        box-shadow: 0 25px 60px -15px rgba(241, 196, 15, 0.35), 0 0 30px rgba(241, 196, 15, 0.2);
     }}
 
     .metric-title {{
@@ -158,7 +165,7 @@ st.markdown(f"""
     }}
     .metric-sub {{
         font-size: 12px;
-        color: #d4af37; 
+        color: #f1c40f; 
         margin-top: 6px;
         font-weight: 600;
     }}
@@ -178,6 +185,11 @@ st.markdown(f"""
         width: 100%;
         box-shadow: 0 4px 20px rgba(212, 175, 55, 0.3);
         font-size: 13px;
+        transition: all 0.3s ease;
+    }}
+    .stButton>button:hover {{
+        transform: translateY(-2px);
+        box-shadow: 0 6px 25px rgba(241, 196, 15, 0.5);
     }}
 
     .tab-active button {{
@@ -253,7 +265,7 @@ if analyze_btn:
                 v_list, comment_list = [], []
                 now = datetime.utcnow()
                 cutoff_28d, cutoff_56d = now - timedelta(days=28), now - timedelta(days=56)
-                views_last_28d, likes_last_28d = 0, 0
+                views_last_28d, likes_last_28d, total_shorts_views = 0, 0, 0
 
                 for i in range(0, len(v_ids), 50):
                     videos_req = youtube.videos().list(part='statistics,snippet,contentDetails,status', id=','.join(v_ids[i:i+50])).execute()
@@ -271,6 +283,9 @@ if analyze_btn:
                             likes_last_28d += likes
 
                         content_type = "Shorts" if duration_sec <= 61 else "Büyük Video"
+                        if content_type == "Shorts":
+                            total_shorts_views += views
+
                         delta_days = (now - published_dt).total_seconds() / 86400
                         time_frame = "Son 24 Saat" if delta_days <= 1 else ("Son 7 Gün" if delta_days <= 7 else ("Son 30 Gün" if delta_days <= 30 else "Arşiv"))
 
@@ -280,17 +295,21 @@ if analyze_btn:
                             "İzlenme Süresi (Dk)": round((views * (duration_sec / 60)) * 0.43, 1)
                         })
 
-                        if comments_count > 0 and len(comment_list) < 20:
+                        # Gelişmiş Yorum Toplama (Cevaplanan / Cevaplanmayan Durum Matrisi)
+                        if comments_count > 0 and len(comment_list) < 25:
                             try:
-                                com_req = youtube.commentThreads().list(part='snippet', videoId=v_id, maxResults=2).execute()
+                                com_req = youtube.commentThreads().list(part='snippet', videoId=v_id, maxResults=3).execute()
                                 for com_item in com_req.get('items', []):
                                     com_snippet = com_item['snippet']['topLevelComment']['snippet']
+                                    total_replies = com_item['snippet']['totalReplyCount']
+                                    status_text = "✅ Cevaplandı" if total_replies > 0 else "⏳ Cevap Bekliyor"
+                                    
                                     comment_list.append({
                                         "Video": title[:30] + "...",
                                         "Yazar": com_snippet['authorDisplayName'],
                                         "Yorum": com_snippet['textDisplay'],
                                         "Tarih": com_snippet['publishedAt'][:10],
-                                        "Durum": "Aktif"
+                                        "Durum": status_text
                                     })
                             except Exception:
                                 pass
@@ -300,11 +319,12 @@ if analyze_btn:
                 st.session_state.avg_eng = float(((st.session_state.df['Beğeni'] + st.session_state.df['Yorum']).sum() / max(st.session_state.df['İzlenme'].sum(), 1)) * 100) if not st.session_state.df.empty else 0.0
                 st.session_state.views_last_28d = views_last_28d
                 st.session_state.likes_last_28d = likes_last_28d
+                st.session_state.total_shorts_views = total_shorts_views
                 st.session_state.loaded = True
         except Exception as e:
             st.error(f"Sistem Çalışma Hatası: {e}")
 
-# ANA EKRAN GÖSTERİMİ (Veriler yüklendiyse kalıcı kalır)
+# ANA EKRAN GÖSTERİMİ (Kalıcı ve Kararlı Mimari)
 if st.session_state.loaded:
     total_views = st.session_state.total_views
     subscribers = st.session_state.subscribers
@@ -317,12 +337,13 @@ if st.session_state.loaded:
     total_watch_hours = 598.0
     views_last_28d = st.session_state.get("views_last_28d", 0)
     likes_last_28d = st.session_state.get("likes_last_28d", 0)
+    total_shorts_views = st.session_state.get("total_shorts_views", 0)
     subs_diff = 12
 
     subs_arrow = '<span style="color:#10b981;">🟢 ↗</span>'
     subs_diff_str = f'<span style="color:#10b981; font-weight:bold;">+{subs_diff}</span>'
 
-    # 4 Temel Metrik Kutucuğu
+    # Üst 4 Ana Metrik Kutucuğu (Şeffaf Cam & Sarı Neon Hover)
     c1, c2, c3, c4 = st.columns(4)
     with c1: st.markdown(f'<div class="metric-card-ondo"><div class="metric-title">TOPLAM İZLENME</div><div class="metric-value">{total_views:,}</div></div>', unsafe_allow_html=True)
     with c2: st.markdown(f'<div class="metric-card-ondo"><div class="metric-title">TOPLAM ABONE</div><div class="metric-value">{subscribers:,}</div></div>', unsafe_allow_html=True)
@@ -331,7 +352,7 @@ if st.session_state.loaded:
 
     st.markdown("<br>", unsafe_allow_html=True)
     
-    # Sekme Butonları (State korumalı)
+    # Sekme Butonları
     t1, t2, t3, t4, t5 = st.columns(5)
     with t1:
         cls = "tab-active" if st.session_state.active_tab == "Performans" else "tab-inactive"
@@ -369,21 +390,23 @@ if st.session_state.loaded:
         with gb2: st.markdown(f'<div class="metric-card-ondo"><div class="metric-title">İZLENME SÜRESİ (SAAT)</div><div class="metric-value" style="font-size: 26px;">{total_watch_hours:,}</div></div>', unsafe_allow_html=True)
         with gb3: st.markdown(f'<div class="metric-card-ondo"><div class="metric-title">GÜNCEL ABONE</div><div class="metric-value" style="font-size: 26px;">{subscribers:,}</div></div>', unsafe_allow_html=True)
 
-        st.markdown('<div class="section-title-box"><h3>⚡ İçerik ve Abone Takip Analizi</h3></div>', unsafe_allow_html=True)
-        inc1, inc2, inc3 = st.columns(3)
-        with inc1: st.markdown(f'<div class="metric-card-ondo"><div class="metric-title">SON 28 GÜN İZLENME</div><div class="metric-value" style="font-size: 26px;">{views_last_28d:,}</div></div>', unsafe_allow_html=True)
-        with inc2: st.markdown(f'<div class="metric-card-ondo"><div class="metric-title">SON 28 GÜN BEĞENİ</div><div class="metric-value" style="font-size: 26px;">{likes_last_28d:,}</div></div>', unsafe_allow_html=True)
-        with inc3: st.markdown(f'<div class="metric-card-ondo"><div class="metric-title">ABONE DEĞİŞİMİ</div><div class="metric-value" style="font-size: 26px;">{subscribers:,}</div><div class="metric-sub">İlk Kayda Göre: {subs_arrow} {subs_diff_str}</div></div>', unsafe_allow_html=True)
+        st.markdown('<div class="section-title-box"><h3>⚡ İçerik, Shorts ve Abone Takip Analizi</h3></div>', unsafe_allow_html=True)
+        inc1, inc2, inc3, inc4 = st.columns(4)
+        with inc1: st.markdown(f'<div class="metric-card-ondo"><div class="metric-title">SON 28 GÜN İZLENME</div><div class="metric-value" style="font-size: 22px;">{views_last_28d:,}</div></div>', unsafe_allow_html=True)
+        with inc2: st.markdown(f'<div class="metric-card-ondo"><div class="metric-title">SON 28 GÜN BEĞENİ</div><div class="metric-value" style="font-size: 22px;">{likes_last_28d:,}</div></div>', unsafe_allow_html=True)
+        with inc3: st.markdown(f'<div class="metric-card-ondo"><div class="metric-title">SHORTS İZLENMELERİ</div><div class="metric-value" style="font-size: 22px;">{total_shorts_views:,}</div></div>', unsafe_allow_html=True)
+        with inc4: st.markdown(f'<div class="metric-card-ondo"><div class="metric-title">ABONE DEĞİŞİMİ</div><div class="metric-value" style="font-size: 22px;">{subscribers:,}</div><div class="metric-sub">Trend: {subs_arrow} {subs_diff_str}</div></div>', unsafe_allow_html=True)
 
     elif curr == "Yorumlar":
-        st.markdown('<div class="ondo-glass-card"><h3>💬 Yorum Yönetim Merkezi</h3></div>', unsafe_allow_html=True)
+        st.markdown('<div class="ondo-glass-card"><h3>💬 Gelişmiş Yorum ve Etkileşim Yönetim Merkezi</h3></div>', unsafe_allow_html=True)
+        st.info("Videolarınıza gelen son yorumlar ve cevaplanma durumları (Cevaplandı / Cevap Bekliyor) aşağıda listelenmiştir:")
         if not df_comments.empty:
             st.dataframe(df_comments, use_container_width=True)
         else:
             st.info("Kanal videolarınızda taranacak aktif yorum bulunamadı.")
 
     elif curr == "Arşiv":
-        st.markdown('<div class="ondo-glass-card"><h3>🔍 Tüm İçeriklerin Arşivi</h3></div>', unsafe_allow_html=True)
+        st.markdown('<div class="ondo-glass-card"><h3>🔍 Tüm İçerikler ve Detaylı Arşiv</h3></div>', unsafe_allow_html=True)
         st.dataframe(df, use_container_width=True)
 
     elif curr == "Kitle":
