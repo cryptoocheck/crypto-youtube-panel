@@ -45,7 +45,7 @@ def parse_iso8601_duration_seconds(duration_str):
     seconds = int(match.group(3)) if match.group(3) else 0
     return hours * 3600 + minutes * 60 + seconds
 
-# 2. Tasarım Mimarisi (CSS - Optimize Edilmiş)
+# 2. Tasarım Mimarisi (CSS)
 st.markdown(f"""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&display=swap');
@@ -235,10 +235,11 @@ st.markdown(f"""
         border: 1px solid rgba(255, 255, 255, 0.3);
         border-radius: 9999px;
         font-weight: 700;
-        padding: 12px 28px;
+        padding: 12px 18px;
         transition: all 0.3s ease;
         width: 100%;
         box-shadow: 0 4px 20px rgba(212, 175, 55, 0.3);
+        font-size: 13px;
     }}
     .stButton>button:hover {{
         background: linear-gradient(135deg, #f1c40f 0%, #d4af37 100%);
@@ -251,26 +252,26 @@ st.markdown(f"""
         backdrop-filter: blur(16px) !important;
         color: #030712 !important;
         font-weight: 800 !important;
-        font-size: 15px !important;
+        font-size: 13px !important;
         border-radius: 9999px !important;
         border: 1px solid rgba(255, 255, 255, 0.5) !important;
         box-shadow: 0 8px 30px rgba(212, 175, 55, 0.5) !important;
-        padding: 14px 24px !important;
+        padding: 12px 18px !important;
     }}
     .tab-inactive button {{
         background: rgba(17, 24, 39, 0.65) !important;
         backdrop-filter: blur(16px) !important;
         color: #e5e7eb !important;
         font-weight: 700 !important;
-        font-size: 14px !important;
+        font-size: 13px !important;
         border-radius: 9999px !important;
         border: 1px solid rgba(255, 255, 255, 0.08) !important;
-        padding: 14px 24px !important;
+        padding: 12px 18px !important;
     }}
 </style>
 """, unsafe_allow_html=True)
 
-# --- ÇİFT YÖNLÜ İPEKSİ SÜZÜLME JS (Intersection Observer) ---
+# --- ÇİFT YÖNLÜ İPEKSİ SÜZÜLME JS ---
 components.html("""
 <script>
 function initDualWayReveal() {
@@ -345,7 +346,7 @@ if analyze_btn:
                     if os.path.exists(tracker_file):
                         tracker_df = pd.read_csv(tracker_file)
                         if not tracker_df.empty:
-                            last_recorded_subs = int(tracker_df.iloc[-1]['Subscribers'])
+                            last_recorded_subs = int(tracker_df.iloc[0]['Subscribers'])
                         else:
                             last_recorded_subs = subscribers
                     else:
@@ -609,14 +610,14 @@ if "loaded" in st.session_state and st.session_state.loaded:
     </script>
     """, height=0)
 
-    # --- 4'LÜ SEKME BUTONLARI ---
+    # --- 5'Lİ SEKME BUTONLARI (KİTLE EKLENDİ) ---
     st.markdown("<br>", unsafe_allow_html=True)
-    tab_col1, tab_col2, tab_col3, tab_col4 = st.columns(4)
+    tab_col1, tab_col2, tab_col3, tab_col4, tab_col5 = st.columns(5)
 
     with tab_col1:
         css_class = "tab-active" if st.session_state.active_tab == "Performans Matrisi" else "tab-inactive"
         st.markdown(f'<div class="{css_class}">', unsafe_allow_html=True)
-        if st.button("📊 PERFORMANS MATRİSİ", use_container_width=True):
+        if st.button("📊 PERFORMANS", use_container_width=True):
             st.session_state.active_tab = "Performans Matrisi"
             st.rerun()
         st.markdown('</div>', unsafe_allow_html=True)
@@ -624,7 +625,7 @@ if "loaded" in st.session_state and st.session_state.loaded:
     with tab_col2:
         css_class = "tab-active" if st.session_state.active_tab == "Gelen Yorumlar" else "tab-inactive"
         st.markdown(f'<div class="{css_class}">', unsafe_allow_html=True)
-        if st.button("💬 GELEN YORUMLAR", use_container_width=True):
+        if st.button("💬 YORUMLAR", use_container_width=True):
             st.session_state.active_tab = "Gelen Yorumlar"
             st.rerun()
         st.markdown('</div>', unsafe_allow_html=True)
@@ -632,15 +633,23 @@ if "loaded" in st.session_state and st.session_state.loaded:
     with tab_col3:
         css_class = "tab-active" if st.session_state.active_tab == "Detaylı Analiz" else "tab-inactive"
         st.markdown(f'<div class="{css_class}">', unsafe_allow_html=True)
-        if st.button("🔍 DETAYLI ANALİZ", use_container_width=True):
+        if st.button("🔍 ARŞİV", use_container_width=True):
             st.session_state.active_tab = "Detaylı Analiz"
             st.rerun()
         st.markdown('</div>', unsafe_allow_html=True)
 
     with tab_col4:
+        css_class = "tab-active" if st.session_state.active_tab == "Kitle" else "tab-inactive"
+        st.markdown(f'<div class="{css_class}">', unsafe_allow_html=True)
+        if st.button("🌍 KİTLE", use_container_width=True):
+            st.session_state.active_tab = "Kitle"
+            st.rerun()
+        st.markdown('</div>', unsafe_allow_html=True)
+
+    with tab_col5:
         css_class = "tab-active" if st.session_state.active_tab == "AI Strateji Raporu" else "tab-inactive"
         st.markdown(f'<div class="{css_class}">', unsafe_allow_html=True)
-        if st.button("🤖 AI STRATEJİ RAPORU", use_container_width=True):
+        if st.button("🤖 AI RAPOR", use_container_width=True):
             st.session_state.active_tab = "AI Strateji Raporu"
             st.rerun()
         st.markdown('</div>', unsafe_allow_html=True)
@@ -715,7 +724,7 @@ if "loaded" in st.session_state and st.session_state.loaded:
             <div class="metric-card-ondo reveal-box" style="min-height: 110px; padding: 18px;">
                 <div class="metric-title">ABONE TAKİBİ (SİSTEM)</div>
                 <div class="metric-value" style="font-size: 26px;">{subscribers:,}</div>
-                <div class="metric-sub">Son Kayda Göre: {subs_arrow} {subs_diff_str}</div>
+                <div class="metric-sub">İlk Kayda Göre: {subs_arrow} {subs_diff_str}</div>
             </div>
             ''', unsafe_allow_html=True)
 
@@ -739,14 +748,11 @@ if "loaded" in st.session_state and st.session_state.loaded:
         ''', unsafe_allow_html=True)
 
         s_c1, s_c2, s_c3 = st.columns(3)
-        shorts_chart_data = []
         for periyot_isim, gun_siniri, col in zip(["Son 24 Saat", "Son 7 Gün", "Son 30 Gün"], [1, 7, 30], [s_c1, s_c2, s_c3]):
             p_data = shorts_df[shorts_df["Yaş (Gün)"] <= gun_siniri]
             p_views = p_data["İzlenme"].sum()
             p_likes = p_data["Beğeni"].sum()
             p_watch_time = p_data["İzlenme Süresi (Dk)"].sum()
-            
-            shorts_chart_data.append({"Periyot": periyot_isim, "İzlenme": p_views, "Beğeni": p_likes})
             
             with col:
                 st.markdown(f'''
@@ -757,7 +763,32 @@ if "loaded" in st.session_state and st.session_state.loaded:
                 </div>
                 ''', unsafe_allow_html=True)
 
-        # --- KANAL DETAYLI PERFORMANS ÖZETİ ---
+        st.markdown("<br>", unsafe_allow_html=True)
+
+        # Büyük Video Başlık Kutusu
+        st.markdown('''
+        <div class="reveal-box section-title-box" style="max-width: 800px; padding: 12px 20px; margin: 20px auto 15px auto;">
+            <h3 style="font-size: 15px;">🖥️ Büyük Video (Long-form) İçerik Performansı</h3>
+        </div>
+        ''', unsafe_allow_html=True)
+
+        l_c1, l_c2, l_c3 = st.columns(3)
+        for periyot_isim, gun_siniri, col in zip(["Son 24 Saat", "Son 7 Gün", "Son 30 Gün"], [1, 7, 30], [l_c1, l_c2, l_c3]):
+            p_data = long_df[long_df["Yaş (Gün)"] <= gun_siniri]
+            p_views = p_data["İzlenme"].sum()
+            p_likes = p_data["Beğeni"].sum()
+            p_watch_time = p_data["İzlenme Süresi (Dk)"].sum()
+            
+            with col:
+                st.markdown(f'''
+                <div class="metric-card-ondo reveal-box" style="min-height: 120px; padding: 18px;">
+                    <div class="metric-title">BÜYÜK VİDEO ({periyot_isim.upper()})</div>
+                    <div class="metric-value" style="font-size: 28px;">{p_views:,}</div>
+                    <div class="metric-sub">{p_likes:,} Beğeni | {p_watch_time:,.1f} Dk İzlenme</div>
+                </div>
+                ''', unsafe_allow_html=True)
+
+        # --- 4. KANAL DETAYLI PERFORMANS ÖZETİ ---
         st.markdown('''
         <div class="reveal-box section-title-box">
             <h3>🎯 KANAL DETAYLI PERFORMANS ÖZETİ</h3>
@@ -811,13 +842,23 @@ if "loaded" in st.session_state and st.session_state.loaded:
         st.markdown('<div class="ondo-glass-card reveal-box">', unsafe_allow_html=True)
         st.write("### 🔍 Tüm İçeriklerin Tür ve Periyot Arşivi")
         
-        # GÜVENLİ SÜTUN FİLTRESİ (KeyError Hatasını Kökten Çözer)
         mevcut_sutunlar = df.columns.tolist()
         istenilen_sutunlar = ["Video Başlığı", "Yayın Tarihi", "Tür", "Periyot", "İzlenme", "Beğeni", "Yorum", "İzlenme Süresi (Dk)", "Süre (Dk)"]
         gosterilecek_sutunlar = [col for col in istenilen_sutunlar if col in mevcut_sutunlar]
         
         df_show = df[gosterilecek_sutunlar]
         st.dataframe(df_show, use_container_width=True)
+        st.markdown('</div>', unsafe_allow_html=True)
+
+    elif current_tab == "Kitle":
+        st.markdown('<div class="ondo-glass-card reveal-box">', unsafe_allow_html=True)
+        st.write("### 🌍 Kitle ve Coğrafi İzlenme Dağılımı")
+        st.info("YouTube Data API v3 gizlilik politikaları ve güvenlik kısıtlamaları gereği, video bazlı veya kanal geneli ülke/coğrafi yüzdelik verileri (Demographics) yalnızca YouTube Analytics API (OAuth girişli) üzerinden çekilebilmektedir. Mevcut API anahtarınızla videolarınızın performans özetini aşağıda inceleyebilirsiniz.")
+        
+        # Video bazlı genel kitle/performans tablosu gösterimi
+        kitle_cols = ["Video Başlığı", "Yayın Tarihi", "Tür", "İzlenme", "Beğeni", "İzlenme Süresi (Dk)"]
+        valid_kitle_cols = [c for c in kitle_cols if c in df.columns]
+        st.dataframe(df[valid_kitle_cols], use_container_width=True)
         st.markdown('</div>', unsafe_allow_html=True)
 
     elif current_tab == "AI Strateji Raporu":
