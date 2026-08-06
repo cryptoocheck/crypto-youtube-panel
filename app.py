@@ -2,12 +2,16 @@ import streamlit as st
 import streamlit.components.v1 as components
 from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import Flow
+from google.oauth2.credentials import Credentials
 from groq import Groq
 import pandas as pd
 import os
 import base64
 import re
 from datetime import datetime, timedelta
+
+# Güvenlik ve OAuth HTTP ayarı (Cloud için zorunlu)
+os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
 
 # 1. Streamlit Sayfa Yapılandırması
 st.set_page_config(
@@ -469,7 +473,74 @@ if "loaded" in st.session_state and st.session_state.loaded:
         
         secret_file = "client_secret.json"
         if os.path.exists(secret_file):
-            st.info("Cloud ortamında OAuth yetkilendirmesi tarayıcı yönlendirme portu gerektirdiği için doğrudan tetiklenemez. Ancak altyapı ve `client_secret.json` dosyanız kusursuz şekilde hazırdır.")
+            redirect_uri = "https://crypto-youtube-panel-isrypwltuienhsuwqmhds.streamlit.app" # Cloud uygulama adresin
+            
+            if "oauth_code" in st.query_params:
+                code = st.query_params["oauth_code"]
+                try:
+                    flow = Flow.from_client_secrets_file(
+                        secret_file,
+                        scopes=["https://www.googleapis.com/auth/yt-analytics.readonly"],
+                        redirect_uri=redirect_uri
+                    )
+                    flow.fetch_token(code=code)
+                    cred = flow.credentials
+                    st.session_state.oauth_creds = {
+                        'token': cred.token,
+                        'refresh_token': cred.refresh_token,
+                        'token_uri': cred.token_uri,
+                        'client_id': cred.client_id,
+                        'client_secret': cred.client_secret,
+                        'scopes': cred.scopes
+                    }
+                    st.success("Google Hesabı başarıyla yetkilendirildi!")
+                    st.rerun()
+                except Exception as err:
+                    st.error(f"Token alma hatası: {err}")
+
+            if "oauth_creds" in st.session_state:
+                try:
+                    creds = Credentials(**st.session_state.oauth_creds)
+                    analytics = build('youtubeAnalytics', 'v2', credentials=creds)
+                    response = analytics.reports().query(
+                        ids="channel==MINE",
+                        startDate="2026-01-01",
+                        endDate=datetime.utcnow().strftime("%Y-%m-%d"),
+                        metrics="views,estimatedMinutesWatched",
+                        dimensions="country",
+                        sort="-views"
+                    ).execute()
+                    
+                    rows = response.get("rows", [])
+                    if rows:
+                        country_df = pd.DataFrame(rows, columns=["Ülke Kodu", "İzlenme", "İzlenme Süresi (Dk)"])
+                        total_v = country_df["İzlenme"].sum()
+                        country_df["Yüzde (%)"] = ((country_df["İzlenme"] / total_v) * 100).round(2)
+                        st.success("Canlı kitle ve ülke verileri başarıyla yüklendi!")
+                        st.dataframe(country_df, use_container_width=True)
+                    else:
+                        st.warning("Bu kanal için seçilen tarih aralığında coğrafi veri bulunamadı.")
+                except Exception as api_err:
+                    st.error(f"YouTube Analytics API veri çekme hatası: {api_err}")
+                    if st.button("Yeniden Yetkilendir"):
+                        del st.session_state.oauth_creds
+                        st.rerun()
+            else:
+                flow = Flow.from_client_secrets_file(
+                    secret_file,
+                    scopes=["https://www.googleapis.com/auth/yt-analytics.readonly"],
+                    redirect_uri=redirect_uri
+                )
+                auth_url, _ = flow.authorization_url(prompt='consent')
+                st.markdown(f"""
+                <div style="text-align: center; margin-top: 20px;">
+                    <a href="{auth_url}" target="_self">
+                        <button style="background: linear-gradient(135deg, #f1c40f 0%, #d4af37 100%); color: #030712; border: none; border-radius: 9999px; font-weight: 800; padding: 14px 28px; font-size: 15px; cursor: pointer; box-shadow: 0 4px 20px rgba(212, 175, 55, 0.4);">
+                            🚀 Google Hesabıyla Bağlan ve Ülke Verilerini Çek
+                        </button>
+                    </a>
+                </div>
+                """, unsafe_allow_html=True)
         else:
             st.error("⚠️ 'client_secret.json' dosyası proje klasöründe bulunamadı!")
         st.markdown('</div>', unsafe_allow_html=True)
