@@ -49,7 +49,7 @@ def parse_iso8601_duration_seconds(duration_str):
     seconds = int(match.group(3)) if match.group(3) else 0
     return hours * 3600 + minutes * 60 + seconds
 
-# 2. Özel Tasarım (Banner Şeffaf Cam + Sarı Neon Hover & Sayaç Efektleri)
+# 2. Tasarım ve Sayaç Animasyon Mimarisi (CSS & JS)
 st.markdown(f"""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&display=swap');
@@ -97,12 +97,13 @@ st.markdown(f"""
         margin-top: 120px;
         margin-bottom: 25px;
     }}
-    
-    /* Kırmızı ile gösterdiğin Banner: Şeffaf Cam + Sarı Neon Hover + Büyüme Efekti */
+
+    /* KIRMIZI İLE GÖSTERİLEN BANNER: Şeffaf cam, mouse gelince neon sarı fon ve büyüme efekti */
     .banner-ondo-box {{
-        background: rgba(17, 24, 39, 0.45);
-        backdrop-filter: blur(18px);
-        border: 1px solid rgba(255, 255, 255, 0.12);
+        background: rgba(17, 24, 39, 0.25);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1px solid rgba(255, 255, 255, 0.08);
         border-radius: 24px;
         padding: 24px;
         box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.7);
@@ -110,13 +111,13 @@ st.markdown(f"""
         max-width: 1200px;
         position: relative;
         box-sizing: border-box;
-        transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
     }}
     .banner-ondo-box:hover {{
+        background: rgba(241, 196, 15, 0.15);
         transform: translateY(-6px) scale(1.02);
-        background: rgba(241, 196, 15, 0.08);
         border-color: rgba(241, 196, 15, 0.9);
-        box-shadow: 0 30px 70px -15px rgba(241, 196, 15, 0.4), 0 0 40px rgba(241, 196, 15, 0.3);
+        box-shadow: 0 30px 70px -15px rgba(241, 196, 15, 0.4), 0 0 35px rgba(241, 196, 15, 0.3);
     }}
     .banner-ondo-box img {{
         width: 100% !important;
@@ -232,11 +233,33 @@ st.markdown(f"""
 </style>
 """, unsafe_allow_html=True)
 
-# Kayarak Gelen Kutu ve Sayaç (Counter) Animasyon Motoru (JS)
+# SARI İLE GÖSTERİLEN KUTUCUKLAR İÇİN SAYAÇ (COUNT-UP) VE KAYMA ANİMASYONU JS
 components.html("""
 <script>
+function runCounterAnimation() {
+    const counters = document.querySelectorAll('.count-up');
+    counters.forEach(counter => {
+        const target = parseFloat(counter.getAttribute('data-target'));
+        const isPercentage = counter.getAttribute('data-percent') === 'true';
+        const decimals = parseInt(counter.getAttribute('data-decimals') || '0');
+        let current = 0;
+        const speed = 40; // Akıcılık hızı
+        const increment = target / 40;
+
+        const updateCount = () => {
+            current += increment;
+            if (current < target) {
+                counter.innerText = isPercentage ? '%' + current.toFixed(decimals) : current.toLocaleString('en-US', {maximumFractionDigits: decimals});
+                setTimeout(updateCount, speed);
+            } else {
+                counter.innerText = isPercentage ? '%' + target.toFixed(decimals) : target.toLocaleString('en-US', {maximumFractionDigits: decimals});
+            }
+        };
+        updateCount();
+    });
+}
+
 function initAnimations() {
-    // Kayarak gelen kutular
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
@@ -250,40 +273,11 @@ function initAnimations() {
     const boxes = window.parent.document.querySelectorAll('.reveal-box');
     boxes.forEach(box => observer.observe(box));
 
-    // Sarı kutucuklardaki sayaç animasyonu
-    const counters = window.parent.document.querySelectorAll('.metric-value-counter');
-    counters.forEach(counter => {
-        if(counter.getAttribute('data-animated') === 'true') return;
-        counter.setAttribute('data-animated', 'true');
-        
-        const target = parseFloat(counter.getAttribute('data-target'));
-        const isFloat = counter.getAttribute('data-float') === 'true';
-        const isPercent = counter.getAttribute('data-percent') === 'true';
-        
-        let count = 0;
-        const duration = 1800; // 1.8 saniyede akıcı tamamlansın
-        const steps = 60;
-        const increment = target / steps;
-        const stepTime = duration / steps;
-        
-        const timer = setInterval(() => {
-            count += increment;
-            if (count >= target) {
-                count = target;
-                clearInterval(timer);
-            }
-            if (isPercent) {
-                counter.innerText = '%' + count.toFixed(2);
-            } else if (isFloat) {
-                counter.innerText = count.toFixed(2);
-            } else {
-                counter.innerText = Math.floor(count).toLocaleString('en-US');
-            }
-        }, stepTime);
-    });
+    runCounterAnimation();
 }
-setTimeout(initAnimations, 400);
-setInterval(initAnimations, 1200);
+
+setTimeout(initAnimations, 600);
+setInterval(runCounterAnimation, 3000);
 </script>
 """, height=0)
 
@@ -399,7 +393,7 @@ if analyze_btn:
         except Exception as e:
             st.error(f"Sistem Çalışma Hatası: {e}")
 
-# ANA EKRAN GÖSTERİMİ (Sayaç Animasyonlu Kutucuklar)
+# ANA EKRAN GÖSTERİMİ
 if st.session_state.loaded:
     total_views = st.session_state.total_views
     subscribers = st.session_state.subscribers
@@ -418,36 +412,12 @@ if st.session_state.loaded:
     subs_arrow = '<span style="color:#10b981;">🟢 ↗</span>'
     subs_diff_str = f'<span style="color:#10b981; font-weight:bold;">+{subs_diff}</span>'
 
-    # Sarı Çizimle Gösterdiğin Üst 4 Metrik Kutucuğu (Sayaç Animasyonlu)
+    # SARI İLE GÖSTERİLEN KUTUCUKLAR (Sayaç Animasyonlu count-up class'ı ile)
     c1, c2, c3, c4 = st.columns(4)
-    with c1: 
-        st.markdown(f'''
-        <div class="metric-card-ondo reveal-box">
-            <div class="metric-title">TOPLAM İZLENME</div>
-            <div class="metric-value metric-value-counter" data-target="{total_views}">0</div>
-        </div>
-        ''', unsafe_allow_html=True)
-    with c2: 
-        st.markdown(f'''
-        <div class="metric-card-ondo reveal-box">
-            <div class="metric-title">TOPLAM ABONE</div>
-            <div class="metric-value metric-value-counter" data-target="{subscribers}">0</div>
-        </div>
-        ''', unsafe_allow_html=True)
-    with c3: 
-        st.markdown(f'''
-        <div class="metric-card-ondo reveal-box">
-            <div class="metric-title">ORTALAMA ETKİLEŞİM</div>
-            <div class="metric-value metric-value-counter" data-target="{avg_eng:.2f}" data-percent="true">%0.00</div>
-        </div>
-        ''', unsafe_allow_html=True)
-    with c4: 
-        st.markdown(f'''
-        <div class="metric-card-ondo reveal-box">
-            <div class="metric-title">İÇERİK SAYISI</div>
-            <div class="metric-value metric-value-counter" data-target="{total_videos}">0</div>
-        </div>
-        ''', unsafe_allow_html=True)
+    with c1: st.markdown(f'<div class="metric-card-ondo reveal-box"><div class="metric-title">TOPLAM İZLENME</div><div class="metric-value count-up" data-target="{total_views}" data-decimals="0">0</div></div>', unsafe_allow_html=True)
+    with c2: st.markdown(f'<div class="metric-card-ondo reveal-box"><div class="metric-title">TOPLAM ABONE</div><div class="metric-value count-up" data-target="{subscribers}" data-decimals="0">0</div></div>', unsafe_allow_html=True)
+    with c3: st.markdown(f'<div class="metric-card-ondo reveal-box"><div class="metric-title">ORTALAMA ETKİLEŞİM</div><div class="metric-value count-up" data-target="{avg_eng:.2f}" data-percent="true" data-decimals="2">%0</div></div>', unsafe_allow_html=True)
+    with c4: st.markdown(f'<div class="metric-card-ondo reveal-box"><div class="metric-title">İÇERİK SAYISI</div><div class="metric-value count-up" data-target="{total_videos}" data-decimals="0">0</div></div>', unsafe_allow_html=True)
 
     st.markdown("<br>", unsafe_allow_html=True)
     
@@ -485,15 +455,15 @@ if st.session_state.loaded:
     if curr == "Performans":
         st.markdown('<div class="reveal-box section-title-box"><h3>🌐 GENEL BAKIŞ & BÜYÜME</h3></div>', unsafe_allow_html=True)
         gb1, gb2, gb3 = st.columns(3)
-        with gb1: st.markdown(f'<div class="metric-card-ondo reveal-box"><div class="metric-title">GÖRÜNTÜLEME</div><div class="metric-value" style="font-size: 26px;">{total_views:,}</div></div>', unsafe_allow_html=True)
-        with gb2: st.markdown(f'<div class="metric-card-ondo reveal-box"><div class="metric-title">İZLENME SÜRESİ (SAAT)</div><div class="metric-value" style="font-size: 26px;">{total_watch_hours:,}</div></div>', unsafe_allow_html=True)
-        with gb3: st.markdown(f'<div class="metric-card-ondo reveal-box"><div class="metric-title">GÜNCEL ABONE</div><div class="metric-value" style="font-size: 26px;">{subscribers:,}</div></div>', unsafe_allow_html=True)
+        with gb1: st.markdown(f'<div class="metric-card-ondo reveal-box"><div class="metric-title">GÖRÜNTÜLEME</div><div class="metric-value count-up" data-target="{total_views}" data-decimals="0" style="font-size: 26px;">0</div></div>', unsafe_allow_html=True)
+        with gb2: st.markdown(f'<div class="metric-card-ondo reveal-box"><div class="metric-title">İZLENME SÜRESİ (SAAT)</div><div class="metric-value count-up" data-target="{total_watch_hours}" data-decimals="1" style="font-size: 26px;">0</div></div>', unsafe_allow_html=True)
+        with gb3: st.markdown(f'<div class="metric-card-ondo reveal-box"><div class="metric-title">GÜNCEL ABONE</div><div class="metric-value count-up" data-target="{subscribers}" data-decimals="0" style="font-size: 26px;">0</div></div>', unsafe_allow_html=True)
 
         st.markdown('<div class="reveal-box section-title-box"><h3>⚡ İçerik, Shorts ve Abone Takip Analizi</h3></div>', unsafe_allow_html=True)
         inc1, inc2, inc3, inc4 = st.columns(4)
-        with inc1: st.markdown(f'<div class="metric-card-ondo reveal-box"><div class="metric-title">SON 28 GÜN İZLENME</div><div class="metric-value" style="font-size: 20px;">{views_last_28d:,}</div></div>', unsafe_allow_html=True)
-        with inc2: st.markdown(f'<div class="metric-card-ondo reveal-box"><div class="metric-title">SON 28 GÜN BEĞENİ</div><div class="metric-value" style="font-size: 20px;">{likes_last_28d:,}</div></div>', unsafe_allow_html=True)
-        with inc3: st.markdown(f'<div class="metric-card-ondo reveal-box"><div class="metric-title">SHORTS İZLENMELERİ</div><div class="metric-value" style="font-size: 20px;">{total_shorts_views:,}</div></div>', unsafe_allow_html=True)
+        with inc1: st.markdown(f'<div class="metric-card-ondo reveal-box"><div class="metric-title">SON 28 GÜN İZLENME</div><div class="metric-value count-up" data-target="{views_last_28d}" data-decimals="0" style="font-size: 20px;">0</div></div>', unsafe_allow_html=True)
+        with inc2: st.markdown(f'<div class="metric-card-ondo reveal-box"><div class="metric-title">SON 28 GÜN BEĞENİ</div><div class="metric-value count-up" data-target="{likes_last_28d}" data-decimals="0" style="font-size: 20px;">0</div></div>', unsafe_allow_html=True)
+        with inc3: st.markdown(f'<div class="metric-card-ondo reveal-box"><div class="metric-title">SHORTS İZLENMELERİ</div><div class="metric-value count-up" data-target="{total_shorts_views}" data-decimals="0" style="font-size: 20px;">0</div></div>', unsafe_allow_html=True)
         with inc4: st.markdown(f'<div class="metric-card-ondo reveal-box"><div class="metric-title">ABONE DEĞİŞİMİ</div><div class="metric-value" style="font-size: 20px;">{subscribers:,}</div><div class="metric-sub">Trend: {subs_arrow} {subs_diff_str}</div></div>', unsafe_allow_html=True)
 
         st.markdown('<div class="reveal-box section-title-box"><h3>📈 KANAL İZLENME VE ETKİLEŞİM GRAFİKLERİ</h3></div>', unsafe_allow_html=True)
