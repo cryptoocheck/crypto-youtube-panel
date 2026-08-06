@@ -758,7 +758,6 @@ if "loaded" in st.session_state and st.session_state.loaded:
                 </div>
                 ''', unsafe_allow_html=True)
 
-        # Shorts Altına Scroll Tetiklemeli 3D Süzülen ve Uzayan Grafik (Güvenli CSS Intersection)
         max_s_val = max([max(d["İzlenme"], d["Beğeni"]) for d in shorts_chart_data] + [1])
         
         s_bar_html = f'''
@@ -857,8 +856,8 @@ if "loaded" in st.session_state and st.session_state.loaded:
             <div class="css-3d-chart-container">
         '''
         for d in shorts_chart_data:
-            h_iz = int((d["İzlenme"] / max_s_val) * 160) + 15
-            h_bg = int((d["Beğeni"] / max_s_val) * 160) + 15
+            h_iz = int((d["İzlenme"] / max_s_val) * 150) + 15
+            h_bg = int((d["Beğeni"] / max_s_val) * 150) + 15
             s_bar_html += f'''
                 <div class="css-3d-group">
                     <div class="css-3d-bars-flex">
@@ -931,7 +930,6 @@ if "loaded" in st.session_state and st.session_state.loaded:
                 </div>
                 ''', unsafe_allow_html=True)
 
-        # Büyük Video Altına Scroll Tetiklemeli 3D Süzülen ve Uzayan Grafik (Güvenli CSS Intersection)
         max_l_val = max([max(d["İzlenme"], d["Beğeni"]) for d in long_chart_data] + [1])
         
         l_bar_html = f'''
@@ -1029,8 +1027,8 @@ if "loaded" in st.session_state and st.session_state.loaded:
             <div class="css-3d-chart-container">
         '''
         for d in long_chart_data:
-            h_iz = int((d["İzlenme"] / max_l_val) * 160) + 15
-            h_bg = int((d["Beğeni"] / max_l_val) * 160) + 15
+            h_iz = int((d["İzlenme"] / max_l_val) * 150) + 15
+            h_bg = int((d["Beğeni"] / max_l_val) * 150) + 15
             l_bar_html += f'''
                 <div class="css-3d-group">
                     <div class="css-3d-bars-flex">
