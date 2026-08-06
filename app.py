@@ -45,7 +45,7 @@ def parse_iso8601_duration_seconds(duration_str):
     seconds = int(match.group(3)) if match.group(3) else 0
     return hours * 3600 + minutes * 60 + seconds
 
-# 2. Tasarım Mimarisi (CSS - Gerçek 3D Donanım Hızlandırmalı Hacimsel Sütunlar)
+# 2. Tasarım Mimarisi (CSS - Ana DOM'a Enjekte Edilmiş 3D Tasarım)
 st.markdown(f"""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&display=swap');
@@ -73,11 +73,11 @@ st.markdown(f"""
         max-width: 100% !important;
     }}
 
-    /* --- İPEKSİ SÜZÜLME VE 3D GEÇİŞ --- */
+    /* --- İPEKSİ SÜZÜLME VE 3D GEÇİŞ (Her Kaydırmada Tetiklenir) --- */
     .reveal-box {{
         opacity: 0;
-        transform: perspective(1200px) rotateX(20deg) translateY(90px) scale(0.9);
-        transition: opacity 1.6s cubic-bezier(0.16, 1, 0.3, 1), transform 1.6s cubic-bezier(0.16, 1, 0.3, 1);
+        transform: perspective(1200px) rotateX(15deg) translateY(60px) scale(0.95);
+        transition: opacity 1.2s cubic-bezier(0.16, 1, 0.3, 1), transform 1.2s cubic-bezier(0.16, 1, 0.3, 1);
         will-change: opacity, transform;
     }}
 
@@ -86,7 +86,7 @@ st.markdown(f"""
         transform: perspective(1200px) rotateX(0deg) translateY(0) scale(1);
     }}
 
-    /* --- GERÇEK 3D HTML5 / CSS HOLOGRAFİK GRAFİK MOTORU --- */
+    /* --- GERÇEK 3D HACİMSEL GRAFİK ALANI (NATIVE DOM) --- */
     .chart-3d-wrapper {{
         background: rgba(17, 24, 39, 0.85);
         backdrop-filter: blur(24px);
@@ -94,25 +94,25 @@ st.markdown(f"""
         border: 1px solid rgba(255, 255, 255, 0.15);
         border-radius: 24px;
         padding: 35px 25px 25px 25px;
-        margin-top: 15px;
-        margin-bottom: 30px;
-        box-shadow: 0 40px 80px -15px rgba(0, 0, 0, 0.9), inset 0 1px 0 rgba(255, 255, 255, 0.2);
-        transform: perspective(1200px) rotateX(6deg) rotateY(-2deg);
-        transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.5s ease, border-color 0.5s ease;
+        margin-top: 20px;
+        margin-bottom: 40px;
+        box-shadow: 0 40px 80px -15px rgba(0, 0, 0, 0.9), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+        transform: perspective(1200px) rotateX(4deg);
+        transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.6s ease, border-color 0.6s ease;
     }}
     .chart-3d-wrapper:hover {{
-        transform: perspective(1200px) rotateX(0deg) rotateY(0deg) translateY(-8px) scale(1.01);
+        transform: perspective(1200px) rotateX(0deg) translateY(-5px) scale(1.01);
         border-color: rgba(241, 196, 15, 0.9);
-        box-shadow: 0 50px 110px -20px rgba(241, 196, 15, 0.45), 0 0 45px rgba(241, 196, 15, 0.35);
+        box-shadow: 0 50px 100px -20px rgba(241, 196, 15, 0.4), 0 0 40px rgba(241, 196, 15, 0.25);
     }}
 
     .css-3d-chart-container {{
         display: flex;
         justify-content: space-around;
         align-items: flex-end;
-        height: 260px;
+        height: 250px;
         padding-top: 40px;
-        border-bottom: 2px solid rgba(255, 255, 255, 0.15);
+        border-bottom: 2px solid rgba(255, 255, 255, 0.2);
         position: relative;
     }}
 
@@ -127,54 +127,58 @@ st.markdown(f"""
 
     .css-3d-bars-flex {{
         display: flex;
-        gap: 12px;
+        gap: 15px;
         align-items: flex-end;
         height: 85%;
         justify-content: center;
         width: 100%;
+        transform-style: preserve-3d;
     }}
 
-    /* 3D Hacimli Sütun Tasarımı */
+    /* 3D Hacimli Çubuklar - Başlangıçta 0 height */
     .css-3d-bar {{
-        width: 38px;
-        border-radius: 6px 6px 0 0;
+        width: 45px;
+        height: 0px; 
+        border-radius: 8px 8px 0 0;
         position: relative;
         transform-style: preserve-3d;
-        transform: perspective(600px) rotateY(-15deg);
-        box-shadow: -10px 10px 20px rgba(0,0,0,0.6), inset 2px 2px 5px rgba(255,255,255,0.3);
-        transition: transform 0.4s ease, filter 0.4s ease;
+        transform: perspective(800px) rotateY(-20deg);
+        box-shadow: -15px 15px 25px rgba(0,0,0,0.7), inset 3px 3px 8px rgba(255,255,255,0.4);
+        transition: height 1.6s cubic-bezier(0.25, 1, 0.5, 1), transform 0.4s ease, filter 0.4s ease;
     }}
     .css-3d-bar:hover {{
-        transform: perspective(600px) rotateY(0deg) scaleY(1.05) translateY(-5px);
-        filter: brightness(1.25);
+        transform: perspective(800px) rotateY(0deg) scaleY(1.05) translateY(-5px);
+        filter: brightness(1.3);
     }}
 
-    .bar-yellow {{
-        background: linear-gradient(135deg, #f1c40f 0%, #b7950b 100%);
-    }}
-    .bar-blue {{
-        background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
-    }}
-    .bar-green {{
-        background: linear-gradient(135deg, #10b981 0%, #047857 100%);
-    }}
+    .bar-yellow {{ background: linear-gradient(135deg, #f1c40f 0%, #b7950b 100%); }}
+    .bar-blue {{ background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); }}
+    .bar-green {{ background: linear-gradient(135deg, #10b981 0%, #047857 100%); }}
 
+    /* Rakam Etiketleri - Başlangıçta Gizli */
     .bar-val-label {{
         position: absolute;
-        top: -24px;
+        top: -30px;
         width: 100%;
         text-align: center;
-        font-size: 11px;
+        font-size: 13px;
         font-weight: 800;
         color: #ffffff;
-        text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+        text-shadow: 0 3px 6px rgba(0,0,0,0.9);
+        opacity: 0;
+        transform: translateY(10px);
+        transition: opacity 0.8s ease 1s, transform 0.8s ease 1s;
+    }}
+    .reveal-box.active .bar-val-label {{
+        opacity: 1;
+        transform: translateY(0);
     }}
 
     .css-3d-label {{
-        margin-top: 12px;
-        font-size: 13px;
-        font-weight: 700;
-        color: #9ca3af;
+        margin-top: 15px;
+        font-size: 14px;
+        font-weight: 800;
+        color: #d1d5db;
         text-transform: uppercase;
         letter-spacing: 1px;
     }}
@@ -182,19 +186,15 @@ st.markdown(f"""
     .chart-legend {{
         display: flex;
         justify-content: center;
-        gap: 25px;
-        margin-top: 15px;
-        font-size: 12px;
-        font-weight: 700;
+        gap: 30px;
+        margin-top: 25px;
+        font-size: 13px;
+        font-weight: 800;
     }}
-    .legend-item {{
-        display: flex;
-        align-items: center;
-        gap: 8px;
-    }}
-    .legend-dot-y {{ width: 12px; height: 12px; background: #f1c40f; border-radius: 3px; box-shadow: 0 0 8px #f1c40f; }}
-    .legend-dot-b {{ width: 12px; height: 12px; background: #3b82f6; border-radius: 3px; box-shadow: 0 0 8px #3b82f6; }}
-    .legend-dot-g {{ width: 12px; height: 12px; background: #10b981; border-radius: 3px; box-shadow: 0 0 8px #10b981; }}
+    .legend-item {{ display: flex; align-items: center; gap: 8px; }}
+    .legend-dot-y {{ width: 14px; height: 14px; background: #f1c40f; border-radius: 4px; box-shadow: 0 0 10px #f1c40f; }}
+    .legend-dot-b {{ width: 14px; height: 14px; background: #3b82f6; border-radius: 4px; box-shadow: 0 0 10px #3b82f6; }}
+    .legend-dot-g {{ width: 14px; height: 14px; background: #10b981; border-radius: 4px; box-shadow: 0 0 10px #10b981; }}
 
     /* --- BANNER --- */
     .absolute-center-banner {{
@@ -235,7 +235,7 @@ st.markdown(f"""
         margin: 0 auto;
     }}
 
-    /* --- ŞEFFAF CAM BAŞLIK KUTULARI (NEON SARI HOVER) --- */
+    /* --- ŞEFFAF CAM BAŞLIK KUTULARI --- */
     .section-title-box {{
         background: rgba(17, 24, 39, 0.65);
         backdrop-filter: blur(16px);
@@ -269,7 +269,7 @@ st.markdown(f"""
         text-shadow: 0 0 10px rgba(241, 196, 15, 0.6);
     }}
 
-    /* --- 3D KUTULAR --- */
+    /* --- METRİK KUTULARI --- */
     .metric-card-ondo, .ondo-glass-card {{
         background: rgba(17, 24, 39, 0.75);
         backdrop-filter: blur(16px);
@@ -379,32 +379,55 @@ st.markdown(f"""
 </style>
 """, unsafe_allow_html=True)
 
-# --- ÇİFT YÖNLÜ İPEKSİ SÜZÜLME JS (Intersection Observer) ---
+# --- ANA SİSTEME ENJEKTE EDİLEN SCROLL GÖZLEMCİSİ ---
+# Bu kod sayfa kaydırıldıkça hem kutuları hem de çubuk grafiklerin yüksekliklerini akıcı şekilde yönetir.
 components.html("""
 <script>
-function initDualWayReveal() {
-    const observerOptions = {
-        root: null,
-        rootMargin: '0px 0px -30px 0px',
-        threshold: 0.05
-    };
+let observer = null;
 
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.classList.add('active');
-            } else {
-                entry.target.classList.remove('active');
-            }
-        });
-    }, observerOptions);
+function initScrollEngine() {
+    if (!observer) {
+        observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    // Kutuyu görünür yap
+                    entry.target.classList.add('active');
+                    
+                    // İçinde 3D çubuk varsa animasyonla hedefine yükselt
+                    const bars = entry.target.querySelectorAll('.css-3d-bar');
+                    bars.forEach(bar => {
+                        const targetHeight = bar.getAttribute('data-height');
+                        if(targetHeight) {
+                            bar.style.height = targetHeight + 'px';
+                        }
+                    });
+                } else {
+                    // Kutuyu gizle
+                    entry.target.classList.remove('active');
+                    
+                    // İçindeki çubukları sıfırla (tekrar inip çıkınca yeniden uzaması için)
+                    const bars = entry.target.querySelectorAll('.css-3d-bar');
+                    bars.forEach(bar => {
+                        bar.style.height = '0px';
+                    });
+                }
+            });
+        }, { root: null, rootMargin: '0px 0px -10% 0px', threshold: 0.1 });
+    }
 
+    // Streamlit her yenilendiğinde yeni eklenen kutuları gözlemciye dahil et
     const boxes = window.parent.document.querySelectorAll('.reveal-box');
-    boxes.forEach(box => observer.observe(box));
+    boxes.forEach(box => {
+        if (!box.dataset.observed) {
+            observer.observe(box);
+            box.dataset.observed = "true";
+        }
+    });
 }
 
-setTimeout(initDualWayReveal, 500);
-setInterval(initDualWayReveal, 1500);
+// Sistemi sürekli aktif tut
+setTimeout(initScrollEngine, 300);
+setInterval(initScrollEngine, 1000);
 </script>
 """, height=0)
 
@@ -448,13 +471,12 @@ if analyze_btn:
                 total_videos = int(channel['statistics']['videoCount'])
                 uploads_playlist_id = channel['contentDetails']['relatedPlaylists']['uploads']
 
-                # --- KENDİ ABONE TAKİP SİSTEMİMİZ (Düzeltildi: İlk kaydı baz alır) ---
+                # --- KENDİ ABONE TAKİP SİSTEMİMİZ (İlk Kaydı Baz Alır) ---
                 tracker_file = "subs_tracker.csv"
                 try:
                     if os.path.exists(tracker_file):
                         tracker_df = pd.read_csv(tracker_file)
                         if not tracker_df.empty:
-                            # Her zaman sistemi başlattığımız İLK günkü veriyi referans al (Gerçek artış/azalış)
                             first_recorded_subs = int(tracker_df.iloc[0]['Subscribers'])
                         else:
                             first_recorded_subs = subscribers
@@ -657,7 +679,6 @@ if "loaded" in st.session_state and st.session_state.loaded:
         subs_arrow = '➖'
         subs_diff_str = "Değişim Yok"
 
-    # Güvenlik Kontrolü
     if "Tür" not in df.columns:
         df["Tür"] = "Büyük Video"
     if "Periyot" not in df.columns:
@@ -831,7 +852,7 @@ if "loaded" in st.session_state and st.session_state.loaded:
 
         st.markdown("<br>", unsafe_allow_html=True)
         
-        # --- 3. SHORTS VE BÜYÜK VİDEO ANALİZİ ---
+        # --- 3. SHORTS VE BÜYÜK VİDEO ANALİZİ & DİNAMİK 3D GRAFİKLER ---
         st.markdown('''
         <div class="reveal-box section-title-box">
             <h3>⚡ Shorts ve Büyük Video Karşılaştırmalı Kümülatif Analiz</h3>
@@ -841,7 +862,7 @@ if "loaded" in st.session_state and st.session_state.loaded:
         shorts_df = df[df["Tür"] == "Shorts"]
         long_df = df[df["Tür"] == "Büyük Video"]
 
-        # Shorts Başlık Kutusu
+        # Shorts Başlık
         st.markdown('''
         <div class="reveal-box section-title-box" style="max-width: 800px; padding: 12px 20px; margin: 20px auto 15px auto;">
             <h3 style="font-size: 15px;">📱 Shorts (Dikey) İçerik Performansı</h3>
@@ -855,7 +876,6 @@ if "loaded" in st.session_state and st.session_state.loaded:
             p_views = p_data["İzlenme"].sum()
             p_likes = p_data["Beğeni"].sum()
             p_watch_time = p_data["İzlenme Süresi (Dk)"].sum()
-            
             shorts_chart_data.append({"Periyot": periyot_isim, "İzlenme": p_views, "Beğeni": p_likes})
             
             with col:
@@ -867,107 +887,16 @@ if "loaded" in st.session_state and st.session_state.loaded:
                 </div>
                 ''', unsafe_allow_html=True)
 
-        # Shorts Altına Scroll Tetiklemeli 3D Süzülen ve Uzayan Grafik (Güvenli CSS Intersection)
+        # Doğrudan Ana DOM'a Yüklenen Shorts 3D Grafiği
         max_s_val = max([max(d["İzlenme"], d["Beğeni"]) for d in shorts_chart_data] + [1])
-        
         s_bar_html = f'''
-        <!DOCTYPE html>
-        <html>
-        <head>
-        <style>
-            body {{ background: transparent; margin: 0; font-family: 'Plus Jakarta Sans', sans-serif; color: #f3f4f6; overflow: hidden; }}
-            .chart-3d-wrapper {{
-                background: rgba(17, 24, 39, 0.85);
-                backdrop-filter: blur(24px);
-                border: 1px solid rgba(255, 255, 255, 0.15);
-                border-radius: 24px;
-                padding: 25px;
-                margin: 10px 0;
-                box-shadow: 0 40px 80px -15px rgba(0, 0, 0, 0.9);
-            }}
-            .css-3d-chart-container {{
-                display: flex;
-                justify-content: space-around;
-                align-items: flex-end;
-                height: 220px;
-                padding-top: 35px;
-                border-bottom: 2px solid rgba(255, 255, 255, 0.15);
-            }}
-            .css-3d-group {{
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                width: 30%;
-                height: 100%;
-                justify-content: flex-end;
-            }}
-            .css-3d-bars-flex {{
-                display: flex;
-                gap: 14px;
-                align-items: flex-end;
-                height: 85%;
-                justify-content: center;
-                width: 100%;
-            }}
-            .css-3d-bar {{
-                width: 40px;
-                height: 0px;
-                border-radius: 6px 6px 0 0;
-                position: relative;
-                transform-style: preserve-3d;
-                transform: perspective(600px) rotateY(-15deg);
-                box-shadow: -12px 12px 25px rgba(0,0,0,0.7), inset 2px 2px 5px rgba(255,255,255,0.3);
-                transition: height 1.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.4s ease, filter 0.4s ease;
-            }}
-            .css-3d-bar:hover {{
-                transform: perspective(600px) rotateY(0deg) scaleY(1.05) translateY(-5px);
-                filter: brightness(1.25);
-            }}
-            .bar-yellow {{ background: linear-gradient(135deg, #f1c40f 0%, #b7950b 100%); }}
-            .bar-blue {{ background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); }}
-            .bar-green {{ background: linear-gradient(135deg, #10b981 0%, #047857 100%); }}
-            .bar-val-label {{
-                position: absolute;
-                top: -24px;
-                width: 100%;
-                text-align: center;
-                font-size: 11px;
-                font-weight: 800;
-                color: #ffffff;
-                text-shadow: 0 2px 4px rgba(0,0,0,0.8);
-                opacity: 0;
-                transition: opacity 0.5s ease;
-            }}
-            .animated .bar-val-label {{ opacity: 1; transition-delay: 1.2s; }}
-            .css-3d-label {{
-                margin-top: 12px;
-                font-size: 13px;
-                font-weight: 700;
-                color: #9ca3af;
-                text-transform: uppercase;
-                letter-spacing: 1px;
-            }}
-            .chart-legend {{
-                display: flex;
-                justify-content: center;
-                gap: 25px;
-                margin-top: 15px;
-                font-size: 12px;
-                font-weight: 700;
-            }}
-            .legend-item {{ display: flex; align-items: center; gap: 8px; }}
-            .legend-dot-y {{ width: 12px; height: 12px; background: #f1c40f; border-radius: 3px; box-shadow: 0 0 8px #f1c40f; }}
-            .legend-dot-b {{ width: 12px; height: 12px; background: #3b82f6; border-radius: 3px; box-shadow: 0 0 8px #3b82f6; }}
-        </style>
-        </head>
-        <body>
-        <div class="chart-3d-wrapper" id="chartCard1">
+        <div class="reveal-box chart-3d-wrapper">
             <h4 style="text-align: center; font-size: 15px; color: #f1c40f; margin-bottom: 10px;">🧊 SHORTS GERÇEK 3D HACİMSEL ETKİLEŞİM GRAFİĞİ</h4>
             <div class="css-3d-chart-container">
         '''
         for d in shorts_chart_data:
-            h_iz = int((d["İzlenme"] / max_s_val) * 160) + 15
-            h_bg = int((d["Beğeni"] / max_s_val) * 160) + 15
+            h_iz = int((d["İzlenme"] / max_s_val) * 160) + 20
+            h_bg = int((d["Beğeni"] / max_s_val) * 160) + 20
             s_bar_html += f'''
                 <div class="css-3d-group">
                     <div class="css-3d-bars-flex">
@@ -988,33 +917,12 @@ if "loaded" in st.session_state and st.session_state.loaded:
                 <div class="legend-item"><div class="legend-dot-b"></div><span>Beğeni</span></div>
             </div>
         </div>
-        <script>
-            const observer = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    const card = document.getElementById('chartCard1');
-                    if (entry.isIntersecting) {
-                        card.classList.add('animated');
-                        document.querySelectorAll('#chartCard1 .css-3d-bar').forEach(bar => {
-                            bar.style.height = bar.getAttribute('data-height') + 'px';
-                        });
-                    } else {
-                        card.classList.remove('animated');
-                        document.querySelectorAll('#chartCard1 .css-3d-bar').forEach(bar => {
-                            bar.style.height = '0px';
-                        });
-                    }
-                });
-            }, { threshold: 0.1 });
-            observer.observe(document.getElementById('chartCard1'));
-        </script>
-        </body>
-        </html>
         '''
-        components.html(s_bar_html, height=380)
+        st.markdown(s_bar_html, unsafe_allow_html=True)
 
         st.markdown("<br>", unsafe_allow_html=True)
 
-        # Büyük Video Başlık Kutusu
+        # Büyük Video Başlık
         st.markdown('''
         <div class="reveal-box section-title-box" style="max-width: 800px; padding: 12px 20px; margin: 20px auto 15px auto;">
             <h3 style="font-size: 15px;">🖥️ Büyük Video (Long-form) İçerik Performansı</h3>
@@ -1028,7 +936,6 @@ if "loaded" in st.session_state and st.session_state.loaded:
             p_views = p_data["İzlenme"].sum()
             p_likes = p_data["Beğeni"].sum()
             p_watch_time = p_data["İzlenme Süresi (Dk)"].sum()
-            
             long_chart_data.append({"Periyot": periyot_isim, "İzlenme": p_views, "Beğeni": p_likes})
             
             with col:
@@ -1040,106 +947,16 @@ if "loaded" in st.session_state and st.session_state.loaded:
                 </div>
                 ''', unsafe_allow_html=True)
 
-        # Büyük Video Altına Scroll Tetiklemeli 3D Süzülen ve Uzayan Grafik
+        # Doğrudan Ana DOM'a Yüklenen Büyük Video 3D Grafiği
         max_l_val = max([max(d["İzlenme"], d["Beğeni"]) for d in long_chart_data] + [1])
-        
         l_bar_html = f'''
-        <!DOCTYPE html>
-        <html>
-        <head>
-        <style>
-            body {{ background: transparent; margin: 0; font-family: 'Plus Jakarta Sans', sans-serif; color: #f3f4f6; overflow: hidden; }}
-            .chart-3d-wrapper {{
-                background: rgba(17, 24, 39, 0.85);
-                backdrop-filter: blur(24px);
-                border: 1px solid rgba(255, 255, 255, 0.15);
-                border-radius: 24px;
-                padding: 25px;
-                margin: 10px 0;
-                box-shadow: 0 40px 80px -15px rgba(0, 0, 0, 0.9);
-            }}
-            .css-3d-chart-container {{
-                display: flex;
-                justify-content: space-around;
-                align-items: flex-end;
-                height: 220px;
-                padding-top: 35px;
-                border-bottom: 2px solid rgba(255, 255, 255, 0.15);
-            }}
-            .css-3d-group {{
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                width: 30%;
-                height: 100%;
-                justify-content: flex-end;
-            }}
-            .css-3d-bars-flex {{
-                display: flex;
-                gap: 14px;
-                align-items: flex-end;
-                height: 85%;
-                justify-content: center;
-                width: 100%;
-            }}
-            .css-3d-bar {{
-                width: 40px;
-                height: 0px;
-                border-radius: 6px 6px 0 0;
-                position: relative;
-                transform-style: preserve-3d;
-                transform: perspective(600px) rotateY(-15deg);
-                box-shadow: -12px 12px 25px rgba(0,0,0,0.7), inset 2px 2px 5px rgba(255,255,255,0.3);
-                transition: height 1.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.4s ease, filter 0.4s ease;
-            }}
-            .css-3d-bar:hover {{
-                transform: perspective(600px) rotateY(0deg) scaleY(1.05) translateY(-5px);
-                filter: brightness(1.25);
-            }}
-            .bar-yellow {{ background: linear-gradient(135deg, #f1c40f 0%, #b7950b 100%); }}
-            .bar-green {{ background: linear-gradient(135deg, #10b981 0%, #047857 100%); }}
-            .bar-val-label {{
-                position: absolute;
-                top: -24px;
-                width: 100%;
-                text-align: center;
-                font-size: 11px;
-                font-weight: 800;
-                color: #ffffff;
-                text-shadow: 0 2px 4px rgba(0,0,0,0.8);
-                opacity: 0;
-                transition: opacity 0.5s ease;
-            }}
-            .animated .bar-val-label {{ opacity: 1; transition-delay: 1.2s; }}
-            .css-3d-label {{
-                margin-top: 12px;
-                font-size: 13px;
-                font-weight: 700;
-                color: #9ca3af;
-                text-transform: uppercase;
-                letter-spacing: 1px;
-            }}
-            .chart-legend {{
-                display: flex;
-                justify-content: center;
-                gap: 25px;
-                margin-top: 15px;
-                font-size: 12px;
-                font-weight: 700;
-            }}
-            .legend-item {{ display: flex; align-items: center; gap: 8px; }}
-            .legend-dot-y {{ width: 12px; height: 12px; background: #f1c40f; border-radius: 3px; box-shadow: 0 0 8px #f1c40f; }}
-            .legend-dot-g {{ width: 12px; height: 12px; background: #10b981; border-radius: 3px; box-shadow: 0 0 8px #10b981; }}
-        </style>
-        </head>
-        <body>
-        <div class="chart-3d-wrapper" id="chartCard2">
+        <div class="reveal-box chart-3d-wrapper">
             <h4 style="text-align: center; font-size: 15px; color: #10b981; margin-bottom: 10px;">🧊 BÜYÜK VİDEO GERÇEK 3D HACİMSEL ETKİLEŞİM GRAFİĞİ</h4>
             <div class="css-3d-chart-container">
         '''
         for d in long_chart_data:
-            h_iz = int((d["İzlenme"] / max_l_val) * 160) + 15
-            h_bg = int((d["Beğeni"] / max_l_val) * 160) + 15
+            h_iz = int((d["İzlenme"] / max_l_val) * 160) + 20
+            h_bg = int((d["Beğeni"] / max_l_val) * 160) + 20
             l_bar_html += f'''
                 <div class="css-3d-group">
                     <div class="css-3d-bars-flex">
@@ -1160,29 +977,8 @@ if "loaded" in st.session_state and st.session_state.loaded:
                 <div class="legend-item"><div class="legend-dot-g"></div><span>Beğeni</span></div>
             </div>
         </div>
-        <script>
-            const observer2 = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    const card = document.getElementById('chartCard2');
-                    if (entry.isIntersecting) {
-                        card.classList.add('animated');
-                        document.querySelectorAll('#chartCard2 .css-3d-bar').forEach(bar => {
-                            bar.style.height = bar.getAttribute('data-height') + 'px';
-                        });
-                    } else {
-                        card.classList.remove('animated');
-                        document.querySelectorAll('#chartCard2 .css-3d-bar').forEach(bar => {
-                            bar.style.height = '0px';
-                        });
-                    }
-                });
-            }, { threshold: 0.1 });
-            observer2.observe(document.getElementById('chartCard2'));
-        </script>
-        </body>
-        </html>
         '''
-        components.html(l_bar_html, height=380)
+        st.markdown(l_bar_html, unsafe_allow_html=True)
 
         # --- 4. KANAL DETAYLI PERFORMANS ÖZETİ ---
         st.markdown('''
