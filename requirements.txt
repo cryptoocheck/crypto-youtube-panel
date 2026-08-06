@@ -1,5 +1,7 @@
 streamlit
 google-api-python-client
+google-auth-oauthlib
+google-auth
 groq
-plotly
 pandas
+plotly
