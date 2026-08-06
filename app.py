@@ -17,7 +17,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# Oturum Durumu Sabitleme (Verilerin silinmesini önler)
+# Oturum Durumu Sabitleme
 if "youtube_key" not in st.session_state:
     st.session_state.youtube_key = ""
 if "groq_key" not in st.session_state:
@@ -49,7 +49,7 @@ def parse_iso8601_duration_seconds(duration_str):
     seconds = int(match.group(3)) if match.group(3) else 0
     return hours * 3600 + minutes * 60 + seconds
 
-# 2. Şeffaf Cam + Sarı Neon Hover + Kayarak Gelen Animasyon Mimarisi (CSS & JS)
+# 2. Özel Tasarım (Banner Şeffaf Cam + Sarı Neon Hover & Sayaç Efektleri)
 st.markdown(f"""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&display=swap');
@@ -77,7 +77,6 @@ st.markdown(f"""
         max-width: 100% !important;
     }}
 
-    /* Aşağı yukarı kaydırınca akarak/kayarak gelen animasyon kutusu */
     .reveal-box {{
         opacity: 0;
         transform: perspective(1200px) rotateX(15deg) translateY(60px) scale(0.95);
@@ -98,9 +97,11 @@ st.markdown(f"""
         margin-top: 120px;
         margin-bottom: 25px;
     }}
+    
+    /* Kırmızı ile gösterdiğin Banner: Şeffaf Cam + Sarı Neon Hover + Büyüme Efekti */
     .banner-ondo-box {{
-        background: rgba(17, 24, 39, 0.75);
-        backdrop-filter: blur(16px);
+        background: rgba(17, 24, 39, 0.45);
+        backdrop-filter: blur(18px);
         border: 1px solid rgba(255, 255, 255, 0.12);
         border-radius: 24px;
         padding: 24px;
@@ -109,6 +110,13 @@ st.markdown(f"""
         max-width: 1200px;
         position: relative;
         box-sizing: border-box;
+        transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    }}
+    .banner-ondo-box:hover {{
+        transform: translateY(-6px) scale(1.02);
+        background: rgba(241, 196, 15, 0.08);
+        border-color: rgba(241, 196, 15, 0.9);
+        box-shadow: 0 30px 70px -15px rgba(241, 196, 15, 0.4), 0 0 40px rgba(241, 196, 15, 0.3);
     }}
     .banner-ondo-box img {{
         width: 100% !important;
@@ -140,7 +148,6 @@ st.markdown(f"""
         text-transform: uppercase;
     }}
 
-    /* Şeffaf Cam + Sarı Neon Hover Efekti */
     .metric-card-ondo, .ondo-glass-card {{
         background: rgba(17, 24, 39, 0.65);
         backdrop-filter: blur(16px);
@@ -225,10 +232,11 @@ st.markdown(f"""
 </style>
 """, unsafe_allow_html=True)
 
-# Kayarak Gelen Kutu Tetikleyici (JavaScript)
+# Kayarak Gelen Kutu ve Sayaç (Counter) Animasyon Motoru (JS)
 components.html("""
 <script>
-function initDualWayReveal() {
+function initAnimations() {
+    // Kayarak gelen kutular
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
@@ -241,9 +249,41 @@ function initDualWayReveal() {
 
     const boxes = window.parent.document.querySelectorAll('.reveal-box');
     boxes.forEach(box => observer.observe(box));
+
+    // Sarı kutucuklardaki sayaç animasyonu
+    const counters = window.parent.document.querySelectorAll('.metric-value-counter');
+    counters.forEach(counter => {
+        if(counter.getAttribute('data-animated') === 'true') return;
+        counter.setAttribute('data-animated', 'true');
+        
+        const target = parseFloat(counter.getAttribute('data-target'));
+        const isFloat = counter.getAttribute('data-float') === 'true';
+        const isPercent = counter.getAttribute('data-percent') === 'true';
+        
+        let count = 0;
+        const duration = 1800; // 1.8 saniyede akıcı tamamlansın
+        const steps = 60;
+        const increment = target / steps;
+        const stepTime = duration / steps;
+        
+        const timer = setInterval(() => {
+            count += increment;
+            if (count >= target) {
+                count = target;
+                clearInterval(timer);
+            }
+            if (isPercent) {
+                counter.innerText = '%' + count.toFixed(2);
+            } else if (isFloat) {
+                counter.innerText = count.toFixed(2);
+            } else {
+                counter.innerText = Math.floor(count).toLocaleString('en-US');
+            }
+        }, stepTime);
+    });
 }
-setTimeout(initDualWayReveal, 500);
-setInterval(initDualWayReveal, 1500);
+setTimeout(initAnimations, 400);
+setInterval(initAnimations, 1200);
 </script>
 """, height=0)
 
@@ -331,7 +371,6 @@ if analyze_btn:
                             "İzlenme Süresi (Dk)": round((views * (duration_sec / 60)) * 0.43, 1)
                         })
 
-                        # Yorum Durum Analizi Matrisi
                         if comments_count > 0 and len(comment_list) < 25:
                             try:
                                 com_req = youtube.commentThreads().list(part='snippet', videoId=v_id, maxResults=3).execute()
@@ -360,7 +399,7 @@ if analyze_btn:
         except Exception as e:
             st.error(f"Sistem Çalışma Hatası: {e}")
 
-# ANA EKRAN GÖSTERİMİ (Kalıcı ve Animasyonlu)
+# ANA EKRAN GÖSTERİMİ (Sayaç Animasyonlu Kutucuklar)
 if st.session_state.loaded:
     total_views = st.session_state.total_views
     subscribers = st.session_state.subscribers
@@ -379,12 +418,36 @@ if st.session_state.loaded:
     subs_arrow = '<span style="color:#10b981;">🟢 ↗</span>'
     subs_diff_str = f'<span style="color:#10b981; font-weight:bold;">+{subs_diff}</span>'
 
-    # Üst 4 Ana Metrik Kutucuğu (Kayarak Gelen Animasyonlu)
+    # Sarı Çizimle Gösterdiğin Üst 4 Metrik Kutucuğu (Sayaç Animasyonlu)
     c1, c2, c3, c4 = st.columns(4)
-    with c1: st.markdown(f'<div class="metric-card-ondo reveal-box"><div class="metric-title">TOPLAM İZLENME</div><div class="metric-value">{total_views:,}</div></div>', unsafe_allow_html=True)
-    with c2: st.markdown(f'<div class="metric-card-ondo reveal-box"><div class="metric-title">TOPLAM ABONE</div><div class="metric-value">{subscribers:,}</div></div>', unsafe_allow_html=True)
-    with c3: st.markdown(f'<div class="metric-card-ondo reveal-box"><div class="metric-title">ORTALAMA ETKİLEŞİM</div><div class="metric-value">%{avg_eng:.2f}</div></div>', unsafe_allow_html=True)
-    with c4: st.markdown(f'<div class="metric-card-ondo reveal-box"><div class="metric-title">İÇERİK SAYISI</div><div class="metric-value">{total_videos:,}</div></div>', unsafe_allow_html=True)
+    with c1: 
+        st.markdown(f'''
+        <div class="metric-card-ondo reveal-box">
+            <div class="metric-title">TOPLAM İZLENME</div>
+            <div class="metric-value metric-value-counter" data-target="{total_views}">0</div>
+        </div>
+        ''', unsafe_allow_html=True)
+    with c2: 
+        st.markdown(f'''
+        <div class="metric-card-ondo reveal-box">
+            <div class="metric-title">TOPLAM ABONE</div>
+            <div class="metric-value metric-value-counter" data-target="{subscribers}">0</div>
+        </div>
+        ''', unsafe_allow_html=True)
+    with c3: 
+        st.markdown(f'''
+        <div class="metric-card-ondo reveal-box">
+            <div class="metric-title">ORTALAMA ETKİLEŞİM</div>
+            <div class="metric-value metric-value-counter" data-target="{avg_eng:.2f}" data-percent="true">%0.00</div>
+        </div>
+        ''', unsafe_allow_html=True)
+    with c4: 
+        st.markdown(f'''
+        <div class="metric-card-ondo reveal-box">
+            <div class="metric-title">İÇERİK SAYISI</div>
+            <div class="metric-value metric-value-counter" data-target="{total_videos}">0</div>
+        </div>
+        ''', unsafe_allow_html=True)
 
     st.markdown("<br>", unsafe_allow_html=True)
     
@@ -433,7 +496,6 @@ if st.session_state.loaded:
         with inc3: st.markdown(f'<div class="metric-card-ondo reveal-box"><div class="metric-title">SHORTS İZLENMELERİ</div><div class="metric-value" style="font-size: 20px;">{total_shorts_views:,}</div></div>', unsafe_allow_html=True)
         with inc4: st.markdown(f'<div class="metric-card-ondo reveal-box"><div class="metric-title">ABONE DEĞİŞİMİ</div><div class="metric-value" style="font-size: 20px;">{subscribers:,}</div><div class="metric-sub">Trend: {subs_arrow} {subs_diff_str}</div></div>', unsafe_allow_html=True)
 
-        # Kayan / İnteraktif Grafik Bölümü (Plotly)
         st.markdown('<div class="reveal-box section-title-box"><h3>📈 KANAL İZLENME VE ETKİLEŞİM GRAFİKLERİ</h3></div>', unsafe_allow_html=True)
         if not df.empty:
             st.markdown('<div class="ondo-glass-card reveal-box">', unsafe_allow_html=True)
