@@ -16,6 +16,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
+# Session State Değişkenleri
 if "youtube_key" not in st.session_state:
     st.session_state.youtube_key = ""
 if "groq_key" not in st.session_state:
@@ -45,7 +46,7 @@ def parse_iso8601_duration_seconds(duration_str):
     seconds = int(match.group(3)) if match.group(3) else 0
     return hours * 3600 + minutes * 60 + seconds
 
-# 2. Tasarım Mimarisi (CSS)
+# 2. Tasarım Mimarisi (CSS - Optimize Edilmiş)
 st.markdown(f"""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&display=swap');
@@ -76,8 +77,8 @@ st.markdown(f"""
     /* --- İPEKSİ SÜZÜLME VE 3D GEÇİŞ --- */
     .reveal-box {{
         opacity: 0;
-        transform: perspective(1200px) rotateX(20deg) translateY(90px) scale(0.9);
-        transition: opacity 1.6s cubic-bezier(0.16, 1, 0.3, 1), transform 1.6s cubic-bezier(0.16, 1, 0.3, 1);
+        transform: perspective(1200px) rotateX(15deg) translateY(60px) scale(0.95);
+        transition: opacity 1.4s cubic-bezier(0.16, 1, 0.3, 1), transform 1.4s cubic-bezier(0.16, 1, 0.3, 1);
         will-change: opacity, transform;
     }}
 
@@ -159,7 +160,7 @@ st.markdown(f"""
         text-shadow: 0 0 10px rgba(241, 196, 15, 0.6);
     }}
 
-    /* --- 3D KUTULAR --- */
+    /* --- 3D METRİK KUTULARI --- */
     .metric-card-ondo, .ondo-glass-card {{
         background: rgba(17, 24, 39, 0.75);
         backdrop-filter: blur(16px);
@@ -228,6 +229,7 @@ st.markdown(f"""
         border-right: 1px solid rgba(255, 255, 255, 0.05);
     }}
     
+    /* Sekme Butonları */
     .stButton>button {{
         background: linear-gradient(135deg, rgba(212, 175, 55, 0.85) 0%, rgba(170, 140, 44, 0.85) 100%); 
         color: #030712;
@@ -269,14 +271,14 @@ st.markdown(f"""
 </style>
 """, unsafe_allow_html=True)
 
-# --- ÇİFT YÖNLÜ İPEKSİ SÜZÜLME JS ---
+# --- ÇİFT YÖNLÜ İPEKSİ SÜZÜLME JS (Intersection Observer) ---
 components.html("""
 <script>
 function initDualWayReveal() {
     const observerOptions = {
         root: null,
-        rootMargin: '0px 0px -50px 0px',
-        threshold: 0.1
+        rootMargin: '0px 0px -30px 0px',
+        threshold: 0.05
     };
 
     const observer = new IntersectionObserver((entries) => {
@@ -294,7 +296,7 @@ function initDualWayReveal() {
 }
 
 setTimeout(initDualWayReveal, 500);
-setInterval(initDualWayReveal, 1000);
+setInterval(initDualWayReveal, 1500);
 </script>
 """, height=0)
 
@@ -514,7 +516,7 @@ if analyze_btn:
                 st.session_state.loaded = True
 
         except Exception as e:
-            st.error(f"Sistem Çalışma Hatası: {e}")
+            st.error(f"Sistem Çalışma Hatası: Lütfen API anahtarlarınızı kontrol edin. Detay: {e}")
 
 # Veriler yüklendiyse paneli çiz
 if "loaded" in st.session_state and st.session_state.loaded:
@@ -756,7 +758,7 @@ if "loaded" in st.session_state and st.session_state.loaded:
                 </div>
                 ''', unsafe_allow_html=True)
 
-        # Shorts Altına Scroll Tetiklemeli 3D Süzülen ve Uzayan Grafik (Intersection Observer)
+        # Shorts Altına Scroll Tetiklemeli 3D Süzülen ve Uzayan Grafik (Güvenli CSS Intersection)
         max_s_val = max([max(d["İzlenme"], d["Beğeni"]) for d in shorts_chart_data] + [1])
         
         s_bar_html = f'''
@@ -825,9 +827,9 @@ if "loaded" in st.session_state and st.session_state.loaded:
                 color: #ffffff;
                 text-shadow: 0 2px 4px rgba(0,0,0,0.8);
                 opacity: 0;
-                transition: opacity 1s ease 1s;
+                transition: opacity 0.5s ease;
             }}
-            .animated .bar-val-label {{ opacity: 1; }}
+            .animated .bar-val-label {{ opacity: 1; transition-delay: 1.2s; }}
             .css-3d-label {{
                 margin-top: 12px;
                 font-size: 13px;
@@ -855,8 +857,8 @@ if "loaded" in st.session_state and st.session_state.loaded:
             <div class="css-3d-chart-container">
         '''
         for d in shorts_chart_data:
-            h_iz = int((d["İzlenme"] / max_s_val) * 150) + 15
-            h_bg = int((d["Beğeni"] / max_s_val) * 150) + 15
+            h_iz = int((d["İzlenme"] / max_s_val) * 160) + 15
+            h_bg = int((d["Beğeni"] / max_s_val) * 160) + 15
             s_bar_html += f'''
                 <div class="css-3d-group">
                     <div class="css-3d-bars-flex">
@@ -893,13 +895,13 @@ if "loaded" in st.session_state and st.session_state.loaded:
                         });
                     }
                 });
-            }, { threshold: 0.2 });
+            }, { threshold: 0.1 });
             observer.observe(document.getElementById('chartCard1'));
         </script>
         </body>
         </html>
         '''
-        components.html(s_bar_html, height=340)
+        components.html(s_bar_html, height=380)
 
         st.markdown("<br>", unsafe_allow_html=True)
 
@@ -929,7 +931,7 @@ if "loaded" in st.session_state and st.session_state.loaded:
                 </div>
                 ''', unsafe_allow_html=True)
 
-        # Büyük Video Altına Scroll Tetiklemeli 3D Süzülen ve Uzayan Grafik
+        # Büyük Video Altına Scroll Tetiklemeli 3D Süzülen ve Uzayan Grafik (Güvenli CSS Intersection)
         max_l_val = max([max(d["İzlenme"], d["Beğeni"]) for d in long_chart_data] + [1])
         
         l_bar_html = f'''
@@ -997,9 +999,9 @@ if "loaded" in st.session_state and st.session_state.loaded:
                 color: #ffffff;
                 text-shadow: 0 2px 4px rgba(0,0,0,0.8);
                 opacity: 0;
-                transition: opacity 1s ease 1s;
+                transition: opacity 0.5s ease;
             }}
-            .animated .bar-val-label {{ opacity: 1; }}
+            .animated .bar-val-label {{ opacity: 1; transition-delay: 1.2s; }}
             .css-3d-label {{
                 margin-top: 12px;
                 font-size: 13px;
@@ -1027,8 +1029,8 @@ if "loaded" in st.session_state and st.session_state.loaded:
             <div class="css-3d-chart-container">
         '''
         for d in long_chart_data:
-            h_iz = int((d["İzlenme"] / max_l_val) * 150) + 15
-            h_bg = int((d["Beğeni"] / max_l_val) * 150) + 15
+            h_iz = int((d["İzlenme"] / max_l_val) * 160) + 15
+            h_bg = int((d["Beğeni"] / max_l_val) * 160) + 15
             l_bar_html += f'''
                 <div class="css-3d-group">
                     <div class="css-3d-bars-flex">
@@ -1065,13 +1067,13 @@ if "loaded" in st.session_state and st.session_state.loaded:
                         });
                     }
                 });
-            }, { threshold: 0.2 });
+            }, { threshold: 0.1 });
             observer2.observe(document.getElementById('chartCard2'));
         </script>
         </body>
         </html>
         '''
-        components.html(l_bar_html, height=340)
+        components.html(l_bar_html, height=380)
 
         # --- 4. KANAL DETAYLI PERFORMANS ÖZETİ ---
         st.markdown('''
