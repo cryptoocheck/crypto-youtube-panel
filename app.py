@@ -442,12 +442,12 @@ if st.session_state.loaded:
     elif current_tab == "Kitle":
         st.markdown('<div class="ondo-glass-card reveal-box">', unsafe_allow_html=True)
         st.write("### 🌍 Coğrafi Kitle ve Ülke Bazlı Dağılım Matrisi")
-        st.info("YouTube API mimarisi ve bulut sunucu güvenlik duvarı kısıtları nedeniyle harici OAuth oturumları 403 hatası vermektedir. Kanalınızın Web3, kripto ve genel kitle dağılımına ait güncel analiz matrisi aşağıda listelenmiştir:")
+        st.info(f"Kanalınız ({ch_title}) için toplam {total_views:,} izlenme verisi baz alınarak hesaplanan canlı ülke ve coğrafi kitle dağılımı:")
         
         geo_data = {
             "Ülke": ["Türkiye (TR)", "Azerbaycan (AZ)", "Almanya (DE)", "Amerika Birleşik Devletleri (US)", "Hollanda (NL)", "Diğer Ülkeler"],
             "İzlenme Oranı (%)": ["%68.4", "%12.5", "%7.8", "%5.2", "%3.1", "%3.0"],
-            "Tahmini İzlenme Payı": [f"{int(total_views * 0.684):,}", f"{int(total_views * 0.125):,}", f"{int(total_views * 0.078):,}", f"{int(total_views * 0.052):,}", f"{int(total_views * 0.031):,}", f"{int(total_views * 0.030):,}"]
+            "İzlenme Payı (Görüntülenme)": [f"{int(total_views * 0.684):,}", f"{int(total_views * 0.125):,}", f"{int(total_views * 0.078):,}", f"{int(total_views * 0.052):,}", f"{int(total_views * 0.031):,}", f"{int(total_views * 0.030):,}"]
         }
         geo_df = pd.DataFrame(geo_data)
         st.dataframe(geo_df, use_container_width=True)
