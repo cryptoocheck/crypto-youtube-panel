@@ -16,6 +16,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
+# Oturum Durumu Sabitleme (Verilerin silinmesini önler)
 if "youtube_key" not in st.session_state:
     st.session_state.youtube_key = ""
 if "groq_key" not in st.session_state:
@@ -75,18 +76,6 @@ st.markdown(f"""
         max-width: 100% !important;
     }}
 
-    .reveal-box {{
-        opacity: 0;
-        transform: perspective(1200px) rotateX(15deg) translateY(60px) scale(0.95);
-        transition: opacity 1.4s cubic-bezier(0.16, 1, 0.3, 1), transform 1.4s cubic-bezier(0.16, 1, 0.3, 1);
-        will-change: opacity, transform;
-    }}
-
-    .reveal-box.active {{
-        opacity: 1;
-        transform: perspective(1200px) rotateX(0deg) translateY(0) scale(1);
-    }}
-
     .absolute-center-banner {{
         display: flex;
         justify-content: center;
@@ -102,17 +91,10 @@ st.markdown(f"""
         border-radius: 24px;
         padding: 24px;
         box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.7);
-        transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
         width: 75%;
         max-width: 1200px;
         position: relative;
-        overflow: hidden;
         box-sizing: border-box;
-    }}
-    .banner-ondo-box:hover {{
-        transform: translateY(-6px) scale(1.01);
-        border-color: rgba(212, 175, 55, 0.7);
-        box-shadow: 0 30px 70px -15px rgba(212, 175, 55, 0.35), 0 0 35px rgba(212, 175, 55, 0.25);
     }}
     .banner-ondo-box img {{
         width: 100% !important;
@@ -135,12 +117,6 @@ st.markdown(f"""
         width: 100%;
         max-width: 1000px;
         box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
-        transition: transform 0.3s ease, border-color 0.3s ease, background 0.3s ease;
-    }}
-    .section-title-box:hover {{
-        transform: translateY(-4px) scale(1.01);
-        background: rgba(17, 24, 39, 0.85);
-        border-color: #f1c40f;
     }}
     .section-title-box h3 {{
         margin: 0;
@@ -164,11 +140,6 @@ st.markdown(f"""
         justify-content: center;
         text-align: center;
         min-height: 140px;
-        transition: transform 0.4s ease, border-color 0.4s ease;
-    }}
-    .metric-card-ondo:hover, .ondo-glass-card:hover {{
-        transform: translateY(-8px) scale(1.01);
-        border-color: rgba(241, 196, 15, 0.8);
     }}
 
     .metric-title {{
@@ -192,14 +163,6 @@ st.markdown(f"""
         font-weight: 600;
     }}
 
-    .stDataFrame {{
-        background: rgba(17, 24, 39, 0.75) !important;
-        backdrop-filter: blur(16px) !important;
-        border: 1px solid rgba(255, 255, 255, 0.08) !important;
-        border-radius: 20px !important;
-        padding: 15px !important;
-    }}
-
     section[data-testid="stSidebar"] {{
         background-color: #0b0f19 !important;
         border-right: 1px solid rgba(255, 255, 255, 0.05);
@@ -212,14 +175,9 @@ st.markdown(f"""
         border-radius: 9999px;
         font-weight: 700;
         padding: 12px 18px;
-        transition: all 0.3s ease;
         width: 100%;
         box-shadow: 0 4px 20px rgba(212, 175, 55, 0.3);
         font-size: 13px;
-    }}
-    .stButton>button:hover {{
-        background: linear-gradient(135deg, #f1c40f 0%, #d4af37 100%);
-        transform: translateY(-3px) scale(1.02);
     }}
 
     .tab-active button {{
@@ -241,27 +199,6 @@ st.markdown(f"""
 </style>
 """, unsafe_allow_html=True)
 
-components.html("""
-<script>
-function initDualWayReveal() {
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.classList.add('active');
-            } else {
-                entry.target.classList.remove('active');
-            }
-        });
-    }, { threshold: 0.05 });
-
-    const boxes = window.parent.document.querySelectorAll('.reveal-box');
-    boxes.forEach(box => observer.observe(box));
-}
-setTimeout(initDualWayReveal, 500);
-setInterval(initDualWayReveal, 1500);
-</script>
-""", height=0)
-
 if img_b64:
     st.markdown(f'''
     <div class="absolute-center-banner">
@@ -273,6 +210,7 @@ if img_b64:
 else:
     st.markdown("<h1 style='text-align: center; font-weight: 800; font-size: 48px;'>Crypto Check</h1>", unsafe_allow_html=True)
 
+# Kenar Çubuğu
 st.sidebar.markdown("### 🌐 Web3 Kontrol Paneli")
 st.session_state.youtube_key = st.sidebar.text_input("YouTube Data API Anahtarı", value=st.session_state.youtube_key, type="password")
 st.session_state.groq_key = st.sidebar.text_input("Groq AI Anahtarı", value=st.session_state.groq_key, type="password")
@@ -315,7 +253,7 @@ if analyze_btn:
                 v_list, comment_list = [], []
                 now = datetime.utcnow()
                 cutoff_28d, cutoff_56d = now - timedelta(days=28), now - timedelta(days=56)
-                views_last_28d, views_prev_28d, likes_last_28d, likes_prev_28d, total_shorts_views = 0, 0, 0, 0, 0
+                views_last_28d, likes_last_28d = 0, 0
 
                 for i in range(0, len(v_ids), 50):
                     videos_req = youtube.videos().list(part='statistics,snippet,contentDetails,status', id=','.join(v_ids[i:i+50])).execute()
@@ -331,14 +269,8 @@ if analyze_btn:
                         if published_dt >= cutoff_28d:
                             views_last_28d += views
                             likes_last_28d += likes
-                        elif cutoff_56d <= published_dt < cutoff_28d:
-                            views_prev_28d += views
-                            likes_prev_28d += likes
 
                         content_type = "Shorts" if duration_sec <= 61 else "Büyük Video"
-                        if content_type == "Shorts":
-                            total_shorts_views += views
-
                         delta_days = (now - published_dt).total_seconds() / 86400
                         time_frame = "Son 24 Saat" if delta_days <= 1 else ("Son 7 Gün" if delta_days <= 7 else ("Son 30 Gün" if delta_days <= 30 else "Arşiv"))
 
@@ -348,7 +280,6 @@ if analyze_btn:
                             "İzlenme Süresi (Dk)": round((views * (duration_sec / 60)) * 0.43, 1)
                         })
 
-                        # Yorumları da çekelim
                         if comments_count > 0 and len(comment_list) < 20:
                             try:
                                 com_req = youtube.commentThreads().list(part='snippet', videoId=v_id, maxResults=2).execute()
@@ -368,14 +299,12 @@ if analyze_btn:
                 st.session_state.df_comments = pd.DataFrame(comment_list) if comment_list else pd.DataFrame(columns=["Video", "Yazar", "Yorum", "Tarih", "Durum"])
                 st.session_state.avg_eng = float(((st.session_state.df['Beğeni'] + st.session_state.df['Yorum']).sum() / max(st.session_state.df['İzlenme'].sum(), 1)) * 100) if not st.session_state.df.empty else 0.0
                 st.session_state.views_last_28d = views_last_28d
-                st.session_state.views_prev_28d = views_prev_28d
                 st.session_state.likes_last_28d = likes_last_28d
-                st.session_state.likes_prev_28d = likes_prev_28d
-                st.session_state.total_shorts_views = total_shorts_views
                 st.session_state.loaded = True
         except Exception as e:
             st.error(f"Sistem Çalışma Hatası: {e}")
 
+# ANA EKRAN GÖSTERİMİ (Veriler yüklendiyse kalıcı kalır)
 if st.session_state.loaded:
     total_views = st.session_state.total_views
     subscribers = st.session_state.subscribers
@@ -393,71 +322,72 @@ if st.session_state.loaded:
     subs_arrow = '<span style="color:#10b981;">🟢 ↗</span>'
     subs_diff_str = f'<span style="color:#10b981; font-weight:bold;">+{subs_diff}</span>'
 
-    # Üst Metrik Kutucukları
+    # 4 Temel Metrik Kutucuğu
     c1, c2, c3, c4 = st.columns(4)
-    with c1: st.markdown(f'<div class="metric-card-ondo reveal-box"><div class="metric-title">TOPLAM İZLENME</div><div class="metric-value">{total_views:,}</div></div>', unsafe_allow_html=True)
-    with c2: st.markdown(f'<div class="metric-card-ondo reveal-box"><div class="metric-title">TOPLAM ABONE</div><div class="metric-value">{subscribers:,}</div></div>', unsafe_allow_html=True)
-    with c3: st.markdown(f'<div class="metric-card-ondo reveal-box"><div class="metric-title">ORTALAMA ETKİLEŞİM</div><div class="metric-value">%{avg_eng:.2f}</div></div>', unsafe_allow_html=True)
-    with c4: st.markdown(f'<div class="metric-card-ondo reveal-box"><div class="metric-title">İÇERİK SAYISI</div><div class="metric-value">{total_videos:,}</div></div>', unsafe_allow_html=True)
+    with c1: st.markdown(f'<div class="metric-card-ondo"><div class="metric-title">TOPLAM İZLENME</div><div class="metric-value">{total_views:,}</div></div>', unsafe_allow_html=True)
+    with c2: st.markdown(f'<div class="metric-card-ondo"><div class="metric-title">TOPLAM ABONE</div><div class="metric-value">{subscribers:,}</div></div>', unsafe_allow_html=True)
+    with c3: st.markdown(f'<div class="metric-card-ondo"><div class="metric-title">ORTALAMA ETKİLEŞİM</div><div class="metric-value">%{avg_eng:.2f}</div></div>', unsafe_allow_html=True)
+    with c4: st.markdown(f'<div class="metric-card-ondo"><div class="metric-title">İÇERİK SAYISI</div><div class="metric-value">{total_videos:,}</div></div>', unsafe_allow_html=True)
 
     st.markdown("<br>", unsafe_allow_html=True)
-    tab_col1, tab_col2, tab_col3, tab_col4, tab_col5 = st.columns(5)
-
-    with tab_col1:
-        css_class = "tab-active" if st.session_state.active_tab == "Performans Matrisi" else "tab-inactive"
-        st.markdown(f'<div class="{css_class}">', unsafe_allow_html=True)
-        if st.button("📊 PERFORMANS", use_container_width=True): st.session_state.active_tab = "Performans Matrisi"; st.rerun()
+    
+    # Sekme Butonları (State korumalı)
+    t1, t2, t3, t4, t5 = st.columns(5)
+    with t1:
+        cls = "tab-active" if st.session_state.active_tab == "Performans" else "tab-inactive"
+        st.markdown(f'<div class="{cls}">', unsafe_allow_html=True)
+        if st.button("📊 PERFORMANS", use_container_width=True): st.session_state.active_tab = "Performans"
         st.markdown('</div>', unsafe_allow_html=True)
-    with tab_col2:
-        css_class = "tab-active" if st.session_state.active_tab == "Gelen Yorumlar" else "tab-inactive"
-        st.markdown(f'<div class="{css_class}">', unsafe_allow_html=True)
-        if st.button("💬 YORUMLAR", use_container_width=True): st.session_state.active_tab = "Gelen Yorumlar"; st.rerun()
+    with t2:
+        cls = "tab-active" if st.session_state.active_tab == "Yorumlar" else "tab-inactive"
+        st.markdown(f'<div class="{cls}">', unsafe_allow_html=True)
+        if st.button("💬 YORUMLAR", use_container_width=True): st.session_state.active_tab = "Yorumlar"
         st.markdown('</div>', unsafe_allow_html=True)
-    with tab_col3:
-        css_class = "tab-active" if st.session_state.active_tab == "Detaylı Analiz" else "tab-inactive"
-        st.markdown(f'<div class="{css_class}">', unsafe_allow_html=True)
-        if st.button("🔍 ARŞİV", use_container_width=True): st.session_state.active_tab = "Detaylı Analiz"; st.rerun()
+    with t3:
+        cls = "tab-active" if st.session_state.active_tab == "Arşiv" else "tab-inactive"
+        st.markdown(f'<div class="{cls}">', unsafe_allow_html=True)
+        if st.button("🔍 ARŞİV", use_container_width=True): st.session_state.active_tab = "Arşiv"
         st.markdown('</div>', unsafe_allow_html=True)
-    with tab_col4:
-        css_class = "tab-active" if st.session_state.active_tab == "Kitle" else "tab-inactive"
-        st.markdown(f'<div class="{css_class}">', unsafe_allow_html=True)
-        if st.button("🌍 KİTLE", use_container_width=True): st.session_state.active_tab = "Kitle"; st.rerun()
+    with t4:
+        cls = "tab-active" if st.session_state.active_tab == "Kitle" else "tab-inactive"
+        st.markdown(f'<div class="{cls}">', unsafe_allow_html=True)
+        if st.button("🌍 KİTLE", use_container_width=True): st.session_state.active_tab = "Kitle"
         st.markdown('</div>', unsafe_allow_html=True)
-    with tab_col5:
-        css_class = "tab-active" if st.session_state.active_tab == "AI Strateji Raporu" else "tab-inactive"
-        st.markdown(f'<div class="{css_class}">', unsafe_allow_html=True)
-        if st.button("🤖 AI RAPOR", use_container_width=True): st.session_state.active_tab = "AI Strateji Raporu"; st.rerun()
+    with t5:
+        cls = "tab-active" if st.session_state.active_tab == "AI Rapor" else "tab-inactive"
+        st.markdown(f'<div class="{cls}">', unsafe_allow_html=True)
+        if st.button("🤖 AI RAPOR", use_container_width=True): st.session_state.active_tab = "AI Rapor"
         st.markdown('</div>', unsafe_allow_html=True)
 
     st.markdown("<br>", unsafe_allow_html=True)
-    current_tab = st.session_state.active_tab
+    curr = st.session_state.active_tab
 
-    if current_tab == "Performans Matrisi":
-        st.markdown('<div class="reveal-box section-title-box"><h3>🌐 GENEL BAKIŞ</h3></div>', unsafe_allow_html=True)
+    if curr == "Performans":
+        st.markdown('<div class="section-title-box"><h3>🌐 GENEL BAKIŞ & BÜYÜME</h3></div>', unsafe_allow_html=True)
         gb1, gb2, gb3 = st.columns(3)
-        with gb1: st.markdown(f'<div class="metric-card-ondo reveal-box"><div class="metric-title">GÖRÜNTÜLEME</div><div class="metric-value" style="font-size: 26px;">{total_views:,}</div></div>', unsafe_allow_html=True)
-        with gb2: st.markdown(f'<div class="metric-card-ondo reveal-box"><div class="metric-title">İZLENME SÜRESİ (SAAT)</div><div class="metric-value" style="font-size: 26px;">{total_watch_hours:,}</div></div>', unsafe_allow_html=True)
-        with gb3: st.markdown(f'<div class="metric-card-ondo reveal-box"><div class="metric-title">GÜNCEL ABONE</div><div class="metric-value" style="font-size: 26px;">{subscribers:,}</div></div>', unsafe_allow_html=True)
+        with gb1: st.markdown(f'<div class="metric-card-ondo"><div class="metric-title">GÖRÜNTÜLEME</div><div class="metric-value" style="font-size: 26px;">{total_views:,}</div></div>', unsafe_allow_html=True)
+        with gb2: st.markdown(f'<div class="metric-card-ondo"><div class="metric-title">İZLENME SÜRESİ (SAAT)</div><div class="metric-value" style="font-size: 26px;">{total_watch_hours:,}</div></div>', unsafe_allow_html=True)
+        with gb3: st.markdown(f'<div class="metric-card-ondo"><div class="metric-title">GÜNCEL ABONE</div><div class="metric-value" style="font-size: 26px;">{subscribers:,}</div></div>', unsafe_allow_html=True)
 
-        st.markdown('<div class="reveal-box section-title-box"><h3>⚡ İçerik ve Abone Takip Analizi</h3></div>', unsafe_allow_html=True)
+        st.markdown('<div class="section-title-box"><h3>⚡ İçerik ve Abone Takip Analizi</h3></div>', unsafe_allow_html=True)
         inc1, inc2, inc3 = st.columns(3)
-        with inc1: st.markdown(f'<div class="metric-card-ondo reveal-box"><div class="metric-title">SON 28 GÜN İZLENME</div><div class="metric-value" style="font-size: 26px;">{views_last_28d:,}</div></div>', unsafe_allow_html=True)
-        with inc2: st.markdown(f'<div class="metric-card-ondo reveal-box"><div class="metric-title">SON 28 GÜN BEĞENİ</div><div class="metric-value" style="font-size: 26px;">{likes_last_28d:,}</div></div>', unsafe_allow_html=True)
-        with inc3: st.markdown(f'<div class="metric-card-ondo reveal-box"><div class="metric-title">ABONE DEĞİŞİMİ</div><div class="metric-value" style="font-size: 26px;">{subscribers:,}</div><div class="metric-sub">İlk Kayda Göre: {subs_arrow} {subs_diff_str}</div></div>', unsafe_allow_html=True)
+        with inc1: st.markdown(f'<div class="metric-card-ondo"><div class="metric-title">SON 28 GÜN İZLENME</div><div class="metric-value" style="font-size: 26px;">{views_last_28d:,}</div></div>', unsafe_allow_html=True)
+        with inc2: st.markdown(f'<div class="metric-card-ondo"><div class="metric-title">SON 28 GÜN BEĞENİ</div><div class="metric-value" style="font-size: 26px;">{likes_last_28d:,}</div></div>', unsafe_allow_html=True)
+        with inc3: st.markdown(f'<div class="metric-card-ondo"><div class="metric-title">ABONE DEĞİŞİMİ</div><div class="metric-value" style="font-size: 26px;">{subscribers:,}</div><div class="metric-sub">İlk Kayda Göre: {subs_arrow} {subs_diff_str}</div></div>', unsafe_allow_html=True)
 
-    elif current_tab == "Gelen Yorumlar":
-        st.markdown('<div class="ondo-glass-card reveal-box"><h3>💬 Yorum Yönetim Merkezi</h3></div>', unsafe_allow_html=True)
+    elif curr == "Yorumlar":
+        st.markdown('<div class="ondo-glass-card"><h3>💬 Yorum Yönetim Merkezi</h3></div>', unsafe_allow_html=True)
         if not df_comments.empty:
             st.dataframe(df_comments, use_container_width=True)
         else:
             st.info("Kanal videolarınızda taranacak aktif yorum bulunamadı.")
 
-    elif current_tab == "Detaylı Analiz":
-        st.markdown('<div class="ondo-glass-card reveal-box"><h3>🔍 Tüm İçeriklerin Arşivi</h3></div>', unsafe_allow_html=True)
+    elif curr == "Arşiv":
+        st.markdown('<div class="ondo-glass-card"><h3>🔍 Tüm İçeriklerin Arşivi</h3></div>', unsafe_allow_html=True)
         st.dataframe(df, use_container_width=True)
 
-    elif current_tab == "Kitle":
-        st.markdown('<div class="ondo-glass-card reveal-box">', unsafe_allow_html=True)
+    elif curr == "Kitle":
+        st.markdown('<div class="ondo-glass-card">', unsafe_allow_html=True)
         st.write("### 🌍 Coğrafi Kitle ve Ülke Bazlı Dağılım Matrisi")
         st.info(f"Kanalınız ({ch_title}) için toplam {total_views:,} izlenme verisi baz alınarak hesaplanan canlı coğrafi kitle dağılımı:")
         
@@ -470,8 +400,8 @@ if st.session_state.loaded:
         st.dataframe(geo_df, use_container_width=True)
         st.markdown('</div>', unsafe_allow_html=True)
 
-    elif current_tab == "AI Strateji Raporu":
-        st.markdown('<div class="ondo-glass-card reveal-box">', unsafe_allow_html=True)
+    elif curr == "AI Rapor":
+        st.markdown('<div class="ondo-glass-card">', unsafe_allow_html=True)
         st.write("### 🤖 Profesyonel Kripto & Kanal Büyüme Raporu (Ağustos 2026)")
         with st.spinner("Kanal verileri ve Ağustos 2026 kripto trendleri Llama 3.3 motoru ile sentezleniyor..."):
             client = Groq(api_key=st.session_state.groq_key)
