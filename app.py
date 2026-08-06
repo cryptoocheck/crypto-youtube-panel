@@ -28,6 +28,8 @@ if "active_tab" not in st.session_state:
     st.session_state.active_tab = "Performans"
 if "loaded" not in st.session_state:
     st.session_state.loaded = False
+if "anim_key" not in st.session_state:
+    st.session_state.anim_key = 0
 
 def get_img_as_base64(file_path):
     if os.path.exists(file_path):
@@ -232,65 +234,59 @@ st.markdown(f"""
 </style>
 """, unsafe_allow_html=True)
 
-# Sayaç ve Kayma Animasyon Motoru (JS)
-components.html("""
+# Sayaç ve Kayma Animasyon Motoru (Butona her basıldığında tetiklenir)
+components.html(f"""
 <script>
-function initAnimations() {
-    // Kayarak gelen kutular
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
+function initAnimations() {{
+    const observer = new IntersectionObserver((entries) => {{
+        entries.forEach(entry => {{
+            if (entry.isIntersecting) {{
                 entry.target.classList.add('active');
-            } else {
+            }} else {{
                 entry.target.classList.remove('active');
-            }
+            }}
         });
-    }, { threshold: 0.05 });
+    }}, {{ threshold: 0.05 }});
 
     const boxes = window.parent.document.querySelectorAll('.reveal-box');
     boxes.forEach(box => observer.observe(box));
 
-    // Sayaç Animasyonu (Yavaş ve Akıcı)
     const counters = window.parent.document.querySelectorAll('.counter-val');
-    counters.forEach(counter => {
-        if (counter.getAttribute('data-animated') === 'true') return;
-        counter.setAttribute('data-animated', 'true');
-        
+    counters.forEach(counter => {{
         const target = parseFloat(counter.getAttribute('data-target'));
         const isFloat = counter.getAttribute('data-float') === 'true';
         const prefix = counter.getAttribute('data-prefix') || '';
-        const duration = 1800; // 1.8 saniye akıcı süre
+        const duration = 1800; 
         const startTime = performance.now();
 
-        function updateCount(currentTime) {
+        function updateCount(currentTime) {{
             const elapsed = currentTime - startTime;
             const progress = Math.min(elapsed / duration, 1);
-            const easeProgress = 1 - Math.pow(1 - progress, 3); // Yumuşak yavaşlama (ease-out)
+            const easeProgress = 1 - Math.pow(1 - progress, 3); 
             const currentVal = target * easeProgress;
 
-            if (isFloat) {
+            if (isFloat) {{
                 counter.innerText = prefix + currentVal.toFixed(2);
-            } else {
+            }} else {{
                 counter.innerText = prefix + Math.floor(currentVal).toLocaleString();
-            }
+            }}
 
-            if (progress < 1) {
+            if (progress < 1) {{
                 requestAnimationFrame(updateCount);
-            } else {
-                if (isFloat) {
+            }} else {{
+                if (isFloat) {{
                     counter.innerText = prefix + target.toFixed(2);
-                } else {
+                }} else {{
                     counter.innerText = prefix + Math.round(target).toLocaleString();
-                }
-            }
-        }
+                }}
+            }}
+        }}
         requestAnimationFrame(updateCount);
-    });
-}
-setTimeout(initAnimations, 400);
-setInterval(initAnimations, 1200);
+    }});
+}}
+setTimeout(initAnimations, 300);
 </script>
-""", height=0)
+""", height=0, key=f"anim_script_{st.session_state.anim_key}")
 
 if img_b64:
     st.markdown(f'''
@@ -401,6 +397,7 @@ if analyze_btn:
                 st.session_state.likes_last_28d = likes_last_28d
                 st.session_state.total_shorts_views = total_shorts_views
                 st.session_state.loaded = True
+                st.session_state.anim_key += 1 # Her veri getirmede sayaç animasyonunu tetikler
         except Exception as e:
             st.error(f"Sistem Çalışma Hatası: {e}")
 
